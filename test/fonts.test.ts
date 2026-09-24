@@ -21,7 +21,8 @@ const licenseFiles = [
 ] as const;
 
 beforeAll(() => {
-  if (!existsSync("dist/fonts.css")) throw new Error("dist/fonts.css not found. Run npm run build first.");
+  if (!existsSync("dist/fonts.css"))
+    throw new Error("dist/fonts.css not found. Run npm run build first.");
 });
 
 describe("fonts.css", () => {
