@@ -15,6 +15,8 @@ concurrency:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      IBM_TELEMETRY_DISABLED: "true"
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
