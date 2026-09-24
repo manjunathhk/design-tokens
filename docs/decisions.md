@@ -186,7 +186,12 @@ same five constants; `tokens.d.ts` types values as `string` or `number`,
 not literals, so a value change (MINOR) never changes a type. The package
 root (`.`) resolves to `tokens.mjs` with a `types` condition and to
 `index.css` under the `style` condition; every file also has its own
-subpath export.
+subpath export. The JS output is ESM only (Node 24 can `require()` it);
+its types resolve under `moduleResolution` `node16`, `nodenext` or
+`bundler`, not legacy `node10`. Flat keys were chosen over nested objects
+because they map 1:1 to the CSS names; changing the shape after 1.0.0 is
+MAJOR. The API diff guards only CSS names today; covering the JSON keys,
+breakpoints included, is #24.
 
 ## D23. base.css selectors use `:where()`
 
