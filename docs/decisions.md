@@ -149,3 +149,14 @@ procedure for implementing an issue. AGENTS.md points every agent at it, and
 it `/implement <n>`. These guide contributors; they are not shipped and do
 not widen the package's scope. Keep the procedure in the workflow file only,
 so it never drifts between tools.
+
+## D20. Contract test details
+
+2026-09-24. Issue #4. The API diff runs as its own CI step
+(`npm run api-diff`), not inside `npm test`, because it needs the npm
+registry; its comparison logic is unit-tested in `npm test`. It compares
+against the `latest` dist-tag, so `next` pre-releases (D9) are never the
+baseline. The naming test derives primitive names from
+`tokens/primitive/color.json` rather than a hard-coded list. The
+`dist/tokens.css` snapshot includes the version banner, so the release PR
+updates it along with the version.

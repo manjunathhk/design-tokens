@@ -1,0 +1,124 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`dist/tokens.css matches the snapshot 1`] = `
+"/*! @manjunathhk/design-tokens v0.0.0 */
+:root {
+  --mk-color-accent: #2A5AA8;
+  --mk-color-accent-subtle: rgba(42, 90, 168, 0.13);
+  --mk-color-bg: #F2F0EB;
+  --mk-color-bg-subtle: #E8E5DE;
+  --mk-color-border: #D8D4CB;
+  --mk-color-border-control: #87816F;
+  --mk-color-border-strong: #BFBAAF;
+  --mk-color-danger: #B42318;
+  --mk-color-focus-ring: #2A5AA8;
+  --mk-color-grid-line: rgba(22, 32, 46, 0.05);
+  --mk-color-on-accent: #FFFFFF;
+  --mk-color-success: #1F6B45;
+  --mk-color-surface: #FBFAF7;
+  --mk-color-text: #16202E;
+  --mk-color-text-muted: #5C6576;
+  --mk-color-text-secondary: #3A4556;
+  --mk-color-warning: #8C5300;
+  --mk-font-family-display: 'IBM Plex Sans Condensed', 'IBM Plex Sans', 'Arial Narrow', sans-serif;
+  --mk-font-family-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --mk-font-family-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mk-font-letter-spacing-display: -0.028em;
+  --mk-font-letter-spacing-heading: -0.022em;
+  --mk-font-letter-spacing-label: 0.07em;
+  --mk-font-letter-spacing-normal: 0;
+  --mk-font-line-height-normal: 1.5;
+  --mk-font-line-height-relaxed: 1.6;
+  --mk-font-line-height-snug: 1.15;
+  --mk-font-line-height-tight: 0.9;
+  --mk-font-size-2xl: clamp(34px, 4vw, 64px);
+  --mk-font-size-3xl: clamp(42px, 5.6vw, 98px);
+  --mk-font-size-base: 17px;
+  --mk-font-size-display: clamp(50px, 8.1vw, 148px);
+  --mk-font-size-lg: 21px;
+  --mk-font-size-md: 18px;
+  --mk-font-size-sm: 14px;
+  --mk-font-size-xl: clamp(28px, 3vw, 40px);
+  --mk-font-size-xs: 12px;
+  --mk-font-weight-bold: 700;
+  --mk-font-weight-medium: 500;
+  --mk-font-weight-regular: 400;
+  --mk-font-weight-semibold: 600;
+  --mk-layout-container-max: 1440px;
+  --mk-layout-grid-size: 56px;
+  --mk-layout-gutter: clamp(16px, 4vw, 56px);
+  --mk-motion-duration-base: 300ms;
+  --mk-motion-duration-fast: 150ms;
+  --mk-motion-duration-slow: 500ms;
+  --mk-motion-duration-slower: 900ms;
+  --mk-motion-ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+  --mk-radius-lg: 12px;
+  --mk-radius-md: 6px;
+  --mk-radius-pill: 999px;
+  --mk-radius-sm: 4px;
+  --mk-radius-xl: 16px;
+  --mk-shadow-raised: 0 16px 40px -20px #00000066;
+  --mk-spacing-1: 4px;
+  --mk-spacing-2: 8px;
+  --mk-spacing-3: 12px;
+  --mk-spacing-4: 16px;
+  --mk-spacing-5: 20px;
+  --mk-spacing-6: 24px;
+  --mk-spacing-8: 32px;
+  --mk-spacing-10: 40px;
+  --mk-spacing-12: 48px;
+  --mk-spacing-16: 64px;
+  --mk-spacing-20: 80px;
+  --mk-spacing-24: 96px;
+  --mk-spacing-32: 128px;
+  --mk-z-index-nav: 50;
+  --mk-z-index-overlay: 80;
+  --mk-z-index-toast: 90;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --mk-color-accent: #8DB2F2;
+    --mk-color-accent-subtle: rgba(141, 178, 242, 0.13);
+    --mk-color-bg: #0F141B;
+    --mk-color-bg-subtle: #141A23;
+    --mk-color-border: #242D3A;
+    --mk-color-border-control: #5E6D83;
+    --mk-color-border-strong: #334052;
+    --mk-color-danger: #FF8A7A;
+    --mk-color-focus-ring: #8DB2F2;
+    --mk-color-grid-line: rgba(255, 255, 255, 0.04);
+    --mk-color-on-accent: #0B1422;
+    --mk-color-success: #86C99A;
+    --mk-color-surface: #18202B;
+    --mk-color-text: #E7EBF1;
+    --mk-color-text-muted: #8792A2;
+    --mk-color-text-secondary: #B3BCC9;
+    --mk-color-warning: #F0B860;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --mk-color-accent: #8DB2F2;
+  --mk-color-accent-subtle: rgba(141, 178, 242, 0.13);
+  --mk-color-bg: #0F141B;
+  --mk-color-bg-subtle: #141A23;
+  --mk-color-border: #242D3A;
+  --mk-color-border-control: #5E6D83;
+  --mk-color-border-strong: #334052;
+  --mk-color-danger: #FF8A7A;
+  --mk-color-focus-ring: #8DB2F2;
+  --mk-color-grid-line: rgba(255, 255, 255, 0.04);
+  --mk-color-on-accent: #0B1422;
+  --mk-color-success: #86C99A;
+  --mk-color-surface: #18202B;
+  --mk-color-text: #E7EBF1;
+  --mk-color-text-muted: #8792A2;
+  --mk-color-text-secondary: #B3BCC9;
+  --mk-color-warning: #F0B860;
+  color-scheme: dark;
+}
+"
+`;
