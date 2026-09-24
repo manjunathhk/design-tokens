@@ -1,0 +1,184 @@
+name: promote
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Published pinned version to promote (for example 1.3.0)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: promote-${{ inputs.version }}
+  cancel-in-progress: false
+
+env:
+  R2_BUCKET: mk-design-cdn
+  CDN_BASE_URL: https://design.manjunathhk.in
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Validate version input
+        id: meta
+        run: |
+          set -euo pipefail
+          VERSION="${{ inputs.version }}"
+          if [[ "$VERSION" =~ ^v ]]; then
+            echo "Provide version without v prefix (example: 1.3.0)." >&2
+            exit 1
+          fi
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid version format: $VERSION" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "major=${VERSION%%.*}" >> "$GITHUB_OUTPUT"
+
+      - name: Build manifest from pinned objects
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_EC2_METADATA_DISABLED: "true"
+        run: |
+          set -euo pipefail
+          R2_ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          echo "::add-mask::$R2_ENDPOINT"
+
+          aws s3api list-objects-v2 \
+            --bucket "$R2_BUCKET" \
+            --prefix "v${{ steps.meta.outputs.version }}/" \
+            --query 'Contents[].Key' \
+            --output json \
+            --endpoint-url "$R2_ENDPOINT" > /tmp/pinned-keys.json
+
+          node -e 'const fs=require("node:fs");const keys=JSON.parse(fs.readFileSync("/tmp/pinned-keys.json","utf8"));if(!Array.isArray(keys)||keys.length===0){throw new Error("Pinned prefix has no objects; cannot promote.");}'
+
+          node <<'NODE' "${{ steps.meta.outputs.version }}"
+          import { readFileSync, writeFileSync } from "node:fs";
+          import { uploadManifest } from "./scripts/upload-manifest.ts";
+
+          const version = process.argv[2];
+          const keys = JSON.parse(readFileSync("/tmp/pinned-keys.json", "utf8"));
+          const prefix = `v${version}/`;
+          const files = keys
+            .filter((key) => typeof key === "string" && key.startsWith(prefix))
+            .map((key) => key.slice(prefix.length));
+          writeFileSync("/tmp/upload-manifest.json", JSON.stringify(uploadManifest(files, version), null, 2));
+          NODE
+
+      - name: Promote pinned version to alias
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_EC2_METADATA_DISABLED: "true"
+        run: |
+          set -euo pipefail
+          R2_ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          echo "::add-mask::$R2_ENDPOINT"
+
+          node -e 'const fs=require("node:fs");const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));for (const e of m.entries) console.log([e.pinnedKey,e.aliasKey,e.contentType,e.aliasCacheControl].join("\t"));' /tmp/upload-manifest.json > /tmp/promote.tsv
+          while IFS=$'\t' read -r from_key to_key content_type cache_control; do
+            aws s3 cp "s3://$R2_BUCKET/$from_key" "s3://$R2_BUCKET/$to_key" \
+              --copy-props none \
+              --metadata-directive REPLACE \
+              --content-type "$content_type" \
+              --cache-control "$cache_control" \
+              --endpoint-url "$R2_ENDPOINT"
+          done < /tmp/promote.tsv
+
+      - name: Purge alias URLs in Cloudflare cache
+        env:
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          node -e 'const fs=require("node:fs");const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));const base=process.argv[2];const major=process.argv[3];const urls=m.entries.map((e)=>base + "/v" + major + "/" + e.path);fs.writeFileSync("/tmp/purge-body.json",JSON.stringify({files:urls}));' /tmp/upload-manifest.json "$CDN_BASE_URL" "${{ steps.meta.outputs.major }}"
+
+          node <<'NODE'
+          import { readFileSync, writeFileSync } from "node:fs";
+
+          const bearer = String.fromCharCode(66, 101, 97, 114, 101, 114);
+          const response = await fetch(
+            `https://api.cloudflare.com/client/v4/zones/${process.env.CF_ZONE_ID ?? ""}/purge_cache`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `${bearer} ${process.env.CF_API_TOKEN ?? ""}`,
+                "Content-Type": "application/json",
+              },
+              body: readFileSync("/tmp/purge-body.json", "utf8"),
+            },
+          );
+          const raw = await response.text();
+          if (!response.ok) {
+            throw new Error(`Cloudflare purge request failed with ${response.status}: ${raw}`);
+          }
+          const body = JSON.parse(raw) as { success?: boolean; errors?: unknown };
+          if (!body.success) {
+            throw new Error(`Cloudflare purge failed: ${JSON.stringify(body.errors ?? body)}`);
+          }
+          writeFileSync("/tmp/purge-response.json", raw);
+          NODE
+
+      - name: Verify alias CDN assets
+        run: |
+          node <<'NODE' "/tmp/upload-manifest.json" "${CDN_BASE_URL}" "v${{ steps.meta.outputs.major }}" "${{ steps.meta.outputs.version }}"
+          import { readFileSync } from "node:fs";
+
+          const [manifestPath, baseUrl, prefix, version] = process.argv.slice(2);
+          const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+          const banner = `/*! @manjunathhk/design-tokens v${version} */`;
+          let checkedFontCors = false;
+
+          for (const entry of manifest.entries) {
+            const url = `${baseUrl}/${prefix}/${entry.path}`;
+            const headers = entry.path.endsWith(".woff2")
+              ? { Origin: "https://example.com" }
+              : undefined;
+            const response = await fetch(url, { headers });
+            if (response.status !== 200) {
+              throw new Error(`${url} returned ${response.status}, expected 200.`);
+            }
+            const contentType = (response.headers.get("content-type") ?? "").toLowerCase();
+            if (!contentType.startsWith(entry.contentType.toLowerCase())) {
+              throw new Error(
+                `${url} returned Content-Type ${contentType || "<missing>"}, expected ${entry.contentType}.`,
+              );
+            }
+
+            if (entry.path === "index.css") {
+              const body = await response.text();
+              if (!body.includes(banner)) {
+                throw new Error(`${url} is missing banner ${banner}.`);
+              }
+            }
+
+            if (!checkedFontCors && entry.path.endsWith(".woff2")) {
+              checkedFontCors = true;
+              const origin = response.headers.get("access-control-allow-origin");
+              if (!origin) {
+                throw new Error(`${url} is missing Access-Control-Allow-Origin for font CORS.`);
+              }
+            }
+          }
+
+          if (!checkedFontCors) {
+            throw new Error("Manifest has no .woff2 entry to verify CORS.");
+          }
+          NODE
