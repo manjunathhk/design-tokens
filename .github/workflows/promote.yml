@@ -110,7 +110,7 @@ jobs:
           set -euo pipefail
           node -e 'const fs=require("node:fs");const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));const base=process.argv[2];const major=process.argv[3];const urls=m.entries.map((e)=>base + "/v" + major + "/" + e.path);fs.writeFileSync("/tmp/purge-body.json",JSON.stringify({files:urls}));' /tmp/upload-manifest.json "$CDN_BASE_URL" "${{ steps.meta.outputs.major }}"
 
-          node <<'NODE'
+          node --input-type=module <<'NODE'
           import { readFileSync, writeFileSync } from "node:fs";
 
           const response = await fetch(
@@ -128,7 +128,7 @@ jobs:
           if (!response.ok) {
             throw new Error(`Cloudflare purge request failed with ${response.status}: ${raw}`);
           }
-          const body = JSON.parse(raw) as { success?: boolean; errors?: unknown };
+          const body = JSON.parse(raw);
           if (!body.success) {
             throw new Error(`Cloudflare purge failed: ${JSON.stringify(body.errors ?? body)}`);
           }
@@ -137,7 +137,7 @@ jobs:
 
       - name: Verify alias CDN assets
         run: |
-          node <<'NODE' "/tmp/upload-manifest.json" "${CDN_BASE_URL}" "v${{ steps.meta.outputs.major }}" "${{ steps.meta.outputs.version }}"
+          node --input-type=module <<'NODE' "/tmp/upload-manifest.json" "${CDN_BASE_URL}" "v${{ steps.meta.outputs.major }}" "${{ steps.meta.outputs.version }}"
           import { readFileSync } from "node:fs";
 
           const [manifestPath, baseUrl, prefix, version] = process.argv.slice(2);

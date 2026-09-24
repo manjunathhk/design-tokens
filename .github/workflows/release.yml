@@ -108,7 +108,7 @@ jobs:
 
       - name: Verify pinned CDN assets
         run: |
-          node <<'NODE' "/tmp/upload-manifest.json" "${CDN_BASE_URL}" "v${{ steps.meta.outputs.version }}" "${{ steps.meta.outputs.version }}"
+          node --input-type=module <<'NODE' "/tmp/upload-manifest.json" "${CDN_BASE_URL}" "v${{ steps.meta.outputs.version }}" "${{ steps.meta.outputs.version }}"
           import { readFileSync } from "node:fs";
 
           const [manifestPath, baseUrl, prefix, version] = process.argv.slice(2);
@@ -188,7 +188,7 @@ jobs:
           set -euo pipefail
           node -e 'const fs=require("node:fs");const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));const base=process.argv[2];const major=process.argv[3];const urls=m.entries.map((e)=>base + "/v" + major + "/" + e.path);fs.writeFileSync("/tmp/purge-body.json",JSON.stringify({files:urls}));' /tmp/upload-manifest.json "$CDN_BASE_URL" "${{ steps.meta.outputs.major }}"
 
-          node <<'NODE'
+          node --input-type=module <<'NODE'
           import { readFileSync, writeFileSync } from "node:fs";
 
           const response = await fetch(
@@ -206,7 +206,7 @@ jobs:
           if (!response.ok) {
             throw new Error(`Cloudflare purge request failed with ${response.status}: ${raw}`);
           }
-          const body = JSON.parse(raw) as { success?: boolean; errors?: unknown };
+          const body = JSON.parse(raw);
           if (!body.success) {
             throw new Error(`Cloudflare purge failed: ${JSON.stringify(body.errors ?? body)}`);
           }
@@ -216,7 +216,7 @@ jobs:
       - name: Verify alias CDN assets
         if: ${{ steps.meta.outputs.is_rc != 'true' }}
         run: |
-          node <<'NODE' "/tmp/upload-manifest.json" "${CDN_BASE_URL}" "v${{ steps.meta.outputs.major }}" "${{ steps.meta.outputs.version }}"
+          node --input-type=module <<'NODE' "/tmp/upload-manifest.json" "${CDN_BASE_URL}" "v${{ steps.meta.outputs.major }}" "${{ steps.meta.outputs.version }}"
           import { readFileSync } from "node:fs";
 
           const [manifestPath, baseUrl, prefix, version] = process.argv.slice(2);
@@ -268,17 +268,32 @@ jobs:
       - name: Build GitHub Release notes from CHANGELOG
         if: ${{ steps.meta.outputs.is_rc != 'true' }}
         run: |
-          node <<'NODE' "${{ steps.meta.outputs.version }}"
+          node --input-type=module <<'NODE' "${{ steps.meta.outputs.version }}"
           import { readFileSync, writeFileSync } from "node:fs";
 
           const version = process.argv[2];
           const changelog = readFileSync("CHANGELOG.md", "utf8");
-          const escaped = version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-          const match = changelog.match(new RegExp(`^## \\[${escaped}\\](?:[^\\n]*)\\n([\\s\\S]*?)(?=^## \\[|\\Z)`, "m"));
-          if (!match || !match[1].trim()) {
+          const lines = changelog.split("\n");
+          const sectionHeading = `## [${version}]`;
+          const start = lines.findIndex((line) => line.startsWith(sectionHeading));
+          if (start < 0) {
             throw new Error(`CHANGELOG.md is missing section ## [${version}] with release notes.`);
           }
-          writeFileSync("/tmp/release-notes.md", match[1].trim() + "\n");
+          let end = lines.length;
+          for (let index = start + 1; index < lines.length; index += 1) {
+            if (lines[index]?.startsWith("## [")) {
+              end = index;
+              break;
+            }
+          }
+          const notes = lines
+            .slice(start + 1, end)
+            .join("\n")
+            .trim();
+          if (!notes) {
+            throw new Error(`CHANGELOG.md section ## [${version}] has no release notes.`);
+          }
+          writeFileSync("/tmp/release-notes.md", notes + "\n");
           NODE
 
       - name: Create GitHub Release
