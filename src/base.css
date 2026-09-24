@@ -1,0 +1,90 @@
+/*
+ * Opt-in base built only on the tokens. Selectors sit inside :where() so they
+ * carry zero specificity and any site rule overrides them.
+ */
+
+/* Reset */
+:where(*, *::before, *::after) {
+  box-sizing: border-box;
+}
+
+:where(body, h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd) {
+  margin: 0;
+}
+
+:where(img, picture, video, canvas, svg) {
+  display: block;
+  max-width: 100%;
+}
+
+:where(input, button, textarea, select) {
+  font: inherit;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p) {
+  overflow-wrap: break-word;
+}
+
+/* Body */
+:where(html) {
+  text-size-adjust: 100%;
+}
+
+:where(body) {
+  min-height: 100vh;
+  background-color: var(--mk-color-bg);
+  color: var(--mk-color-text);
+  font-family: var(--mk-font-family-sans);
+  font-size: var(--mk-font-size-base);
+  font-weight: var(--mk-font-weight-regular);
+  line-height: var(--mk-font-line-height-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+:where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--mk-font-family-display);
+  font-weight: var(--mk-font-weight-semibold);
+  line-height: var(--mk-font-line-height-snug);
+  letter-spacing: var(--mk-font-letter-spacing-heading);
+}
+
+:where(code, kbd, samp, pre) {
+  font-family: var(--mk-font-family-mono);
+}
+
+/* Links */
+:where(a) {
+  color: var(--mk-color-accent);
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.15em;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--mk-color-accent);
+  color: var(--mk-color-on-accent);
+}
+
+/* Focus ring */
+:where(:focus-visible) {
+  outline: 2px solid var(--mk-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  :where(*, *::before, *::after) {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Drafting grid: the one helper class. */
+.mk-grid-bg {
+  background-image:
+    linear-gradient(var(--mk-color-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mk-color-grid-line) 1px, transparent 1px);
+  background-size: var(--mk-layout-grid-size) var(--mk-layout-grid-size);
+}

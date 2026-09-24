@@ -174,3 +174,32 @@ handling: v5 catches errors thrown by transforms and, unless
 build now runs verbose so a failing D6 alpha transform still names the
 token, its file (and so its mode) and the bad value. `warnings: "error"`
 still makes any warning fatal, so verbose adds no output to a clean build.
+
+## D22. Shape of the JS and JSON outputs
+
+2026-09-24. Issue #5. `tokens.json` is
+`{ version, light, dark, shared, breakpoints }`, each group flat and keyed
+by dotted token path (`"color.accent"`, `"breakpoint.md"`). Breakpoints get
+their own `breakpoints` key rather than sitting in `shared`, so `shared`
+plus one mode is exactly what `tokens.css` emits. `tokens.mjs` exports the
+same five constants; `tokens.d.ts` types values as `string` or `number`,
+not literals, so a value change (MINOR) never changes a type. The package
+root (`.`) resolves to `tokens.mjs` with a `types` condition and to
+`index.css` under the `style` condition; every file also has its own
+subpath export.
+
+## D23. base.css selectors use `:where()`
+
+2026-09-24. Issue #5. Every base.css selector except `::selection` (a
+pseudo-element cannot sit in `:where()`) and `.mk-grid-bg` is wrapped in
+`:where()`, so the base has zero specificity and any site rule wins without
+`!important`. stylelint bans hex, named colours and colour functions in
+`src/base.css`; the `transparent` keyword is allowed, for the grid's
+gradient stops.
+
+## D24. Output checks live in `npm test`
+
+2026-09-24. Issue #5. The exports, banner, SCSS and `npm pack --dry-run`
+checks run in Vitest (`test/outputs.test.ts`), so CI runs them in its test
+step and a contributor runs them locally with `npm test`. `sass` is a dev
+dependency only to compile `_tokens.scss` in that test.
