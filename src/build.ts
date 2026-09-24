@@ -1,16 +1,21 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { baseCss, indexCss, tokensCss, tokensScss } from "./css.js";
 import { tokensDts, tokensJson, tokensMjs } from "./data.js";
+import { copyFontAssets, fontsCss } from "./fonts.js";
 import { loadTokens } from "./tokens.js";
 
 const set = await loadTokens();
 const base = readFileSync("src/base.css", "utf8");
+const fonts = fontsCss(set.version);
+const fontRules = fonts.slice(fonts.indexOf("\n") + 1);
 rmSync("dist", { recursive: true, force: true });
-mkdirSync("dist");
+mkdirSync("dist", { recursive: true });
+copyFontAssets("dist");
 const outputs: Record<string, string> = {
   "tokens.css": tokensCss(set),
   "base.css": baseCss(set, base),
-  "index.css": indexCss(set, base),
+  "fonts.css": fonts,
+  "index.css": indexCss(set, fontRules, base),
   "tokens.json": tokensJson(set),
   "tokens.mjs": tokensMjs(set),
   "tokens.d.ts": tokensDts(set),

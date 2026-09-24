@@ -22,6 +22,7 @@
     "./index.css": "./dist/index.css",
     "./tokens.css": "./dist/tokens.css",
     "./base.css": "./dist/base.css",
+    "./fonts.css": "./dist/fonts.css",
     "./tokens.json": "./dist/tokens.json",
     "./tokens.mjs": {
       "types": "./dist/tokens.d.ts",
@@ -50,6 +51,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@ibm/plex-mono": "2.5.0",
+    "@ibm/plex-sans": "1.1.0",
+    "@ibm/plex-sans-condensed": "2.0.0",
     "@types/node": "^24.13.6",
     "eslint": "^10.11.0",
     "prettier": "^3.9.9",
