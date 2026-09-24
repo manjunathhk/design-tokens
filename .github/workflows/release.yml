@@ -191,13 +191,12 @@ jobs:
           node <<'NODE'
           import { readFileSync, writeFileSync } from "node:fs";
 
-          const bearer = String.fromCharCode(66, 101, 97, 114, 101, 114);
           const response = await fetch(
             `https://api.cloudflare.com/client/v4/zones/${process.env.CF_ZONE_ID ?? ""}/purge_cache`,
             {
               method: "POST",
               headers: {
-                Authorization: `${bearer} ${process.env.CF_API_TOKEN ?? ""}`,
+                Authorization: "Bearer " + (process.env.CF_API_TOKEN ?? ""),
                 "Content-Type": "application/json",
               },
               body: readFileSync("/tmp/purge-body.json", "utf8"),
