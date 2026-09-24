@@ -1,0 +1,15 @@
+{
+  "shadow": {
+    "$type": "shadow",
+    "raised": {
+      "$description": "Raised surfaces: cards on hover, popovers.",
+      "$value": {
+        "color": "#00000066",
+        "offsetX": "0",
+        "offsetY": "16px",
+        "blur": "40px",
+        "spread": "-20px"
+      }
+    }
+  }
+}

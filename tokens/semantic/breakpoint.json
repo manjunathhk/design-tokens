@@ -1,0 +1,10 @@
+{
+  "breakpoint": {
+    "$type": "dimension",
+    "$description": "Reference only. Emitted to JSON, TS and SCSS, never as CSS custom properties: custom properties do not work inside media queries.",
+    "sm": { "$value": "560px" },
+    "md": { "$value": "900px" },
+    "lg": { "$value": "1000px" },
+    "xl": { "$value": "1440px" }
+  }
+}
