@@ -40,6 +40,12 @@ jobs:
           name: dist
           path: dist/
           if-no-files-found: error
+      - name: Upload specimen
+        uses: actions/upload-artifact@v7
+        with:
+          name: specimen
+          path: docs/index.html
+          if-no-files-found: error
 
   playwright:
     runs-on: ubuntu-latest
