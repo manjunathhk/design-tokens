@@ -108,7 +108,7 @@ const licenses = [
 ] as const;
 
 const packagePath = (packageName: string, ...parts: string[]) =>
-  join(process.cwd(), "node_modules", ...packageName.split("/"), ...parts);
+  join(process.cwd(), "node_modules", packageName, ...parts);
 
 const requireFile = (path: string, message: string) => {
   if (!existsSync(path)) throw new Error(message);
@@ -138,8 +138,8 @@ export function copyFontAssets(distDir: string): void {
   }
 }
 
-export function fontsCss(version: string): string {
-  const body = fontFaces
+export function fontRules(): string {
+  return fontFaces
     .map(
       (face) => `@font-face {
   font-family: "${face.family}";
@@ -151,5 +151,8 @@ export function fontsCss(version: string): string {
 }`,
     )
     .join("\n\n");
-  return `${banner(version)}\n${body}\n`;
+}
+
+export function fontsCss(version: string): string {
+  return `${banner(version)}\n${fontRules()}\n`;
 }

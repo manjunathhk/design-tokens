@@ -127,7 +127,7 @@ describe("index.css", () => {
     const index = read("dist/index.css");
     const body = (file: string) => read(file).slice(BANNER.length + 1);
     expect(index).toBe(
-      `${BANNER}\n${body("dist/fonts.css")}\n${body("dist/tokens.css")}\n${body("dist/base.css")}`,
+      `${BANNER}\n${body("dist/fonts.css").trimEnd()}\n${body("dist/tokens.css")}\n${body("dist/base.css")}`,
     );
     expect(index).not.toMatch(/@import/);
   });
