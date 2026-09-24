@@ -236,3 +236,13 @@ negative CORS check uses `Promise.allSettled` so an unexpected rejection does
 not hang the test. The Playwright job in CI runs separately from the vitest
 job; it uses `npm run test:e2e` (`playwright test`) and installs the Chromium
 browser with `--with-deps`.
+
+## D27. Specimen generation and shadow review
+
+2026-09-24. Issue #8. `docs/index.html` is generated at build time from the
+token set and never committed; CI uploads that HTML as a PR artifact for
+review, and `pages.yml` deploys it only for final release tags (`vX.Y.Z`,
+never rc). The specimen includes a minimal `data-theme` toggle for review only
+(not shipped runtime JS). Visual review of `shadow.raised` in dark mode keeps
+the shared value from D7 for now; if a dark variant is needed later, that stays
+a MINOR token addition.
