@@ -153,6 +153,10 @@ export function fontRules(): string {
     .join("\n\n");
 }
 
-export function fontsCss(version: string): string {
-  return `${banner(version)}\n${fontRules()}\n`;
+export function fontOutput(version: string): { body: string; css: string } {
+  const body = fontRules();
+  return {
+    body,
+    css: `${banner(version)}\n${body}\n`,
+  };
 }
