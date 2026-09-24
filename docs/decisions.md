@@ -125,5 +125,18 @@ references to the brief and to these decisions). Its PR closes it. The
 
 ## D17. Release automation (release-please or similar): open
 
+Superseded by D18.
+
 2026-09-24. Under discussion. Until decided, versions are bumped by hand in
 the release PR and a human pushes the tag. Tracked in #12.
+
+## D18. No release automation for 1.0.0; Changesets preferred later
+
+2026-09-24. Supersedes D17. Versions and CHANGELOG entries are bumped by
+hand in a "Release X.Y.Z" PR and a human pushes the tag. release-please was
+rejected: the bot creates the tag (against AGENTS.md), tags made with
+`GITHUB_TOKEN` do not trigger release.yml, it publishes the GitHub Release
+before the CDN is verified, rc-to-final needs config edits, and inferring
+bumps from commit types does not enforce "value change = MINOR". If
+automation is wanted after 1.0.0, evaluate Changesets: each PR declares its
+bump explicitly, CI can enforce it, and a human still pushes the tag.
