@@ -47,5 +47,13 @@ API diff, Playwright consumption smoke test, lint and format.
 - Every file uploaded to R2 carries an explicit Content-Type and
   Cache-Control header.
 
+## Workflow
+- Read docs/decisions.md before starting. It records what was decided after
+  docs/brief.md and wins where they disagree. A PR that makes a new decision
+  records it there in the same PR.
+- GitHub Flow: short-lived branches off main, merged into main by PR. One
+  GitHub issue per unit of work; its PR closes it.
+- A release is a tag on a main commit, pushed by a human (see Releases).
+
 ## When unsure
 Stop and ask. Say what is ambiguous and propose an option. Do not guess.
