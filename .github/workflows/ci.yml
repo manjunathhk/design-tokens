@@ -40,3 +40,27 @@ jobs:
           name: dist
           path: dist/
           if-no-files-found: error
+
+  playwright:
+    runs-on: ubuntu-latest
+    env:
+      IBM_TELEMETRY_DISABLED: "true"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+      - name: Playwright smoke test
+        run: npm run test:e2e
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report/

@@ -219,3 +219,20 @@ usage data to an IBM endpoint. `ci.yml` sets `IBM_TELEMETRY_DISABLED: "true"`
 at the job level so `npm ci` never makes that call; these packages ship no
 runtime code either way, so nothing else about the build changes. Anyone
 installing inside a local container should export the same variable.
+
+## D26. Cross-origin Playwright smoke test
+
+2026-09-24. Issue #7. Two `node:http` servers start inside `test.beforeAll`:
+port 7341 serves the fixture page (`test/e2e/fixture/index.html`), port 7342
+serves `dist/` with `Access-Control-Allow-Origin: *` (mirroring R2's CORS
+policy), and port 7343 serves `dist/` without CORS headers (used only in the
+negative check). `<link rel="stylesheet">` carries no `crossorigin` attribute
+because CSS is fetched as no-cors and applied regardless; CORS headers are
+required only for fonts, which browsers always fetch in CORS mode when the
+font origin differs from the page origin. `document.fonts.load()` is used
+instead of DOM injection to force all three IBM Plex families to load, because
+the browser otherwise lazy-loads only families used by visible text. The
+negative CORS check uses `Promise.allSettled` so an unexpected rejection does
+not hang the test. The Playwright job in CI runs separately from the vitest
+job; it uses `npm run test:e2e` (`playwright test`) and installs the Chromium
+browser with `--with-deps`.

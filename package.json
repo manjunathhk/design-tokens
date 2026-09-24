@@ -46,6 +46,7 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "api-diff": "tsx scripts/api-diff.ts",
     "build": "tsx src/build.ts"
   },
@@ -54,6 +55,7 @@
     "@ibm/plex-mono": "2.5.0",
     "@ibm/plex-sans": "1.1.0",
     "@ibm/plex-sans-condensed": "2.0.0",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^24.13.6",
     "eslint": "^10.11.0",
     "prettier": "^3.9.9",
