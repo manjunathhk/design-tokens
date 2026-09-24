@@ -1,7 +1,4 @@
 import { readFileSync } from "node:fs";
-// Pinned to 4.4 (D12). GHSA-vj5c-m527-mpff (prototype pollution in
-// convertTokenData, no 4.x fix) is accepted: it runs only at build time over
-// committed token files and we never call that function.
 import StyleDictionary from "style-dictionary";
 import type { TransformedToken } from "style-dictionary/types";
 
@@ -56,7 +53,9 @@ async function exportMode(mode: Mode): Promise<TransformedToken[]> {
   const sd = new StyleDictionary({
     usesDtcg: true,
     source: ["tokens/primitive/*.json", `${SEMANTIC_DIR}!(color.*).json`, modeFile(mode)],
-    log: { verbosity: "silent", warnings: "error" },
+    // v5 catches errors thrown by transforms; only "verbose" keeps the token,
+    // file and our message in the error it throws (D21).
+    log: { verbosity: "verbose", warnings: "error" },
     platforms: {
       css: {
         prefix: "mk",
