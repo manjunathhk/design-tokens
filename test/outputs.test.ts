@@ -25,6 +25,7 @@ describe("banners", () => {
     "index.css",
     "tokens.css",
     "base.css",
+    "fonts.css",
     "_tokens.scss",
     "tokens.mjs",
     "tokens.d.ts",
@@ -46,9 +47,14 @@ describe("exports map", () => {
       : Object.entries(target).map(([condition, t]) => ({ entry, condition, target: t })),
   );
 
-  it("has an entry for every file in dist/ and for package.json", () => {
+  it("has an entry for every top-level file in dist/ and for package.json", () => {
     const exported = new Set(targets.map((t) => t.target));
-    const files = ["./package.json", ...readdirSync("dist").map((f) => `./dist/${f}`)];
+    const files = [
+      "./package.json",
+      ...readdirSync("dist", { withFileTypes: true })
+        .filter((entry) => entry.isFile())
+        .map((entry) => `./dist/${entry.name}`),
+    ];
     const missing = files.filter((f) => !exported.has(f));
     expect(missing, `Files in dist/ with no exports entry: ${missing.join(", ")}`).toEqual([]);
   });
@@ -117,10 +123,12 @@ describe("tokens.json", () => {
 });
 
 describe("index.css", () => {
-  it("concatenates tokens and base without @import (D8)", () => {
+  it("concatenates fonts, tokens and base without @import (D8)", () => {
     const index = read("dist/index.css");
     const body = (file: string) => read(file).slice(BANNER.length + 1);
-    expect(index).toBe(`${BANNER}\n${body("dist/tokens.css")}\n${body("dist/base.css")}`);
+    expect(index).toBe(
+      `${BANNER}\n${body("dist/fonts.css").trimEnd()}\n${body("dist/tokens.css")}\n${body("dist/base.css")}`,
+    );
     expect(index).not.toMatch(/@import/);
   });
 });

@@ -12,9 +12,10 @@ Each file in `dist/` has a subpath export (`@manjunathhk/design-tokens/<file>`).
 
 | File           | Contents                                                                              |
 | -------------- | ------------------------------------------------------------------------------------- |
-| `index.css`    | Tokens and base in one file (the package `style` entry)                               |
+| `index.css`    | Fonts, tokens and base in one file (the package `style` entry)                        |
 | `tokens.css`   | `--mk-*` custom properties, light and dark                                            |
 | `base.css`     | Opt-in reset and base styles, zero specificity, plus `.mk-grid-bg`                    |
+| `fonts.css`    | Self-hosted IBM Plex Sans, Sans Condensed and Mono `@font-face` rules                 |
 | `tokens.json`  | `{ version, light, dark, shared, breakpoints }`, flat, keyed by token path            |
 | `tokens.mjs`   | The same five groups as typed constants (`tokens.d.ts`); also the package root import |
 | `_tokens.scss` | `$mk-*: var(--mk-*)`, raw `$mk-breakpoint-*` values and `@include mk-media(md)`       |

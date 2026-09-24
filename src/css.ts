@@ -37,9 +37,9 @@ ${declarations(set.modes.dark, "  ")}
 /** The hand-written base (src/base.css) with the banner. */
 export const baseCss = (set: TokenSet, base: string) => `${banner(set.version)}\n${base}`;
 
-/** Tokens then base in one file, no @import chain (D8). Fonts join when they land. */
-export const indexCss = (set: TokenSet, base: string) =>
-  `${banner(set.version)}\n${tokenRules(set)}\n${base}`;
+/** Fonts, tokens and base in one file, no @import chain (D8). */
+export const indexCss = (set: TokenSet, fonts: string, base: string) =>
+  `${banner(set.version)}\n${fonts}\n${tokenRules(set)}\n${base}`;
 
 /** $mk-* variables pointing at the custom properties, plus raw breakpoints and mk-media(). */
 export function tokensScss(set: TokenSet): string {

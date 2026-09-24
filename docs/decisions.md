@@ -208,3 +208,14 @@ gradient stops.
 checks run in Vitest (`test/outputs.test.ts`), so CI runs them in its test
 step and a contributor runs them locally with `npm test`. `sass` is a dev
 dependency only to compile `_tokens.scss` in that test.
+
+## D25. IBM Telemetry disabled in CI
+
+2026-09-24. Issue #6. The `@ibm/plex-sans`, `@ibm/plex-sans-condensed` and
+`@ibm/plex-mono` devDependencies each run
+`postinstall: ibmtelemetry --config=telemetry.yml`. By its own docs this
+activates specifically in CI/container environments and reports anonymised
+usage data to an IBM endpoint. `ci.yml` sets `IBM_TELEMETRY_DISABLED: "true"`
+at the job level so `npm ci` never makes that call; these packages ship no
+runtime code either way, so nothing else about the build changes. Anyone
+installing inside a local container should export the same variable.
