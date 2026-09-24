@@ -1,5 +1,5 @@
 import { banner } from "./css.js";
-import { measureContrast } from "./contrast.js";
+import { measureContrast, type ContrastResult } from "./contrast.js";
 import { MODES, type Mode, type Token, type TokenSet } from "./tokens.js";
 
 const escapeHtml = (value: string) =>
@@ -51,8 +51,8 @@ const swatches = (set: TokenSet, mode: Mode) =>
     </tr>`,
   );
 
-const contrastRows = (set: TokenSet, mode: Mode) =>
-  measureContrast(set)
+const contrastRows = (rows: ContrastResult[], mode: Mode) =>
+  rows
     .filter((row) => row.mode === mode)
     .map(
       (row) => `<tr>
@@ -104,6 +104,7 @@ const motionRows = (set: TokenSet) =>
 export function specimenHtml(set: TokenSet): string {
   const shadow = tokenValue(set.shared, "shadow.raised");
   const major = set.version.split(".")[0] ?? "1";
+  const contrast = measureContrast(set);
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -165,7 +166,7 @@ pre { margin: 0; white-space: pre-wrap; padding: 0.75rem; border-radius: var(--m
             <h3>${modeTitle(mode)} contrast ratios</h3>
             <table>
               <thead><tr><th>FG token</th><th>FG value</th><th>BG token</th><th>BG value</th><th>Ratio</th><th>Rule</th></tr></thead>
-              <tbody>${contrastRows(set, mode).join("")}</tbody>
+              <tbody>${contrastRows(contrast, mode).join("")}</tbody>
             </table>
           </article>`,
         ).join("")}
