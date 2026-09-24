@@ -56,10 +56,10 @@ const contrastRows = (rows: ContrastResult[], mode: Mode) =>
     .filter((row) => row.mode === mode)
     .map(
       (row) => `<tr>
-        <td>color.${row.fg}</td>
-        <td><code>${row.fgValue}</code></td>
-        <td>color.${row.bg}</td>
-        <td><code>${row.bgValue}</code></td>
+        <td>${escapeHtml(`color.${row.fg}`)}</td>
+        <td><code>${escapeHtml(row.fgValue)}</code></td>
+        <td>${escapeHtml(`color.${row.bg}`)}</td>
+        <td><code>${escapeHtml(row.bgValue)}</code></td>
         <td>${row.ratio.toFixed(2)}</td>
         <td>&ge; ${row.min}</td>
       </tr>`,
@@ -68,36 +68,36 @@ const contrastRows = (rows: ContrastResult[], mode: Mode) =>
 const typeRows = (set: TokenSet) =>
   tokenSection(set.shared, "font.size.").map(
     (token) => `<tr>
-      <th scope="row">${token.path}</th>
-      <td><code>${token.value}</code></td>
-      <td><span style="font-size: ${token.value}; line-height: 1.2;">The quick brown fox</span></td>
+      <th scope="row">${escapeHtml(token.path)}</th>
+      <td><code>${escapeHtml(String(token.value))}</code></td>
+      <td><span style="font-size: ${escapeHtml(String(token.value))}; line-height: 1.2;">The quick brown fox</span></td>
     </tr>`,
   );
 
 const spacingRows = (set: TokenSet) =>
   tokenSection(set.shared, "spacing.").map(
     (token) => `<tr>
-      <th scope="row">${token.path}</th>
-      <td><code>${token.value}</code></td>
-      <td><span class="spacing-sample" style="width:${token.value};"></span></td>
+      <th scope="row">${escapeHtml(token.path)}</th>
+      <td><code>${escapeHtml(String(token.value))}</code></td>
+      <td><span class="spacing-sample" style="width:${escapeHtml(String(token.value))};"></span></td>
     </tr>`,
   );
 
 const radiusRows = (set: TokenSet) =>
   tokenSection(set.shared, "radius.").map(
     (token) => `<tr>
-      <th scope="row">${token.path}</th>
-      <td><code>${token.value}</code></td>
-      <td><span class="radius-sample" style="border-radius:${token.value};"></span></td>
+      <th scope="row">${escapeHtml(token.path)}</th>
+      <td><code>${escapeHtml(String(token.value))}</code></td>
+      <td><span class="radius-sample" style="border-radius:${escapeHtml(String(token.value))};"></span></td>
     </tr>`,
   );
 
 const motionRows = (set: TokenSet) =>
   tokenSection(set.shared, "motion.duration.").map(
     (token) => `<tr>
-      <th scope="row">${token.path}</th>
-      <td><code>${token.value}</code></td>
-      <td><span class="motion-sample" style="transition-duration:${token.value}; transition-timing-function:${tokenValue(set.shared, "motion.ease")};"></span></td>
+      <th scope="row">${escapeHtml(token.path)}</th>
+      <td><code>${escapeHtml(String(token.value))}</code></td>
+      <td><span class="motion-sample" style="transition-duration:${escapeHtml(String(token.value))}; transition-timing-function:${escapeHtml(tokenValue(set.shared, "motion.ease"))};"></span></td>
     </tr>`,
   );
 
