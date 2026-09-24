@@ -54,6 +54,7 @@ API diff, Playwright consumption smoke test, lint and format.
 - GitHub Flow: short-lived branches off main, merged into main by PR. One
   GitHub issue per unit of work; its PR closes it.
 - A release is a tag on a main commit, pushed by a human (see Releases).
+- To implement an issue, follow docs/workflow/implement-issue.md.
 
 ## When unsure
 Stop and ask. Say what is ambiguous and propose an option. Do not guess.
