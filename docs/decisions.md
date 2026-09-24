@@ -140,3 +140,12 @@ before the CDN is verified, rc-to-final needs config edits, and inferring
 bumps from commit types does not enforce "value change = MINOR". If
 automation is wanted after 1.0.0, evaluate Changesets: each PR declares its
 bump explicitly, CI can enforce it, and a human still pushes the tag.
+
+## D19. Agent workflow files are in scope as contributor tooling
+
+2026-09-24. `docs/workflow/implement-issue.md` holds the tool-agnostic
+procedure for implementing an issue. AGENTS.md points every agent at it, and
+`.claude/skills/implement/SKILL.md` is a thin Claude Code wrapper that makes
+it `/implement <n>`. These guide contributors; they are not shipped and do
+not widen the package's scope. Keep the procedure in the workflow file only,
+so it never drifts between tools.
