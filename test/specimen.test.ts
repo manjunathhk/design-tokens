@@ -9,10 +9,17 @@ beforeAll(() => {
 });
 
 describe("specimen page", () => {
-  const html = read("docs/index.html");
-  const tokens = JSON.parse(read("dist/tokens.json")) as {
+  let html = "";
+  let tokens: {
     shared: Record<string, string | number>;
   };
+
+  beforeAll(() => {
+    html = read("docs/index.html");
+    tokens = JSON.parse(read("dist/tokens.json")) as {
+      shared: Record<string, string | number>;
+    };
+  });
 
   it("is generated with specimen sections", () => {
     expect(html).toContain("<title>@manjunathhk/design-tokens specimen</title>");

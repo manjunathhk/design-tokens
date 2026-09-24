@@ -103,6 +103,7 @@ const motionRows = (set: TokenSet) =>
 
 export function specimenHtml(set: TokenSet): string {
   const shadow = tokenValue(set.shared, "shadow.raised");
+  const major = set.version.split(".")[0] ?? "1";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -222,7 +223,7 @@ pre { margin: 0; white-space: pre-wrap; padding: 0.75rem; border-radius: var(--m
     <section class="stack">
       <h2>Consumption snippets</h2>
       <h3>CDN link</h3>
-      <pre>&lt;link rel="stylesheet" href="https://design.manjunathhk.in/v1/index.css"&gt;</pre>
+      <pre>&lt;link rel="stylesheet" href="https://design.manjunathhk.in/v${major}/index.css"&gt;</pre>
       <h3>npm CSS import</h3>
       <pre>@import "@manjunathhk/design-tokens/index.css";</pre>
       <h3>Theme override</h3>
