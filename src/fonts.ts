@@ -122,19 +122,19 @@ export function copyFontAssets(distDir: string): void {
   mkdirSync(licensesDir, { recursive: true });
 
   for (const face of fontFaces) {
-    const source = requireFile(
-      packagePath(face.packageName, "fonts", "split", "woff2", face.file),
-      `Missing font asset ${face.file} in ${face.packageName}.`,
+    const source = packagePath(face.packageName, "fonts", "split", "woff2", face.file);
+    copyFileSync(
+      requireFile(source, `Missing font asset ${face.file} in ${face.packageName}: ${source}.`),
+      join(fontsDir, face.file),
     );
-    copyFileSync(source, join(fontsDir, face.file));
   }
 
   for (const license of licenses) {
-    const source = requireFile(
-      packagePath(license.packageName, "LICENSE.txt"),
-      `Missing OFL licence for ${license.packageName}.`,
+    const source = packagePath(license.packageName, "LICENSE.txt");
+    copyFileSync(
+      requireFile(source, `Missing OFL licence for ${license.packageName}: ${source}.`),
+      join(licensesDir, license.file),
     );
-    copyFileSync(source, join(licensesDir, license.file));
   }
 }
 
