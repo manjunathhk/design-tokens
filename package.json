@@ -26,7 +26,8 @@
     "lint": "eslint . && stylelint \"src/**/*.css\" --allow-empty-input && prettier --check .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
+    "api-diff": "tsx scripts/api-diff.ts",
     "build": "tsx src/build.ts"
   },
   "devDependencies": {

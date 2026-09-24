@@ -1,4 +1,7 @@
 import { readFileSync } from "node:fs";
+// Pinned to 4.4 (D12). GHSA-vj5c-m527-mpff (prototype pollution in
+// convertTokenData, no 4.x fix) is accepted: it runs only at build time over
+// committed token files and we never call that function.
 import StyleDictionary from "style-dictionary";
 import type { TransformedToken } from "style-dictionary/types";
 
@@ -84,6 +87,21 @@ function toToken(t: TransformedToken): Token {
 
 const byPath = (a: Token, b: Token) => a.path.localeCompare(b.path, "en", { numeric: true });
 
+/** Throws, naming the token, its value and the file, if a mode lacks a token the other has. */
+export function checkModeParity(modes: Record<Mode, Token[]>): void {
+  for (const mode of MODES) {
+    const other = mode === "light" ? "dark" : "light";
+    const otherPaths = new Set(modes[other].map((t) => t.path));
+    for (const t of modes[mode]) {
+      if (!otherPaths.has(t.path)) {
+        throw new Error(
+          `Token ${t.path} has a ${mode} value (${t.value}) but no ${other} value in ${modeFile(other)}.`,
+        );
+      }
+    }
+  }
+}
+
 export async function loadTokens(): Promise<TokenSet> {
   const pkg = JSON.parse(readFileSync("package.json", "utf8")) as { version: string };
   const exported = { light: await exportMode("light"), dark: await exportMode("dark") };
@@ -114,16 +132,6 @@ export async function loadTokens(): Promise<TokenSet> {
       .sort(byPath),
   };
 
-  for (const mode of MODES) {
-    const other = mode === "light" ? "dark" : "light";
-    const otherPaths = new Set(set.modes[other].map((t) => t.path));
-    for (const t of set.modes[mode]) {
-      if (!otherPaths.has(t.path)) {
-        throw new Error(
-          `Token ${t.path} has a ${mode} value (${t.value}) but no ${other} value in ${modeFile(other)}.`,
-        );
-      }
-    }
-  }
+  checkModeParity(set.modes);
   return set;
 }
