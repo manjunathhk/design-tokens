@@ -1,0 +1,52 @@
+{
+  "color": {
+    "$type": "color",
+    "white": { "$value": "#FFFFFF" },
+    "black": { "$value": "#000000" },
+    "paper": {
+      "$description": "Warm paper and sand neutrals used by the light theme.",
+      "50": { "$value": "#FBFAF7" },
+      "100": { "$value": "#F2F0EB" },
+      "200": { "$value": "#E8E5DE" },
+      "300": { "$value": "#D8D4CB" },
+      "400": { "$value": "#BFBAAF" },
+      "600": { "$value": "#87816F" }
+    },
+    "ink": {
+      "$description": "Ink greys used for text in the light theme.",
+      "500": { "$value": "#5C6576" },
+      "700": { "$value": "#3A4556" },
+      "900": { "$value": "#16202E" }
+    },
+    "navy": {
+      "$description": "Blue-grey scale used by the dark theme, lightest to darkest.",
+      "50": { "$value": "#E7EBF1" },
+      "200": { "$value": "#B3BCC9" },
+      "400": { "$value": "#8792A2" },
+      "500": { "$value": "#5E6D83" },
+      "700": { "$value": "#334052" },
+      "800": { "$value": "#242D3A" },
+      "900": { "$value": "#18202B" },
+      "925": { "$value": "#141A23" },
+      "950": { "$value": "#0F141B" },
+      "975": { "$value": "#0B1422" }
+    },
+    "denim": {
+      "$description": "Brand accent.",
+      "300": { "$value": "#8DB2F2" },
+      "600": { "$value": "#2A5AA8" }
+    },
+    "red": {
+      "300": { "$value": "#FF8A7A" },
+      "600": { "$value": "#B42318" }
+    },
+    "green": {
+      "300": { "$value": "#86C99A" },
+      "700": { "$value": "#1F6B45" }
+    },
+    "amber": {
+      "300": { "$value": "#F0B860" },
+      "700": { "$value": "#8C5300" }
+    }
+  }
+}

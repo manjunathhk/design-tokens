@@ -1,0 +1,52 @@
+{
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "display": {
+        "$value": ["IBM Plex Sans Condensed", "IBM Plex Sans", "Arial Narrow", "sans-serif"],
+        "$description": "Display headings."
+      },
+      "sans": {
+        "$value": ["IBM Plex Sans", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
+        "$description": "Body text and UI."
+      },
+      "mono": {
+        "$value": ["IBM Plex Mono", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        "$description": "Code and tabular figures."
+      }
+    },
+    "size": {
+      "$type": "dimension",
+      "xs": { "$value": "12px" },
+      "sm": { "$value": "14px" },
+      "base": { "$value": "17px", "$description": "Body text." },
+      "md": { "$value": "18px" },
+      "lg": { "$value": "21px" },
+      "xl": { "$value": "clamp(28px, 3vw, 40px)" },
+      "2xl": { "$value": "clamp(34px, 4vw, 64px)" },
+      "3xl": { "$value": "clamp(42px, 5.6vw, 98px)" },
+      "display": { "$value": "clamp(50px, 8.1vw, 148px)" }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "regular": { "$value": 400 },
+      "medium": { "$value": 500 },
+      "semibold": { "$value": 600 },
+      "bold": { "$value": 700 }
+    },
+    "line-height": {
+      "$type": "number",
+      "tight": { "$value": 0.9, "$description": "Display type." },
+      "snug": { "$value": 1.15, "$description": "Headings." },
+      "normal": { "$value": 1.5, "$description": "UI text." },
+      "relaxed": { "$value": 1.6, "$description": "Long-form body copy." }
+    },
+    "letter-spacing": {
+      "$type": "dimension",
+      "display": { "$value": "-0.028em" },
+      "heading": { "$value": "-0.022em" },
+      "normal": { "$value": "0" },
+      "label": { "$value": "0.07em", "$description": "Uppercase labels." }
+    }
+  }
+}

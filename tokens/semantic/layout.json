@@ -1,0 +1,8 @@
+{
+  "layout": {
+    "$type": "dimension",
+    "gutter": { "$value": "clamp(16px, 4vw, 56px)", "$description": "Page side padding." },
+    "container-max": { "$value": "1440px", "$description": "Maximum content width." },
+    "grid-size": { "$value": "56px", "$description": "Drafting-grid cell size." }
+  }
+}

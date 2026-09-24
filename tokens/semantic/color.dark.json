@@ -1,0 +1,99 @@
+{
+  "color": {
+    "bg": {
+      "$type": "color",
+      "$description": "page background",
+      "$value": "{color.navy.950}"
+    },
+    "bg-subtle": {
+      "$type": "color",
+      "$description": "alternate section background",
+      "$value": "{color.navy.925}"
+    },
+    "surface": {
+      "$type": "color",
+      "$description": "cards, panels, form fields",
+      "$value": "{color.navy.900}"
+    },
+    "text": {
+      "$type": "color",
+      "$description": "primary text, headings",
+      "$value": "{color.navy.50}"
+    },
+    "text-secondary": {
+      "$type": "color",
+      "$description": "body copy on subtle backgrounds",
+      "$value": "{color.navy.200}"
+    },
+    "text-muted": {
+      "$type": "color",
+      "$description": "labels, captions, metadata",
+      "$value": "{color.navy.400}"
+    },
+    "border": {
+      "$type": "color",
+      "$description": "hairlines, dividers (decorative)",
+      "$value": "{color.navy.800}"
+    },
+    "border-strong": {
+      "$type": "color",
+      "$description": "emphasised rules (decorative; not for control outlines)",
+      "$value": "{color.navy.700}"
+    },
+    "border-control": {
+      "$type": "color",
+      "$description": "outlines of form controls and other UI that must be seen (3:1)",
+      "$value": "{color.navy.500}"
+    },
+    "grid-line": {
+      "$type": "color",
+      "$description": "drafting-grid background lines",
+      "$value": "{color.white}",
+      "$extensions": {
+        "in.manjunathhk": {
+          "alpha": 0.04
+        }
+      }
+    },
+    "accent": {
+      "$type": "color",
+      "$description": "links, highlights, primary actions",
+      "$value": "{color.denim.300}"
+    },
+    "on-accent": {
+      "$type": "color",
+      "$description": "text or icons on accent fills",
+      "$value": "{color.navy.975}"
+    },
+    "accent-subtle": {
+      "$type": "color",
+      "$description": "tinted backgrounds; accent at 13% alpha",
+      "$value": "{color.denim.300}",
+      "$extensions": {
+        "in.manjunathhk": {
+          "alpha": 0.13
+        }
+      }
+    },
+    "danger": {
+      "$type": "color",
+      "$description": "errors",
+      "$value": "{color.red.300}"
+    },
+    "success": {
+      "$type": "color",
+      "$description": "success states",
+      "$value": "{color.green.300}"
+    },
+    "warning": {
+      "$type": "color",
+      "$description": "warnings",
+      "$value": "{color.amber.300}"
+    },
+    "focus-ring": {
+      "$type": "color",
+      "$description": "focus outline; same as accent",
+      "$value": "{color.denim.300}"
+    }
+  }
+}

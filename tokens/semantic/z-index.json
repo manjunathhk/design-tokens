@@ -1,0 +1,8 @@
+{
+  "z-index": {
+    "$type": "number",
+    "nav": { "$value": 50 },
+    "overlay": { "$value": 80 },
+    "toast": { "$value": 90 }
+  }
+}
