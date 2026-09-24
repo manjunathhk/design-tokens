@@ -1,0 +1,7 @@
+dist/
+docs/index.html
+test-results/
+playwright-report/
+test/__snapshots__/
+package-lock.json
+AGENTS.md
