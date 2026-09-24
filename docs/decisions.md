@@ -87,6 +87,8 @@ SIL OFL 1.1, shipped in `dist/LICENSES/`.
 
 ## D12. Style Dictionary pinned to 4.4
 
+Superseded by D21.
+
 2026-09-24. The brief specifies v4. `npm audit` reports GHSA-vj5c-m527-mpff
 (prototype pollution in `convertTokenData`, `>=4.3.0 <5.4.4`, no 4.x fix).
 Accepted: it runs only at build time over committed token files, we do not
@@ -160,3 +162,15 @@ baseline. The naming test derives primitive names from
 `tokens/primitive/color.json` rather than a hard-coded list. The
 `dist/tokens.css` snapshot includes the version banner, so the release PR
 updates it along with the version.
+
+## D21. Style Dictionary 5
+
+2026-09-24. Supersedes D12 and brief section 3's "Style Dictionary v4".
+Issue #20. `style-dictionary` is `^5.5.5`, which fixes GHSA-vj5c-m527-mpff
+(fixed in 5.4.4); `npm audit` is clean. The v4 API we use is unchanged in
+v5 and `dist/tokens.css` is byte-identical. One behaviour change needed
+handling: v5 catches errors thrown by transforms and, unless
+`log.verbosity` is `"verbose"`, replaces them with a generic count. The
+build now runs verbose so a failing D6 alpha transform still names the
+token, its file (and so its mode) and the bad value. `warnings: "error"`
+still makes any warning fatal, so verbose adds no output to a clean build.
