@@ -246,3 +246,16 @@ never rc). The specimen includes a minimal `data-theme` toggle for review only
 (not shipped runtime JS). Visual review of `shadow.raised` in dark mode keeps
 the shared value from D7 for now; if a dark variant is needed later, that stays
 a MINOR token addition.
+
+## D28. Release procedure consolidated in docs/workflow/release.md
+
+2026-09-25. The release checklist was scattered across cdn.md's flow summary,
+decisions.md (D9, D14, D15, D18) and the release.yml/promote.yml mechanics.
+`docs/workflow/release.md` consolidates it into one step-by-step procedure,
+mirroring `implement-issue.md`'s format (D19); AGENTS.md points to it.
+Written while first provisioning the R2 bucket by hand, which also surfaced
+that Cloudflare's dashboard had moved since docs/cdn.md was written: bucket
+public access is two separate toggles (Bucket Access vs Custom Domains) not
+one, CORS is a form not a raw JSON paste, and Cache Rules moved from Rules to
+Caching in the sidebar with Edge/Browser TTL now left unset rather than
+explicitly set to respect the origin. docs/cdn.md §1-3 updated to match.
