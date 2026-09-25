@@ -332,3 +332,29 @@ construction and needs no assumption about which fields R2 chooses to
 include. `promote.yml`'s existing-objects check already used this shape
 (`Contents[].Key` parsed and `Array.isArray`-checked in Node) and did not
 have the bug.
+
+## D32. `node --input-type=module <<'NODE' args...` silently never ran the script
+
+2026-09-25. Four steps across `release.yml` and `promote.yml` (pinned and
+alias CDN verification, the GitHub Release notes builder) fed a script via
+a heredoc on stdin while also passing shell arguments after the heredoc
+delimiter: `node --input-type=module <<'NODE' "$ARG1" ...`. Node's CLI
+treats the first non-flag positional argument as the entry-point script
+path to load, not as `process.argv` for a script read from stdin, whether
+or not a heredoc is also attached to stdin. For the two CDN-verification
+steps, that first argument was always `/tmp/upload-manifest.json`, a real
+file, so Node silently `require()`'d it as an inert JSON module and exited
+0 — the HTTP status/content-type/banner/font-CORS checks never ran, in any
+release so far, and every run still reported success. For the release-notes
+step the lone argument was the bare version string (e.g. `1.0.0`), which
+resolves to no real file, so that one failed loudly instead of silently.
+Discovered when `v1.0.0`'s tag run failed at "Build GitHub Release notes";
+the CDN-verification steps had been passing vacuously since the very first
+release.yml run. Fixed by using Node's documented `-` stdin sentinel
+(`node --input-type=module - "$ARG1" ... <<'NODE'`), which explicitly reads
+the entry point from stdin and correctly populates `process.argv` from the
+trailing arguments. The two heredocs with no trailing arguments (the
+Cloudflare purge calls) were never affected. `release.yml`'s own CDN
+verification for this fix must be trusted going forward only once a run
+with this fix has actually shown the check executing (a thrown assertion
+on a deliberately wrong banner/URL would prove it, not just a green step).
