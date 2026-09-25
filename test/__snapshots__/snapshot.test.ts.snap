@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`dist/tokens.css matches the snapshot 1`] = `
-"/*! @manjunathhk/design-tokens v1.0.0-rc.1 */
+"/*! @manjunathhk/design-tokens v1.0.0-rc.2 */
 :root {
   --mk-color-accent: #2A5AA8;
   --mk-color-accent-subtle: rgba(42, 90, 168, 0.13);
@@ -125,7 +125,7 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
 
 exports[`dist/tokens.json matches the snapshot 1`] = `
 "{
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "light": {
     "color.accent": "#2A5AA8",
     "color.accent-subtle": "rgba(42, 90, 168, 0.13)",
