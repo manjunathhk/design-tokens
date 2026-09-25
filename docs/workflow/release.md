@@ -2,35 +2,42 @@
 
 The procedure for releasing `@manjunathhk/design-tokens`: tagging `main`,
 publishing to npm, and updating the CDN. Tool-agnostic like
-`implement-issue.md`, but most of it is human-only per `AGENTS.md`: agents
-never push tags, run `npm publish`, or touch R2/Cloudflare credentials. An
-agent's role here stops at step 2.
+`implement-issue.md`. Per `AGENTS.md`, three things are always human —
+pushing a tag, running `npm publish`, and handling an R2 or Cloudflare
+credential directly — and nothing below changes that. Everything else in
+this procedure an agent can drive, as `/release` in Claude Code (D30); each
+step says which.
 
 ## 1. Preconditions
 
 - Everything you want released is merged to `main` and green.
-- You know the target version (semver: MAJOR for removing/renaming an
-  emitted token, MINOR for adding a token or changing a value, PATCH for
-  build/doc fixes — see `AGENTS.md`).
+- You give `/release` the target version (semver: MAJOR for
+  removing/renaming an emitted token, MINOR for adding a token or changing
+  a value, PATCH for build/doc fixes — see `AGENTS.md`). `/release` checks
+  that number against the diff since the last tag before using it: on a
+  mismatch it stops, says why, and proposes the version the diff actually
+  calls for, rather than silently overriding you or silently proceeding
+  with a bump it believes is wrong.
 
 ## 2. Land the Release PR
 
-Hand-bump, in one PR, on a branch off `main`:
+`/release <version>` opens this PR once the version above checks out:
 
 - `package.json` `version` → the **rc** version, e.g. `1.3.0-rc.1`.
   `release.yml` requires the pushed tag (minus its `v`) to match this
   string exactly, so it has to carry the `-rc.N` suffix here, not the
   final `1.3.0`.
 - `CHANGELOG.md` → add the `## [1.3.0]` section (final version, no `-rc`
-  suffix in the heading) with real notes. `release.yml` only checks for
-  this section on the **final** tag, not the rc, but write it now so it's
-  ready.
+  suffix in the heading), drafted from the PRs merged since the last tag.
+  `release.yml` only checks for this section on the **final** tag, not the
+  rc, but write it now so it's ready.
 - The `dist/tokens.css` version-banner snapshot, if the build produces one.
 
-Normal PR, normal CI. No version-bump automation runs here (D18): a human
-decides the bump and writes the notes.
+Normal PR, normal CI. `/release` proposes the bump and drafts the notes,
+but nothing lands unattended (D18, refined by D30): you review and merge
+this PR like any other.
 
-**(Human only from here.)**
+**(Human only: this step.)**
 
 ## 3. Push the release-candidate tag
 
@@ -55,19 +62,25 @@ Triggers `release.yml`. For an `-rc.N` tag it:
 
 An rc never touches the `/vMAJOR/` alias or npm's `latest` tag.
 
+**(Human only: this step and its command.)**
+
 ## 4. Validate the rc
 
-Pull `next` from npm and/or hit the pinned CDN URLs directly. Fix forward
-with a new rc (`-rc.2`, ...) if anything's wrong — don't reuse a pinned
-prefix.
+Run `/release verify` after pushing the rc tag: it pulls `next` from npm
+and hits the pinned CDN URLs (status, content-type, version banner, font
+CORS), then reports pass/fail. Read-only, no credential involved — the
+same checks `release.yml` already ran, confirmed from outside CI. Fix
+forward with a new rc (`-rc.2`, ...) if anything's wrong — don't reuse a
+pinned prefix.
 
 ## 5. Land the Finalize PR
 
-A small follow-up PR, on a new branch off `main`: bump `package.json`
-`version` from `1.3.0-rc.1` to `1.3.0` — dropping the `-rc.N` suffix is
-required, since the final tag's validation needs an exact match against
-this new string. No CHANGELOG change needed; the `## [1.3.0]` section
-already landed in step 2.
+`/release <version> finalize` opens a small follow-up PR, on a new branch
+off `main`: bump `package.json` `version` from `1.3.0-rc.1` to `1.3.0` —
+dropping the `-rc.N` suffix is required, since the final tag's validation
+needs an exact match against this new string. No CHANGELOG change needed;
+the `## [1.3.0]` section already landed in step 2. Reviewed and merged
+like any other PR.
 
 ## 6. Push the final tag
 
@@ -91,26 +104,45 @@ it, then:
 The tag push _is_ the release — there is no separate release button or
 draft step.
 
+**(Human only: this step and its command.)**
+
 ## 7. Verify
 
-Check the alias URL (`design.manjunathhk.in/v1/...`) resolves post-purge,
-and that npm shows the new version as `latest`.
+Run `/release verify` again after pushing the final tag: it checks the
+alias URL (`design.manjunathhk.in/v1/...`) resolves post-purge, and that
+npm shows the new version as `latest`. Read-only.
 
 ## 8. Roll back a bad alias promotion
 
 If the alias promotion needs redoing but the pinned version is already
-published and doesn't need republishing: **Actions → promote → Run
-workflow**, input the version without `v` (e.g. `1.3.0`). It re-runs
-promote + purge + alias verification against the existing pinned objects,
-refusing if that pinned prefix has zero objects. It does not touch npm.
+published and doesn't need republishing: run `/release <version>
+rollback`. It dispatches **Actions → promote → Run workflow** with the
+version input (without `v`, e.g. `1.3.0`) via the GitHub API, polls the run
+to completion, and reports the result. `promote.yml` re-runs promote +
+purge + alias verification against the existing pinned objects, refusing
+if that pinned prefix has zero objects. It does not touch npm. Dispatching
+this workflow is not the same as an agent handling an R2 or Cloudflare
+credential: `promote.yml` authenticates with its own repository secrets,
+exactly as it does when a human clicks the button in the Actions UI (D30).
 
 ## 9. What's manual, always
 
-Per `AGENTS.md`, these are never automated and never done by an agent:
+Per `AGENTS.md`, three things are never automated and never done by an
+agent, whatever else drives the rest of this procedure:
 
-- deciding the version bump and writing the CHANGELOG notes (D18 —
-  release-please and similar were rejected: bots would create the tag,
-  `GITHUB_TOKEN`-made tags don't trigger `release.yml`, and inferring
-  bumps from commit types doesn't enforce "value change = MINOR");
-- pushing the tag;
-- anything touching Cloudflare or npm credentials.
+- pushing the rc or final tag — and not just by policy: a tag pushed with
+  an agent's default `GITHUB_TOKEN` wouldn't even trigger `release.yml`,
+  since GitHub suppresses a workflow run triggered by another workflow's
+  default token, so moving this to an agent would need a PAT or app-token
+  workaround that reintroduces the exact credential problem this rule
+  avoids;
+- running `npm publish` directly (it still runs, but only inside
+  `release.yml` as CI, authenticated via OIDC);
+- handling an R2 or Cloudflare credential directly.
+
+Deciding the version bump stays yours to state; `/release` checks it
+against the diff and pushes back on a mismatch rather than deciding
+unilaterally (step 1) — D18's objection was to _inferring_ a bump from
+commit types without enforcing the emitted-token contract, which this
+doesn't do. See D30 for the full automation boundary and why the earlier
+release-please rejection doesn't reopen here.

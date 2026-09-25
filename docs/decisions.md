@@ -272,3 +272,40 @@ suffix before the final tag. D14's "the version bump and CHANGELOG entry
 land in a Release X.Y.Z PR" undersold this; it still holds for the rc PR,
 just not as the whole story. Surfaced by a Copilot review comment on PR
 #32; `docs/workflow/release.md` documents the corrected two-PR flow.
+
+## D30. `/release` automation boundary: refines D18
+
+2026-09-25. `/release` (`.claude/skills/release/SKILL.md`,
+`docs/workflow/release.md`) automates the release procedure up to, but
+never across, the boundary AGENTS.md already draws:
+
+- Given a target version, it checks the requested bump against the diff
+  since the last tag using AGENTS.md's rules (MAJOR: removed/renamed
+  emitted token; MINOR: added token or changed value; PATCH: build/doc
+  fix) before using it. On a mismatch it stops, says why, and proposes the
+  version the diff calls for, rather than silently overriding the human or
+  silently proceeding with a bump it believes is wrong.
+- It drafts the Release PR (rc bump, CHANGELOG section drafted from PRs
+  merged since the last tag, snapshot refresh) and the Finalize PR (D29's
+  two-PR flow). Both are reviewed and merged like any other PR — nothing
+  lands unattended.
+- It runs rc and final validation (pull npm `next`/`latest`, hit
+  pinned/alias CDN URLs, check banner/content-type/font-CORS) as read-only
+  checks that touch no credential.
+- It can dispatch `promote.yml`'s `workflow_dispatch` for rollback: the
+  workflow authenticates with its own repository secrets exactly as it
+  does when a human clicks the button in the Actions UI, so this doesn't
+  put an R2 or Cloudflare credential in an agent's hands.
+
+Unchanged from AGENTS.md and D18, and not reopened by this decision:
+pushing the rc or final tag, running `npm publish` directly, and any
+direct handling of an R2 or Cloudflare credential. Tag-pushing specifically
+can't move to an agent even if it were allowed to: a tag created with an
+agent's default `GITHUB_TOKEN` does not trigger `release.yml` — GitHub
+suppresses a workflow run triggered by another workflow's default token —
+so moving it would need a PAT or app-token workaround that reintroduces the
+exact credential-handling problem AGENTS.md avoids. D18's other objections
+to release-please don't apply here either: the GitHub Release is still
+created after CDN verification (ordering is unchanged from the human
+procedure), and the bump is checked against the emitted-token contract in
+AGENTS.md, never inferred from commit history.
