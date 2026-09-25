@@ -90,7 +90,7 @@ jobs:
             --bucket "$R2_BUCKET" \
             --prefix "v${{ steps.meta.outputs.version }}/" \
             --max-items 1 \
-            --query 'KeyCount' \
+            --query 'length(Contents || `[]`)' \
             --output text \
             --endpoint-url "$R2_ENDPOINT")"
           if [[ "$existing_count" != "0" ]]; then
