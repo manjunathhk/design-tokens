@@ -27,6 +27,14 @@ step says which.
   behavior (D20): it already passes trivially when the package isn't on
   npm yet or has no `latest` dist-tag, so nothing here is a new gap in the
   contract, just `/release` following the same rule.
+- **First-ever release only**: npm trusted publishing (the OIDC publish
+  in step 3) can't be configured until the package has published at
+  least once — its Settings page doesn't exist before that (`docs/cdn.md`
+  §5a). If it isn't bootstrapped yet, step 3 still completes the R2/CDN
+  side successfully and only fails at the npm-publish step. That's
+  recoverable without a new rc number — see the note in step 3 — so it's
+  fine to discover this the first time you push a tag rather than
+  bootstrapping npm up front.
 
 ## 2. Land the Release PR
 
@@ -76,6 +84,16 @@ Triggers `release.yml`. For an `-rc.N` tag it:
 
 An rc never touches the `/vMAJOR/` alias or npm's `latest` tag.
 
+**Let this run to completion** — roughly 2-4 minutes for the full gate
+plus R2 upload plus npm publish — before assuming something is wrong.
+Cancelling mid-run, especially mid-upload, can leave partial,
+unverifiable objects under the pinned prefix; because pinned prefixes
+are immutable, a stranded tag can never be reused and you'd have to
+bump to a new rc number to recover (step 4). If the run fails only at
+the npm-publish step and R2/CDN already succeeded, that's very likely
+the first-release npm bootstrap gap (`docs/cdn.md` §5a), not a reason to
+retag — fix npm access for that same version instead.
+
 **(Human only: this step and its command.)**
 
 ## 4. Validate the rc
@@ -86,6 +104,13 @@ CORS), then reports pass/fail. Read-only, no credential involved — the
 same checks `release.yml` already ran, confirmed from outside CI. Fix
 forward with a new rc (`-rc.2`, ...) if anything's wrong — don't reuse a
 pinned prefix.
+
+A green "Verify pinned/alias CDN assets" step in `release.yml` itself is
+necessary but was not, for a while, sufficient: D32 covers a bug where
+those in-CI steps silently never executed their checks at all while still
+reporting success. Fixed as of that decision, but it's exactly why an
+independent, outside-CI `/release verify` earns its place as a separate
+step rather than trusting the workflow's own green checkmark alone.
 
 ## 5. Land the Finalize PR
 

@@ -359,7 +359,38 @@ verification for this fix must be trusted going forward only once a run
 with this fix has actually shown the check executing (a thrown assertion
 on a deliberately wrong banner/URL would prove it, not just a green step).
 
-## D33. Pages publishes the specimen only
+## D33. First-ever npm publish needs a one-time manual bootstrap
+
+2026-09-25. D10's OIDC trusted-publishing setup (`docs/cdn.md` §5)
+assumes the package already exists on npm: Trusted Publishers is
+configured on a package's own Settings page, which npm does not create
+until that package has published at least once. For the `v1.0.0-rc.1`
+and `v1.0.0-rc.2` tags this meant `release.yml`'s `npm publish` step 404'd
+(`PUT .../@manjunathhk%2Fdesign-tokens` not found) even though
+`id-token: write` and the workflow were both correct — there was simply
+nothing yet to attach trust to. npm's "Staged Packages" page looked like
+a plausible bootstrap path and is not; it is an unrelated manual-approval
+feature for packages that already exist.
+
+Resolved with a one-time manual publish from a human's own machine using
+a scoped, 2FA-protected Granular Access Token (deleted immediately after)
+and `--no-provenance` (provenance generation needs a recognized CI OIDC
+provider; a local machine has none). `v1.0.0-rc.2`'s R2/CDN upload had
+already succeeded before the npm failure, so this published that exact
+same version rather than burning a `v1.0.0-rc.3` — see `docs/cdn.md` §5a for the
+full runbook, now folded into `docs/workflow/release.md` step 1 and 3 as
+a documented, expected first-release speed bump rather than a surprise.
+Once the package exists, Trusted Publishers configures normally and every
+later release (rc or final) publishes via OIDC with no further manual
+step. Also observed and not a bug: npm sets `dist-tags.latest` to a
+package's first-ever published version regardless of `--tag`, since a
+package must always have a `latest` tag; self-corrects on the next
+normal (non-`next`) publish. And: the public `registry.npmjs.org` read
+API can lag several minutes behind npm's own website immediately after a
+brand-new package's first publish — a `404` there in that window is
+propagation lag, not a failed publish (confirm on the website first).
+
+## D34. Pages publishes the specimen only
 
 2026-09-25. Issue #42. `pages.yml` uploaded all of `docs/` as the Pages
 artifact, which also served the brief, these decisions, the CDN runbook,
