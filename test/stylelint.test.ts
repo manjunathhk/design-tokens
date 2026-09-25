@@ -29,6 +29,17 @@ const expectedRuleByFixture: Record<string, string> = {
 };
 
 describe("stylelint shareable config", () => {
+  it("has expected-rule mappings for every fail fixture", () => {
+    const failNames = fixtureFiles("fail").map((file) => basename(file));
+    const mapped = Object.keys(expectedRuleByFixture);
+    const missing = failNames.filter((name) => expectedRuleByFixture[name] === undefined);
+    const stale = mapped.filter((name) => !failNames.includes(name));
+    expect(missing, `Missing expected rule mapping for fixtures: ${missing.join(", ")}`).toEqual(
+      [],
+    );
+    expect(stale, `Rule mappings with no fixture file: ${stale.join(", ")}`).toEqual([]);
+  });
+
   it("passes all allowed fixtures", async () => {
     for (const file of fixtureFiles("pass")) {
       const result = await lintFixture(file);
