@@ -8,23 +8,32 @@ It covers Cloudflare setup, GitHub secrets, npm trusted publishing, and dry-runs
 1. Cloudflare Dashboard → **R2 Object Storage** → **Create bucket**.
 2. Name: `mk-design-cdn`.
 3. Keep this bucket public-only for design-token assets. Never store private files in it.
-4. In the bucket, add custom domain `design.manjunathhk.in`.
-5. Keep the `r2.dev` public URL disabled.
+4. Bucket → **Settings** → **Custom Domains** → **Connect Domain** → `design.manjunathhk.in`.
+5. Bucket → **Settings** → **Bucket Access** → leave the `R2.dev subdomain` toggle
+   **disabled**. This isn't just tidiness: caching (step 3 below), WAF rules and
+   access controls only work behind a custom domain — `r2.dev` doesn't support them.
 
 ## 2) Apply R2 CORS policy
 
-1. Open `mk-design-cdn` → **Settings** → **CORS policy**.
-2. Paste `docs/r2-cors.json` exactly.
+1. Open `mk-design-cdn` → **Settings** → **CORS Policy** → **Add CORS policy**.
+2. Fill in the fields to match `docs/r2-cors.json`: Allowed Origins `*`, Allowed
+   Methods `GET`, `HEAD`, Allowed Headers `*`, Max Age `86400`.
 3. Save.
 
 Why `*`: assets are public, credentials are never sent, and we avoid per-origin cache fragmentation.
 
 ## 3) Add Cloudflare cache behavior
 
-1. Cloudflare Dashboard → **Rules** → **Cache Rules** → **Create rule**.
-2. Match hostname `design.manjunathhk.in`.
-3. Set cache eligibility to cache static files and respect origin `Cache-Control` headers.
-4. Save and deploy.
+1. Cloudflare Dashboard → select zone `manjunathhk.in` → **Caching** → **Cache Rules**
+   → **Create rule**.
+2. Match: field `Hostname`, operator `equals`, value `design.manjunathhk.in`.
+3. Cache eligibility: **Eligible for cache**.
+4. Leave **Edge TTL** and **Browser TTL** unset — don't click "Add setting" on
+   either. Unset is what makes Cloudflare respect the origin `Cache-Control`
+   header, which is what `upload-manifest.ts` sets per object. Do not add a
+   Cache Response Rule to rewrite headers at the edge; R2 already serves the
+   right ones.
+5. Deploy.
 
 Pinned paths (`/vX.Y.Z/`) use long immutable cache. Alias paths (`/vMAJOR/`) use short cache.
 
