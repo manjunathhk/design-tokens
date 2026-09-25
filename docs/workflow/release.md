@@ -115,6 +115,9 @@ it, then:
 - creates the GitHub Release, body pulled from `CHANGELOG.md`'s
   `## [1.3.0]` section.
 
+In parallel, `pages.yml` deploys the specimen to GitHub Pages. That needs
+the one-time `github-pages` tag rule in `docs/cdn.md` §6.
+
 The tag push _is_ the release — there is no separate release button or
 draft step.
 
@@ -125,6 +128,10 @@ draft step.
 Run `/release verify` again after pushing the final tag: it checks the
 alias URL (`design.manjunathhk.in/v1/...`) resolves post-purge, and that
 npm shows the new version as `latest`. Read-only.
+
+Also check that the **pages** run for the tag succeeded and that
+`https://manjunathhk.github.io/design-tokens/` shows the new version. A failed `deploy` job with a passing `build` means the tag rule in
+`docs/cdn.md` §6 is missing.
 
 ## 8. Roll back a bad alias promotion
 

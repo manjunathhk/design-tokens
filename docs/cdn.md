@@ -1,7 +1,7 @@
 # CDN and release setup
 
 This runbook is for `design.manjunathhk.in` backed by the `mk-design-cdn` R2 bucket.
-It covers Cloudflare setup, GitHub secrets, npm trusted publishing, and dry-runs.
+It covers Cloudflare setup, GitHub secrets, npm trusted publishing, GitHub Pages, and dry-runs.
 
 ## 1) Create and expose the public R2 bucket
 
@@ -92,20 +92,43 @@ don't add anything under the **Variables** tab — the workflows only read
 
 `release.yml` uses `id-token: write` and runs `npm publish`/`npm publish --tag next` with no token secret.
 
-## 6) Release flow summary
+## 6) Configure GitHub Pages for the specimen
+
+`pages.yml` deploys the specimen (`docs/index.html`) on final release tags
+only (D15). It needs two one-time repository settings:
+
+1. GitHub → repository **Settings** → **Pages** → **Build and deployment** →
+   **Source**: **GitHub Actions**. Leave the suggested Jekyll and Static HTML
+   workflows unconfigured: they deploy on every push to `main`. Leave
+   **Custom domain** empty; the specimen is served from
+   `https://manjunathhk.github.io/design-tokens/`.
+2. **Settings** → **Environments** → `github-pages` → **Deployment branches
+   and tags**: keep **Selected branches and tags** and **Add deployment
+   branch or tag rule** → Ref type **Tag**, pattern `v*.*.*`. The pattern
+   also matches rc tags; `pages.yml` skips those itself.
+
+GitHub creates the `github-pages` environment when you pick the Actions
+source, and by default it only allows deploys from the default branch.
+Without the tag rule, the `build` job passes and the `deploy` job fails
+without starting ("Tag 'vX.Y.Z' is not allowed to deploy to github-pages
+due to environment protection rules"). After adding the rule, open that
+failed run and use **Re-run failed jobs**. There's no need to re-tag.
+
+## 7) Release flow summary
 
 - Push pre-release tag (`vX.Y.Z-rc.N`) on a `main` commit.
   - Workflow validates tag/version, tests, uploads pinned `/vX.Y.Z-rc.N/`, verifies HTTPS headers/banner/CORS, publishes npm with `--tag next`, and stops.
 - Push final tag (`vX.Y.Z`) on a `main` commit.
   - Workflow uploads pinned `/vX.Y.Z/`, verifies it, promotes to alias `/vX/`, purges explicit alias URLs, verifies alias, publishes npm, and creates GitHub Release notes from `CHANGELOG.md`.
+  - `pages.yml` separately deploys the specimen to GitHub Pages (needs §6).
 
-## 7) Rollback runbook
+## 8) Rollback runbook
 
 Use **Actions → promote → Run workflow** with input `version` (example `1.3.0`).
 
 `promote.yml` re-runs alias promote + purge + alias verification for an already-published pinned version without republishing npm.
 
-## 8) Emergency fallback
+## 9) Emergency fallback
 
 If CDN has an incident, switch consumer sites to jsDelivr temporarily:
 
@@ -113,7 +136,7 @@ If CDN has an incident, switch consumer sites to jsDelivr temporarily:
 
 Use this only as fallback; default URL remains `design.manjunathhk.in`.
 
-## 9) Dry-run paths without credentials
+## 10) Dry-run paths without credentials
 
 You can validate release inputs locally without Cloudflare/npm credentials:
 
@@ -129,7 +152,7 @@ And validate workflow syntax with actionlint:
 actionlint
 ```
 
-## 10) Alias propagation note
+## 11) Alias propagation note
 
 Alias updates (`/vMAJOR/`) can briefly serve mixed files while edge caches update.
 That is acceptable for tokens/base assets because files are version-bannered and quickly converged via purge + short alias TTL.
