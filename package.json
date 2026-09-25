@@ -28,12 +28,24 @@
       "types": "./dist/tokens.d.ts",
       "default": "./dist/tokens.mjs"
     },
+    "./stylelint": {
+      "types": "./dist/stylelint.d.ts",
+      "default": "./dist/stylelint.mjs"
+    },
     "./_tokens.scss": "./dist/_tokens.scss",
     "./package.json": "./package.json"
   },
   "sideEffects": [
     "*.css"
   ],
+  "peerDependencies": {
+    "stylelint": ">=16"
+  },
+  "peerDependenciesMeta": {
+    "stylelint": {
+      "optional": true
+    }
+  },
   "publishConfig": {
     "access": "public",
     "provenance": true

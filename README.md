@@ -169,6 +169,32 @@ font-src 'self' https://design.manjunathhk.in;
 Add `https://cdn.jsdelivr.net` to both directives only on a site that is
 actively using the jsDelivr fallback above.
 
+## Optional: shareable stylelint config
+
+This package exports `@manjunathhk/design-tokens/stylelint` for consumer CSS.
+Install `stylelint` in your own project, then extend this config:
+
+```sh
+npm install --save-dev stylelint
+```
+
+```json
+{
+  "extends": ["stylelint-config-standard", "@manjunathhk/design-tokens/stylelint"]
+}
+```
+
+The shared rules reject:
+
+- hex literals (`color-no-hex`);
+- named colours (`color-named: "never"`);
+- colour functions case-insensitively via `function-disallowed-list`:
+  `rgb`, `rgba`, `hsl`, `hsla`, `hwb`, `lab`, `lch`, `oklab`, `oklch`,
+  `color`, `color-mix`.
+
+`color-mix()` is banned even with token arguments: derived colours belong in
+tokens. `transparent`, `currentcolor` and system colours stay allowed.
+
 ## Versioning policy
 
 Semantic versioning is what makes "change once, reflect everywhere" safe:

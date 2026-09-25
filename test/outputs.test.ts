@@ -28,6 +28,8 @@ describe("banners", () => {
     "fonts.css",
     "_tokens.scss",
     "tokens.mjs",
+    "stylelint.mjs",
+    "stylelint.d.ts",
     "tokens.d.ts",
   ]) {
     it(`dist/${file} starts with ${BANNER}`, () => {
