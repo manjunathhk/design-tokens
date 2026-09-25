@@ -40,10 +40,11 @@ step says which.
   suffix in the heading), drafted from the PRs merged since the last tag.
   On the first release there is no last tag to draft from — the merged-PR
   list would be the whole repo history — so `/release` writes a plain
-  `## [1.0.0] - Initial release` heading instead and leaves the notes for
-  you to fill in before merging. `release.yml` only checks for this
-  section on the **final** tag, not the rc, but write it now so it's
-  ready.
+  `## [<version>] - Initial release` heading instead, using whichever
+  version you gave it in step 1 (`1.0.0` or a `0.x` pre-release, your
+  call), and leaves the notes for you to fill in before merging.
+  `release.yml` only checks for this section on the **final** tag, not the
+  rc, but write it now so it's ready.
 - The `dist/tokens.css` version-banner snapshot, if the build produces one.
 
 Normal PR, normal CI. `/release` proposes the bump and drafts the notes,

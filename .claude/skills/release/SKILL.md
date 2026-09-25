@@ -17,9 +17,9 @@ work from memory of it or of this file.
   silently proceed with a bump you believe is wrong. If there is no prior
   tag (first release), skip that check — there's nothing to diff — and
   take the given version as-is; write the CHANGELOG section as a plain
-  "Initial release" heading instead of drafting it from merged PRs, since
-  there is no last tag to draft since. Once validated, draft the Release
-  PR.
+  "Initial release" heading using that version instead of drafting it from
+  merged PRs, since there is no last tag to draft from. Once validated,
+  draft the Release PR.
 - `verify`: step 4 or step 7, whichever the current tag/package state
   matches. Read-only: pulls from npm, hits CDN URLs, reports pass/fail.
   Touches no credential.
