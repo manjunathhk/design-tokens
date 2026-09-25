@@ -86,11 +86,12 @@ jobs:
           R2_ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
           echo "::add-mask::$R2_ENDPOINT"
 
+          # shellcheck disable=SC2016 # backticks are a JMESPath array literal, not command substitution
           existing_count="$(aws s3api list-objects-v2 \
             --bucket "$R2_BUCKET" \
             --prefix "v${{ steps.meta.outputs.version }}/" \
             --max-items 1 \
-            --query 'KeyCount' \
+            --query 'length(Contents || `[]`)' \
             --output text \
             --endpoint-url "$R2_ENDPOINT")"
           if [[ "$existing_count" != "0" ]]; then

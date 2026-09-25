@@ -316,3 +316,19 @@ to release-please don't apply here either: the GitHub Release is still
 created after CDN verification (ordering is unchanged from the human
 procedure), and the bump is checked against the emitted-token contract in
 AGENTS.md, never inferred from commit history.
+
+## D31. R2's `list-objects-v2` omits `KeyCount` on an empty prefix
+
+2026-09-25. `release.yml`'s pinned-prefix guard queried
+`--query 'KeyCount' --output text` and refused to upload even against a
+genuinely empty `v1.0.0-rc.1/` prefix (confirmed empty in the R2
+dashboard: 0 B, no objects). Real AWS S3 always returns `KeyCount`, even
+`0`, but Cloudflare R2's S3-compatible API omits the field entirely when
+no objects match; the AWS CLI's JMESPath query then resolves to null,
+which `--output text` prints as the literal string `None`, and
+`"None" != "0"` wrongly trips the guard on every fresh prefix. Fixed by
+querying ``length(Contents || `[]`)`` instead, which is null-safe by
+construction and needs no assumption about which fields R2 chooses to
+include. `promote.yml`'s existing-objects check already used this shape
+(`Contents[].Key` parsed and `Array.isArray`-checked in Node) and did not
+have the bug.
