@@ -92,6 +92,88 @@ don't add anything under the **Variables** tab — the workflows only read
 
 `release.yml` uses `id-token: write` and runs `npm publish`/`npm publish --tag next` with no token secret.
 
+## 5a) Bootstrapping trust for a brand-new package (first release only)
+
+Step 5's **Settings → Trusted publishers** page only exists on a package
+that has already been published at least once — there is nothing to
+configure it on beforehand. npm's **Staged Packages** sidebar item looks
+related but is not: that's a separate manual-approval workflow for
+packages that already exist and have staged publishing turned on: it
+will not help create a new package, and its "no packages waiting for
+review" state is not diagnostic of anything here.
+
+**Symptom:** `release.yml`'s `npm publish` step fails on the very first
+rc or final tag, even with a correct `id-token: write` permission and no
+code problem:
+
+```
+npm error code E404
+npm error 404 Not Found - PUT https://registry.npmjs.org/@scope%2Fname
+```
+
+**One-time fix**, before the first tag push can succeed end to end:
+
+1. npmjs.com → **Access Tokens** → **Generate New Token** → **Granular
+   Access Token**.
+   - Uncheck **Bypass two-factor authentication** — this is an
+     interactive, human-run publish, not CI; you don't need to bypass
+     your own 2FA.
+   - Permissions: **Read and write (publish and stage)**, not "stage
+     only" (which queues a version instead of publishing it).
+   - Select packages: scope it to the specific package/scope if the
+     picker allows; if the name isn't selectable yet (nothing published
+     under it), use **All packages** and delete the token immediately
+     after use below.
+2. From your own machine, on the exact tag you want to publish:
+   ```sh
+   git fetch origin --tags
+   git checkout v<version>
+   npm ci
+   npm run build
+   npm login   # or configure the token in ~/.npmrc
+   npm publish --access public --tag next --no-provenance
+   ```
+   `--no-provenance` is required for this one manual publish:
+   `package.json`'s `publishConfig.provenance: true` (D10/D11) tells npm
+   to auto-attach a provenance attestation, which only works when npm
+   detects it's running inside a supported CI OIDC provider. A local
+   machine reports `provider: null` and the publish fails with `EUSAGE`
+   otherwise. Every subsequent publish from `release.yml` still
+   generates provenance normally — GitHub Actions _is_ a supported
+   provider — this flag only applies to the bootstrap publish itself.
+   Use `--tag next` for an rc, or omit it (defaults to `latest`) if
+   you're bootstrapping directly on a final version.
+3. Delete the access token — it has done its one job.
+4. The package now exists. Go to its page → **Settings → Trusted
+   publishers** and configure it exactly as in step 5 above. npm may
+   have already pre-populated an entry here from your account's linked
+   GitHub identity and `package.json`'s `repository` field — check that
+   what's there matches (owner/repo, workflow file
+   `.github/workflows/release.yml`) before assuming you need to add a
+   new one.
+
+If R2/CDN already succeeded for this tag before npm publish failed
+(check the tag's `release.yml` run step by step), don't burn a new rc
+number to retry: the pinned prefix is already valid, so just complete
+the npm side manually for that exact same version as above, then
+continue with `/release verify`.
+
+Two npm behaviors you'll likely see immediately after, that are not
+signs of anything wrong:
+
+- **`dist-tags.latest` gets set to your first-ever published version**,
+  even if you published with `--tag next`. A package must always have a
+  `latest` tag and there's nothing else yet for it to point to. This
+  self-corrects the moment a real final version publishes normally
+  (without `--tag next`) — no action needed.
+- **The public `registry.npmjs.org` read API can lag several minutes
+  behind npm's own website** after a brand-new package's first publish,
+  which shows it immediately on your account's Packages page. `npm view
+<pkg> dist-tags` or a direct fetch of `registry.npmjs.org/<pkg>` may
+  404 for a few minutes even though the package genuinely exists — use
+  the website's Packages page as the source of truth while waiting, and
+  retry the registry check rather than assuming the publish failed.
+
 ## 6) Release flow summary
 
 - Push pre-release tag (`vX.Y.Z-rc.N`) on a `main` commit.
