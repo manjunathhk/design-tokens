@@ -404,13 +404,20 @@ build, the specimen test, the CI artifact and `.gitignore` all name
 
 ## D35. npm install-scripts warnings stay unconfigured for now
 
-2026-09-25. Issue #19. After moving CI to `actions/setup-node@v7`, the
-`ci` and `playwright` jobs no longer emit Node's DEP0040 (`punycode`) or
-DEP0169 (`url.parse`) warnings, and `.nvmrc` resolution plus npm cache hits
-still work as before. npm 11 still prints `npm warn install-scripts` for
-packages with install/postinstall hooks (currently
-`@ibm/plex-{mono,sans,sans-condensed}`, `@parcel/watcher`, `esbuild`). We
-are leaving `allowScripts` unset for now: npm is warning-only today, and
-adding repository policy/configuration preemptively would violate AGENTS.md's
-"no configuration options nobody asked for". Revisit only if npm changes
-this from warning to enforcement or if CI policy requires explicit approvals.
+2026-09-25. Issue #19. The `actions/setup-node@v7` move was already done in
+commit `f79524f`; this PR records its outcome: `ci`/`playwright` logs no
+longer emit DEP0040 (`punycode`) or DEP0169 (`url.parse`), and `.nvmrc`
+resolution plus npm cache hits still work. On this PR, rows 3 and 4 from the
+issue are already resolved by D21 (`style-dictionary` `^5.5.5`): `npm ci`
+shows `found 0 vulnerabilities` and no `glob@10.5.0` deprecation warning.
+
+Owner choice for row 5 is option (a): leave `allowScripts` unset. Today npm 11
+only warns, so adding configuration has no effect yet. The warning list has
+also changed since the issue text: the current five packages are
+`@ibm/plex-{mono,sans,sans-condensed}`, `@parcel/watcher`, and `esbuild`
+(not style-dictionary/glob). The three IBM Plex packages run
+`ibmtelemetry` postinstalls, but CI already disables that telemetry via
+`IBM_TELEMETRY_DISABLED: "true"` (D25); if npm later enforces `allowScripts`,
+that enforcement would also block those telemetry hooks, which is desirable.
+`npm ci --ignore-scripts && npm run build && npm test` passes on this PR, so
+enforcement would not break the build or test path.
