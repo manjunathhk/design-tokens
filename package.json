@@ -28,6 +28,10 @@
       "types": "./dist/tokens.d.ts",
       "default": "./dist/tokens.mjs"
     },
+    "./stylelint": {
+      "types": "./dist/stylelint.d.ts",
+      "default": "./dist/stylelint.mjs"
+    },
     "./_tokens.scss": "./dist/_tokens.scss",
     "./package.json": "./package.json"
   },

@@ -3,6 +3,7 @@ import { baseCss, indexCss, tokensCss, tokensScss } from "./css.js";
 import { tokensDts, tokensJson, tokensMjs } from "./data.js";
 import { copyFontAssets, fontOutput } from "./fonts.js";
 import { specimenHtml } from "./specimen.js";
+import { stylelintConfigDts, stylelintConfigMjs } from "./stylelint.js";
 import { loadTokens } from "./tokens.js";
 
 const set = await loadTokens();
@@ -18,6 +19,8 @@ const outputs: Record<string, string> = {
   "index.css": indexCss(set, fonts.body, base),
   "tokens.json": tokensJson(set),
   "tokens.mjs": tokensMjs(set),
+  "stylelint.mjs": stylelintConfigMjs(set.version),
+  "stylelint.d.ts": stylelintConfigDts(set.version),
   "tokens.d.ts": tokensDts(set),
   "_tokens.scss": tokensScss(set),
 };

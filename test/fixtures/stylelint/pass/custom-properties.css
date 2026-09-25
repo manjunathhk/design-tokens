@@ -1,0 +1,5 @@
+.card {
+  background: var(--mk-color-surface);
+  border-color: currentcolor;
+  color: var(--mk-color-text);
+}

@@ -263,6 +263,20 @@ npm run typecheck
 npm test
 ```
 
+## Optional: shareable stylelint config
+
+This package exports `@manjunathhk/design-tokens/stylelint` for consumer CSS.
+It rejects hex, named colours, and `rgb()` / `hsl()` colour functions so sites
+keep using token values.
+
+Extend it in your project:
+
+```json
+{
+  "extends": ["stylelint-config-standard", "@manjunathhk/design-tokens/stylelint"]
+}
+```
+
 ### Required status checks
 
 Branch protection on `main` requires a PR and these checks (squash merges are
