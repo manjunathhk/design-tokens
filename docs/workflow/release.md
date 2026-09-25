@@ -17,10 +17,14 @@ agent's role here stops at step 2.
 
 Hand-bump, in one PR, on a branch off `main`:
 
-- `package.json` `version` → the target version.
-- `CHANGELOG.md` → add a `## [X.Y.Z]` section with real notes. Required:
-  `release.yml` fails the build if this section is missing or empty. It
-  becomes the GitHub Release body verbatim.
+- `package.json` `version` → the **rc** version, e.g. `1.3.0-rc.1`.
+  `release.yml` requires the pushed tag (minus its `v`) to match this
+  string exactly, so it has to carry the `-rc.N` suffix here, not the
+  final `1.3.0`.
+- `CHANGELOG.md` → add the `## [1.3.0]` section (final version, no `-rc`
+  suffix in the heading) with real notes. `release.yml` only checks for
+  this section on the **final** tag, not the rc, but write it now so it's
+  ready.
 - The `dist/tokens.css` version-banner snapshot, if the build produces one.
 
 Normal PR, normal CI. No version-bump automation runs here (D18): a human
@@ -39,8 +43,8 @@ git push origin v1.3.0-rc.1
 
 Triggers `release.yml`. For an `-rc.N` tag it:
 
-- validates the tag matches `package.json` and the tagged commit is on
-  `main` — hard-fails otherwise, no drift possible;
+- validates the tag matches `package.json` exactly and the tagged commit
+  is on `main` — hard-fails otherwise, no drift possible;
 - runs the full gate: lint, typecheck, build, unit tests, API-diff,
   Playwright e2e;
 - uploads to the **pinned** `/v1.3.0-rc.1/` prefix only, refusing if that
@@ -57,9 +61,17 @@ Pull `next` from npm and/or hit the pinned CDN URLs directly. Fix forward
 with a new rc (`-rc.2`, ...) if anything's wrong — don't reuse a pinned
 prefix.
 
-## 5. Push the final tag
+## 5. Land the Finalize PR
 
-Same commit, no changes:
+A small follow-up PR, on a new branch off `main`: bump `package.json`
+`version` from `1.3.0-rc.1` to `1.3.0` — dropping the `-rc.N` suffix is
+required, since the final tag's validation needs an exact match against
+this new string. No CHANGELOG change needed; the `## [1.3.0]` section
+already landed in step 2.
+
+## 6. Push the final tag
+
+On the Finalize PR's merged commit:
 
 ```sh
 git tag v1.3.0
@@ -79,12 +91,12 @@ it, then:
 The tag push _is_ the release — there is no separate release button or
 draft step.
 
-## 6. Verify
+## 7. Verify
 
 Check the alias URL (`design.manjunathhk.in/v1/...`) resolves post-purge,
 and that npm shows the new version as `latest`.
 
-## 7. Roll back a bad alias promotion
+## 8. Roll back a bad alias promotion
 
 If the alias promotion needs redoing but the pinned version is already
 published and doesn't need republishing: **Actions → promote → Run
@@ -92,7 +104,7 @@ workflow**, input the version without `v` (e.g. `1.3.0`). It re-runs
 promote + purge + alias verification against the existing pinned objects,
 refusing if that pinned prefix has zero objects. It does not touch npm.
 
-## 8. What's manual, always
+## 9. What's manual, always
 
 Per `AGENTS.md`, these are never automated and never done by an agent:
 
