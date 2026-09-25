@@ -401,3 +401,16 @@ specimen wasn't built, so a broken build can never publish an empty site.
 Moving the specimen output out of `docs/` was considered and rejected: the
 build, the specimen test, the CI artifact and `.gitignore` all name
 `docs/index.html`, and the brief places it there.
+
+## D35. npm install-scripts warnings stay unconfigured for now
+
+2026-09-25. Issue #19. After moving CI to `actions/setup-node@v7`, the
+`ci` and `playwright` jobs no longer emit Node's DEP0040 (`punycode`) or
+DEP0169 (`url.parse`) warnings, and `.nvmrc` resolution plus npm cache hits
+still work as before. npm 11 still prints `npm warn install-scripts` for
+packages with install/postinstall hooks (currently
+`@ibm/plex-{mono,sans,sans-condensed}`, `@parcel/watcher`, `esbuild`). We
+are leaving `allowScripts` unset for now: npm is warning-only today, and
+adding repository policy/configuration preemptively would violate AGENTS.md's
+"no configuration options nobody asked for". Revisit only if npm changes
+this from warning to enforcement or if CI policy requires explicit approvals.
