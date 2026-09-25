@@ -18,6 +18,15 @@ step says which.
   mismatch it stops, says why, and proposes the version the diff actually
   calls for, rather than silently overriding you or silently proceeding
   with a bump it believes is wrong.
+- **No prior tag** (this repo's first release, currently at `0.0.0`):
+  there is nothing to diff against, so `/release` skips the bump-mismatch
+  check entirely rather than forcing a MAJOR/MINOR/PATCH classification
+  against an empty baseline. It takes the version you give as the initial
+  release version as-is — it doesn't guess whether you mean `1.0.0` or a
+  `0.x` pre-release, that call is yours. This matches `api-diff.ts`'s own
+  behavior (D20): it already passes trivially when the package isn't on
+  npm yet or has no `latest` dist-tag, so nothing here is a new gap in the
+  contract, just `/release` following the same rule.
 
 ## 2. Land the Release PR
 
@@ -29,8 +38,12 @@ step says which.
   final `1.3.0`.
 - `CHANGELOG.md` → add the `## [1.3.0]` section (final version, no `-rc`
   suffix in the heading), drafted from the PRs merged since the last tag.
-  `release.yml` only checks for this section on the **final** tag, not the
-  rc, but write it now so it's ready.
+  On the first release there is no last tag to draft from — the merged-PR
+  list would be the whole repo history — so `/release` writes a plain
+  `## [1.0.0] - Initial release` heading instead and leaves the notes for
+  you to fill in before merging. `release.yml` only checks for this
+  section on the **final** tag, not the rc, but write it now so it's
+  ready.
 - The `dist/tokens.css` version-banner snapshot, if the build produces one.
 
 Normal PR, normal CI. `/release` proposes the bump and drafts the notes,

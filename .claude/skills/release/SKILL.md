@@ -14,8 +14,12 @@ work from memory of it or of this file.
   (MAJOR/MINOR/PATCH) against the diff since the last tag using AGENTS.md's
   rules before using it. On a mismatch, stop, say why, and propose the
   correct version — never silently override the number given, and never
-  silently proceed with a bump you believe is wrong. Once validated, draft
-  the Release PR.
+  silently proceed with a bump you believe is wrong. If there is no prior
+  tag (first release), skip that check — there's nothing to diff — and
+  take the given version as-is; write the CHANGELOG section as a plain
+  "Initial release" heading instead of drafting it from merged PRs, since
+  there is no last tag to draft since. Once validated, draft the Release
+  PR.
 - `verify`: step 4 or step 7, whichever the current tag/package state
   matches. Read-only: pulls from npm, hits CDN URLs, reports pass/fail.
   Touches no credential.

@@ -284,7 +284,14 @@ never across, the boundary AGENTS.md already draws:
   emitted token; MINOR: added token or changed value; PATCH: build/doc
   fix) before using it. On a mismatch it stops, says why, and proposes the
   version the diff calls for, rather than silently overriding the human or
-  silently proceeding with a bump it believes is wrong.
+  silently proceeding with a bump it believes is wrong. With no prior tag
+  (this repo's first release, currently `0.0.0`) there is nothing to diff,
+  so it skips this check and takes the given version as-is rather than
+  guessing at `1.0.0` vs. a `0.x` pre-release; it also writes the
+  CHANGELOG's first entry as a plain "Initial release" heading instead of
+  drafting one from every PR ever merged. This mirrors `api-diff.ts`'s own
+  pre-publish behavior (D20): it already no-ops when the package isn't on
+  npm yet or has no `latest` dist-tag.
 - It drafts the Release PR (rc bump, CHANGELOG section drafted from PRs
   merged since the last tag, snapshot refresh) and the Finalize PR (D29's
   two-PR flow). Both are reviewed and merged like any other PR — nothing
