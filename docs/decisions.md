@@ -327,7 +327,7 @@ dashboard: 0 B, no objects). Real AWS S3 always returns `KeyCount`, even
 no objects match; the AWS CLI's JMESPath query then resolves to null,
 which `--output text` prints as the literal string `None`, and
 `"None" != "0"` wrongly trips the guard on every fresh prefix. Fixed by
-querying `length(Contents || `[]`)` instead, which is null-safe by
+querying ``length(Contents || `[]`)`` instead, which is null-safe by
 construction and needs no assumption about which fields R2 chooses to
 include. `promote.yml`'s existing-objects check already used this shape
 (`Contents[].Key` parsed and `Array.isArray`-checked in Node) and did not
