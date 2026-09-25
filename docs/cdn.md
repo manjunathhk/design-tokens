@@ -39,12 +39,34 @@ Pinned paths (`/vX.Y.Z/`) use long immutable cache. Alias paths (`/vMAJOR/`) use
 
 ## 4) Create the two Cloudflare API tokens
 
-Create scoped tokens:
+These live on two different screens — don't look for both in the same place.
 
-- **R2 uploader token**: Object Read & Write on bucket `mk-design-cdn` only.
-- **Cache purge token**: Zone > Cache Purge on zone `manjunathhk.in` only.
+**R2 uploader token** (gives `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY`):
 
-Add these repository secrets in GitHub (**Settings → Secrets and variables → Actions**):
+1. Cloudflare Dashboard → **R2 Object Storage** → **Manage R2 API Tokens** →
+   **Create API Token**.
+2. Permissions: **Object Read & Write**.
+3. Specify bucket(s): `mk-design-cdn` only — never account-wide.
+4. Create, then copy the **Access Key ID** and **Secret Access Key**
+   immediately; Cloudflare shows the secret once.
+
+**Cache purge token** (gives `CF_API_TOKEN`):
+
+1. Cloudflare Dashboard → **My Profile** (top-right avatar) → **API Tokens**
+   → **Create Token** → **Custom Token**.
+2. Permissions: **Zone → Cache Purge → Purge**.
+3. Zone Resources: **Include → Specific zone → `manjunathhk.in`** only.
+4. Create, then copy the token; Cloudflare shows it once.
+
+**The two IDs** (not tokens — no creation step, just look them up):
+
+- `R2_ACCOUNT_ID`: Cloudflare Dashboard → account home (or the R2 Overview
+  page) → **Account ID** in the right-hand sidebar.
+- `CF_ZONE_ID`: select zone `manjunathhk.in` → **Overview** → **Zone ID** in
+  the right-hand **API** panel.
+
+Add these repository secrets in GitHub (**Settings → Secrets and variables →
+Actions → Secrets** tab → **New repository secret**, one per name):
 
 - `R2_ACCOUNT_ID`
 - `R2_ACCESS_KEY_ID`
@@ -52,7 +74,9 @@ Add these repository secrets in GitHub (**Settings → Secrets and variables →
 - `CF_ZONE_ID`
 - `CF_API_TOKEN`
 
-These are the only remaining release secrets. Do not add `NPM_TOKEN`.
+These are the only remaining release secrets. Do not add `NPM_TOKEN`, and
+don't add anything under the **Variables** tab — the workflows only read
+`secrets.*`.
 
 ## 5) Configure npm trusted publishing (OIDC)
 
