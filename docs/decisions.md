@@ -246,3 +246,29 @@ never rc). The specimen includes a minimal `data-theme` toggle for review only
 (not shipped runtime JS). Visual review of `shadow.raised` in dark mode keeps
 the shared value from D7 for now; if a dark variant is needed later, that stays
 a MINOR token addition.
+
+## D28. Release procedure consolidated in docs/workflow/release.md
+
+2026-09-25. The release checklist was scattered across cdn.md's flow summary,
+decisions.md (D9, D14, D15, D18) and the release.yml/promote.yml mechanics.
+`docs/workflow/release.md` consolidates it into one step-by-step procedure,
+mirroring `implement-issue.md`'s format (D19); AGENTS.md points to it.
+Written while first provisioning the R2 bucket by hand, which also surfaced
+that Cloudflare's dashboard had moved since docs/cdn.md was written: bucket
+public access is two separate toggles (Bucket Access vs Custom Domains) not
+one, CORS is a form not a raw JSON paste, and Cache Rules moved from Rules to
+Caching in the sidebar with Edge/Browser TTL now left unset rather than
+explicitly set to respect the origin. docs/cdn.md §1-3 updated to match.
+
+## D29. Release PR flow is two PRs, not one: refines D14
+
+2026-09-25. `release.yml` requires the pushed tag (minus its `v`) to
+exactly equal `package.json`'s `version` string. One PR can't cover both
+tags: the rc tag needs `package.json` at `X.Y.Z-rc.N`, the final tag needs
+it at plain `X.Y.Z`. In practice that is two PRs — a "Release X.Y.Z" PR
+that bumps to the rc version and writes the CHANGELOG entry, then, once
+the rc is validated, a small "Finalize X.Y.Z" PR that drops the `-rc.N`
+suffix before the final tag. D14's "the version bump and CHANGELOG entry
+land in a Release X.Y.Z PR" undersold this; it still holds for the rc PR,
+just not as the whole story. Surfaced by a Copilot review comment on PR
+#32; `docs/workflow/release.md` documents the corrected two-PR flow.
