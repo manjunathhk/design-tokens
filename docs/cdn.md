@@ -148,8 +148,9 @@ npm error 404 Not Found - PUT https://registry.npmjs.org/@scope%2Fname
    publishers** and configure it exactly as in step 5 above. npm may
    have already pre-populated an entry here from your account's linked
    GitHub identity and `package.json`'s `repository` field — check that
-   what's there matches (owner/repo, workflow file `release.yml`)
-   before assuming you need to add a new one.
+   what's there matches (owner/repo, workflow file
+   `.github/workflows/release.yml`) before assuming you need to add a
+   new one.
 
 If R2/CDN already succeeded for this tag before npm publish failed
 (check the tag's `release.yml` run step by step), don't burn a new rc

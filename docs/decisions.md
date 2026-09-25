@@ -364,8 +364,8 @@ on a deliberately wrong banner/URL would prove it, not just a green step).
 2026-09-25. D10's OIDC trusted-publishing setup (`docs/cdn.md` §5)
 assumes the package already exists on npm: Trusted Publishers is
 configured on a package's own Settings page, which npm does not create
-until that package has published at least once. For `1.0.0`'s `rc.1`/
-`rc.2` tags this meant `release.yml`'s `npm publish` step 404'd
+until that package has published at least once. For the `v1.0.0-rc.1`
+and `v1.0.0-rc.2` tags this meant `release.yml`'s `npm publish` step 404'd
 (`PUT .../@manjunathhk%2Fdesign-tokens` not found) even though
 `id-token: write` and the workflow were both correct — there was simply
 nothing yet to attach trust to. npm's "Staged Packages" page looked like
@@ -375,9 +375,9 @@ feature for packages that already exist.
 Resolved with a one-time manual publish from a human's own machine using
 a scoped, 2FA-protected Granular Access Token (deleted immediately after)
 and `--no-provenance` (provenance generation needs a recognized CI OIDC
-provider; a local machine has none). `rc.2`'s R2/CDN upload had already
-succeeded before the npm failure, so this published that exact same
-version rather than burning an `rc.3` — see `docs/cdn.md` §5a for the
+provider; a local machine has none). `v1.0.0-rc.2`'s R2/CDN upload had
+already succeeded before the npm failure, so this published that exact
+same version rather than burning a `v1.0.0-rc.3` — see `docs/cdn.md` §5a for the
 full runbook, now folded into `docs/workflow/release.md` step 1 and 3 as
 a documented, expected first-release speed bump rather than a surprise.
 Once the package exists, Trusted Publishers configures normally and every
