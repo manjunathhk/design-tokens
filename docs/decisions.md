@@ -358,3 +358,15 @@ Cloudflare purge calls) were never affected. `release.yml`'s own CDN
 verification for this fix must be trusted going forward only once a run
 with this fix has actually shown the check executing (a thrown assertion
 on a deliberately wrong banner/URL would prove it, not just a green step).
+
+## D33. Pages publishes the specimen only
+
+2026-09-25. Issue #42. `pages.yml` uploaded all of `docs/` as the Pages
+artifact, which also served the brief, these decisions, the CDN runbook,
+`r2-cors.json` and the workflow docs from `manjunathhk.github.io`. The
+workflow now copies the generated `docs/index.html` into a `_site/`
+staging directory and uploads only that. A plain `cp` fails the job if the
+specimen wasn't built, so a broken build can never publish an empty site.
+Moving the specimen output out of `docs/` was considered and rejected: the
+build, the specimen test, the CI artifact and `.gitignore` all name
+`docs/index.html`, and the brief places it there.
