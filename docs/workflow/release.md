@@ -76,7 +76,7 @@ it, then:
 - creates the GitHub Release, body pulled from `CHANGELOG.md`'s
   `## [1.3.0]` section.
 
-The tag push *is* the release — there is no separate release button or
+The tag push _is_ the release — there is no separate release button or
 draft step.
 
 ## 6. Verify
