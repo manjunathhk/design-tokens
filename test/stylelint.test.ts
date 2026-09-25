@@ -1,48 +1,52 @@
 import { readdirSync, readFileSync } from "node:fs";
+import { basename } from "node:path";
 import stylelint from "stylelint";
 import { describe, expect, it } from "vitest";
-
-type StylelintConfig = {
-  rules: Record<string, unknown>;
-};
 
 const fixtureFiles = (kind: "pass" | "fail") =>
   readdirSync(`test/fixtures/stylelint/${kind}`)
     .filter((name) => name.endsWith(".css"))
     .map((name) => `test/fixtures/stylelint/${kind}/${name}`);
 
-const lintFixture = async (file: string, config: StylelintConfig) =>
+const lintFixture = async (file: string) =>
   stylelint.lint({
     code: readFileSync(file, "utf8"),
     codeFilename: file,
-    config,
+    configBasedir: process.cwd(),
+    config: { extends: ["@manjunathhk/design-tokens/stylelint"] },
   });
+
+const expectedRuleByFixture: Record<string, string> = {
+  "hex.css": "color-no-hex",
+  "hsl.css": "function-disallowed-list",
+  "hsla.css": "function-disallowed-list",
+  "named.css": "color-named",
+  "rgb.css": "function-disallowed-list",
+  "rgb-uppercase.css": "function-disallowed-list",
+  "rgba.css": "function-disallowed-list",
+  "color-mix.css": "function-disallowed-list",
+  "var-fallback-hex.css": "color-no-hex",
+};
 
 describe("stylelint shareable config", () => {
-  it("resolves @manjunathhk/design-tokens/stylelint", async () => {
-    const mod = (await import("@manjunathhk/design-tokens/stylelint")) as {
-      default: StylelintConfig;
-    };
-    expect(mod.default.rules["color-no-hex"]).toBe(true);
-  });
-
   it("passes all allowed fixtures", async () => {
-    const mod = (await import("@manjunathhk/design-tokens/stylelint")) as {
-      default: StylelintConfig;
-    };
     for (const file of fixtureFiles("pass")) {
-      const result = await lintFixture(file, mod.default);
+      const result = await lintFixture(file);
       expect(result.errored, file).toBe(false);
     }
   });
 
   it("fails all disallowed fixtures", async () => {
-    const mod = (await import("@manjunathhk/design-tokens/stylelint")) as {
-      default: StylelintConfig;
-    };
     for (const file of fixtureFiles("fail")) {
-      const result = await lintFixture(file, mod.default);
+      const result = await lintFixture(file);
       expect(result.errored, file).toBe(true);
+      const warnings = result.results[0]?.warnings ?? [];
+      const expectedRule = expectedRuleByFixture[basename(file)];
+      expect(expectedRule, `missing expected rule mapping for ${file}`).toBeDefined();
+      expect(
+        warnings.some((warning) => warning.rule === expectedRule),
+        `${file} did not report ${expectedRule}. Found: ${warnings.map((w) => w.rule).join(", ")}`,
+      ).toBe(true);
     }
   });
 });

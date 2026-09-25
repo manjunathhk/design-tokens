@@ -1,0 +1,3 @@
+.card {
+  color: color-mix(in srgb, var(--mk-color-accent) 20%, transparent);
+}

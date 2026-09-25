@@ -38,6 +38,14 @@
   "sideEffects": [
     "*.css"
   ],
+  "peerDependencies": {
+    "stylelint": ">=16"
+  },
+  "peerDependenciesMeta": {
+    "stylelint": {
+      "optional": true
+    }
+  },
   "publishConfig": {
     "access": "public",
     "provenance": true

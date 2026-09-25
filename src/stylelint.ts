@@ -5,7 +5,7 @@ export default {
   rules: {
     "color-no-hex": true,
     "color-named": "never",
-    "function-disallowed-list": ["rgb", "rgba", "hsl", "hsla", "hwb", "lab", "lch", "oklab", "oklch", "color", "color-mix"]
+    "function-disallowed-list": ["/^(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix)$/i"]
   }
 };
 `;

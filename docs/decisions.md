@@ -401,3 +401,25 @@ specimen wasn't built, so a broken build can never publish an empty site.
 Moving the specimen output out of `docs/` was considered and rejected: the
 build, the specimen test, the CI artifact and `.gitignore` all name
 `docs/index.html`, and the brief places it there.
+
+## D35. Shareable stylelint export contract
+
+2026-09-25. Issue #11. Owner decision. `@manjunathhk/design-tokens/stylelint`
+is in scope as the brief §10 optional deliverable. It is a lint-time config,
+not runtime JavaScript, and does not widen repository scope beyond that issue.
+
+The exported rules are:
+
+- `color-no-hex`;
+- `color-named: "never"`;
+- `function-disallowed-list` with one case-insensitive regex entry that bans
+  all colour functions:
+  `/^(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix)$/i`.
+
+`transparent`, `currentcolor` and system colours remain allowed. `color-mix()`
+stays banned even when arguments are token-based, aligning with D6: derived
+colours belong in tokens. Starting strict is deliberate: loosening later is
+MINOR, but shipping permissive and tightening later would be MAJOR.
+
+Versioning for this config is public API from its first release: stricter
+changes (new banned values or rules) are MAJOR; looser changes are MINOR.
