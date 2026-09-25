@@ -43,9 +43,10 @@ theme (WordPress themes in particular).
 ## Light and dark
 
 Semantic colour tokens are authored in two source files with the same keys,
-`tokens/semantic/color.light.json` and `color.dark.json`; the build fails,
-naming the token and the file, if one mode is missing a key a token has in
-the other. The emitted CSS follows the OS by default and can be forced:
+`tokens/semantic/color.light.json` and `tokens/semantic/color.dark.json`; the
+build fails, naming the token and the file, if one mode is missing a key a
+token has in the other. The emitted CSS follows the OS by default and can be
+forced:
 
 ```html
 <html data-theme="dark">
@@ -88,10 +89,12 @@ case only.
 
 ### Angular
 
-`angular.json`, in the project's `styles` array:
+`angular.json`, in the project's `architect.build.options`:
 
 ```json
-"styles": ["node_modules/@manjunathhk/design-tokens/dist/index.css", "src/styles.scss"]
+{
+  "styles": ["node_modules/@manjunathhk/design-tokens/dist/index.css", "src/styles.scss"]
+}
 ```
 
 SCSS, via `@use` against the `_tokens.scss` subpath export:
@@ -179,8 +182,9 @@ Semantic versioning is what makes "change once, reflect everywhere" safe:
 
 ## How to change the palette
 
-1. Edit `tokens/semantic/color.light.json` and `color.dark.json` (both files,
-   same keys — see [Light and dark](#light-and-dark)). Never invent a colour
+1. Edit `tokens/semantic/color.light.json` and
+   `tokens/semantic/color.dark.json` (both files, same keys — see
+   [Light and dark](#light-and-dark)). Never invent a colour
    value; it must come from the brief or from an approved PR description.
 2. Run `npm run build` and open `docs/index.html` (generated, not committed)
    to preview swatches, contrast ratios and the type scale in both modes.
