@@ -137,7 +137,7 @@ jobs:
 
       - name: Verify alias CDN assets
         run: |
-          node --input-type=module <<'NODE' "/tmp/upload-manifest.json" "${CDN_BASE_URL}" "v${{ steps.meta.outputs.major }}" "${{ steps.meta.outputs.version }}"
+          node --input-type=module - "/tmp/upload-manifest.json" "${CDN_BASE_URL}" "v${{ steps.meta.outputs.major }}" "${{ steps.meta.outputs.version }}" <<'NODE'
           import { readFileSync } from "node:fs";
 
           const [manifestPath, baseUrl, prefix, version] = process.argv.slice(2);
