@@ -453,8 +453,8 @@ changes (new banned values or rules) are MAJOR; looser changes are MINOR.
   endOfLine: lf then matches.
 - .abacusai/ (local agent metadata) is in .gitignore and .prettierignore;
   it is never published because package.json iles lists only dist.
-- The npm pack test runs npm through a shell on Windows, where 
-pm is a
+- The npm pack test runs npm through a shell on Windows, where
+  pm is a
   .cmd shim.
 - CI adds ci-windows and playwright-windows jobs as separate jobs, so the
   required check names ci and playwright are unchanged. Adding the new jobs
