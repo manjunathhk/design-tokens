@@ -171,6 +171,7 @@ describe("npm pack", () => {
     const [report] = JSON.parse(
       execFileSync("npm", ["pack", "--dry-run", "--json", "--ignore-scripts"], {
         encoding: "utf8",
+        shell: process.platform === "win32",
       }),
     ) as [{ files: { path: string }[] }];
     const stray = report.files
