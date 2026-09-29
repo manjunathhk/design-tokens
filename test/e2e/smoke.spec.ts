@@ -285,3 +285,290 @@ test("without CORS header, cross-origin fonts fail to load", async ({ page }) =>
     await stopServer(noCorsPageServer);
   }
 });
+
+// ---------------------------------------------------------------------------
+// Base stylesheet: reset, reduced motion, and specificity
+// ---------------------------------------------------------------------------
+
+test("base reset: elements, ::before and ::after receive border-box from built index.css", async ({
+  page,
+}) => {
+  await page.goto(`http://127.0.0.1:${PAGE_PORT}/`);
+  await page.waitForLoadState("networkidle");
+
+  await page.evaluate(() => {
+    const style = document.createElement("style");
+    style.id = "pseudo-elements-content";
+    style.textContent = `
+      .test-element::before { content: "before"; display: block; }
+      .test-element::after { content: "after"; display: block; }
+    `;
+    document.head.appendChild(style);
+
+    const div = document.createElement("div");
+    div.className = "test-element";
+    div.id = "box-sizing-target";
+    document.body.appendChild(div);
+  });
+
+  const [elBoxSizing, beforeBoxSizing, afterBoxSizing] = await page.evaluate(() => {
+    const el = document.getElementById("box-sizing-target");
+    if (!el) throw new Error("box-sizing-target not found");
+    return [
+      getComputedStyle(el).boxSizing,
+      getComputedStyle(el, "::before").boxSizing,
+      getComputedStyle(el, "::after").boxSizing,
+    ];
+  });
+
+  expect(elBoxSizing).toBe("border-box");
+  expect(beforeBoxSizing).toBe("border-box");
+  expect(afterBoxSizing).toBe("border-box");
+});
+
+test("base reset: elements, ::before and ::after receive border-box from built base.css directly", async ({
+  page,
+}) => {
+  const cdnOrigin = `http://127.0.0.1:${CDN_PORT}`;
+  const html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="${cdnOrigin}/base.css" />
+    <style>
+      .standalone-test::before { content: "before"; display: block; }
+      .standalone-test::after { content: "after"; display: block; }
+    </style>
+  </head>
+  <body>
+    <div class="standalone-test" id="standalone-target"></div>
+  </body>
+</html>`;
+
+  await page.setContent(html);
+  await page.waitForLoadState("networkidle");
+
+  const [elBoxSizing, beforeBoxSizing, afterBoxSizing] = await page.evaluate(() => {
+    const el = document.getElementById("standalone-target");
+    if (!el) throw new Error("standalone-target not found");
+    return [
+      getComputedStyle(el).boxSizing,
+      getComputedStyle(el, "::before").boxSizing,
+      getComputedStyle(el, "::after").boxSizing,
+    ];
+  });
+
+  expect(elBoxSizing).toBe("border-box");
+  expect(beforeBoxSizing).toBe("border-box");
+  expect(afterBoxSizing).toBe("border-box");
+});
+
+test("reduced motion: pseudo-element animation and transition follow reduction policy, ordinary mode unchanged", async ({
+  page,
+}) => {
+  // 1. Reduced motion enabled: durations clamped to 0.01ms, iteration count clamped to 1
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(`http://127.0.0.1:${PAGE_PORT}/`);
+  await page.waitForLoadState("networkidle");
+
+  await page.evaluate(() => {
+    const style = document.createElement("style");
+    style.id = "motion-style";
+    style.textContent = `
+      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      .motion-box {
+        animation: spin 10s infinite;
+        transition: opacity 10s;
+      }
+      .motion-box::before {
+        content: "b";
+        display: block;
+        animation: spin 10s infinite;
+        transition: opacity 10s;
+      }
+      .motion-box::after {
+        content: "a";
+        display: block;
+        animation: spin 10s infinite;
+        transition: opacity 10s;
+      }
+    `;
+    document.head.appendChild(style);
+
+    const div = document.createElement("div");
+    div.className = "motion-box";
+    div.id = "motion-target";
+    document.body.appendChild(div);
+  });
+
+  const reduced = await page.evaluate(() => {
+    const el = document.getElementById("motion-target");
+    if (!el) throw new Error("motion-target not found");
+    const before = getComputedStyle(el, "::before");
+    const after = getComputedStyle(el, "::after");
+    const elStyle = getComputedStyle(el);
+    return {
+      elAnimDuration: elStyle.animationDuration,
+      elAnimIteration: elStyle.animationIterationCount,
+      elTransDuration: elStyle.transitionDuration,
+      beforeAnimDuration: before.animationDuration,
+      beforeAnimIteration: before.animationIterationCount,
+      beforeTransDuration: before.transitionDuration,
+      afterAnimDuration: after.animationDuration,
+      afterAnimIteration: after.animationIterationCount,
+      afterTransDuration: after.transitionDuration,
+    };
+  });
+
+  expect(["0.00001s", "1e-05s"]).toContain(reduced.elAnimDuration);
+  expect(reduced.elAnimIteration).toBe("1");
+  expect(["0.00001s", "1e-05s"]).toContain(reduced.elTransDuration);
+
+  expect(["0.00001s", "1e-05s"]).toContain(reduced.beforeAnimDuration);
+  expect(reduced.beforeAnimIteration).toBe("1");
+  expect(["0.00001s", "1e-05s"]).toContain(reduced.beforeTransDuration);
+
+  expect(["0.00001s", "1e-05s"]).toContain(reduced.afterAnimDuration);
+  expect(reduced.afterAnimIteration).toBe("1");
+  expect(["0.00001s", "1e-05s"]).toContain(reduced.afterTransDuration);
+
+  // 2. Ordinary mode (reducedMotion: "no-preference") unchanged
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto(`http://127.0.0.1:${PAGE_PORT}/`);
+  await page.waitForLoadState("networkidle");
+
+  await page.evaluate(() => {
+    const style = document.createElement("style");
+    style.id = "motion-style-ordinary";
+    style.textContent = `
+      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      .motion-box {
+        animation: spin 10s infinite;
+        transition: opacity 10s;
+      }
+      .motion-box::before {
+        content: "b";
+        display: block;
+        animation: spin 10s infinite;
+        transition: opacity 10s;
+      }
+      .motion-box::after {
+        content: "a";
+        display: block;
+        animation: spin 10s infinite;
+        transition: opacity 10s;
+      }
+    `;
+    document.head.appendChild(style);
+
+    const div = document.createElement("div");
+    div.className = "motion-box";
+    div.id = "motion-target-ordinary";
+    document.body.appendChild(div);
+  });
+
+  const ordinary = await page.evaluate(() => {
+    const el = document.getElementById("motion-target-ordinary");
+    if (!el) throw new Error("motion-target-ordinary not found");
+    const before = getComputedStyle(el, "::before");
+    const after = getComputedStyle(el, "::after");
+    const elStyle = getComputedStyle(el);
+    return {
+      elAnimDuration: elStyle.animationDuration,
+      elAnimIteration: elStyle.animationIterationCount,
+      elTransDuration: elStyle.transitionDuration,
+      beforeAnimDuration: before.animationDuration,
+      beforeAnimIteration: before.animationIterationCount,
+      beforeTransDuration: before.transitionDuration,
+      afterAnimDuration: after.animationDuration,
+      afterAnimIteration: after.animationIterationCount,
+      afterTransDuration: after.transitionDuration,
+    };
+  });
+
+  expect(ordinary.elAnimDuration).toBe("10s");
+  expect(ordinary.elAnimIteration).toBe("infinite");
+  expect(ordinary.elTransDuration).toBe("10s");
+  expect(ordinary.beforeAnimDuration).toBe("10s");
+  expect(ordinary.beforeAnimIteration).toBe("infinite");
+  expect(ordinary.beforeTransDuration).toBe("10s");
+  expect(ordinary.afterAnimDuration).toBe("10s");
+  expect(ordinary.afterAnimIteration).toBe("infinite");
+  expect(ordinary.afterTransDuration).toBe("10s");
+});
+
+test("consumer overrides: site rules override pseudo-element reset without !important (D23)", async ({
+  page,
+}) => {
+  // Test consumer styles loaded after index.css
+  await page.goto(`http://127.0.0.1:${PAGE_PORT}/`);
+  await page.waitForLoadState("networkidle");
+
+  await page.evaluate(() => {
+    const style = document.createElement("style");
+    style.id = "consumer-override-style";
+    style.textContent = `
+      .custom-box { box-sizing: content-box; }
+      .custom-box::before { content: "b"; display: block; box-sizing: content-box; }
+      .custom-box::after { content: "a"; display: block; box-sizing: content-box; }
+    `;
+    document.head.appendChild(style);
+
+    const div = document.createElement("div");
+    div.className = "custom-box";
+    div.id = "override-target";
+    document.body.appendChild(div);
+  });
+
+  const [elBoxSizing, beforeBoxSizing, afterBoxSizing] = await page.evaluate(() => {
+    const el = document.getElementById("override-target");
+    if (!el) throw new Error("override-target not found");
+    return [
+      getComputedStyle(el).boxSizing,
+      getComputedStyle(el, "::before").boxSizing,
+      getComputedStyle(el, "::after").boxSizing,
+    ];
+  });
+
+  expect(elBoxSizing).toBe("content-box");
+  expect(beforeBoxSizing).toBe("content-box");
+  expect(afterBoxSizing).toBe("content-box");
+});
+
+test("consumer overrides: site rules placed before index.css override pseudo-element reset without !important (D23)", async ({
+  page,
+}) => {
+  const cdnOrigin = `http://127.0.0.1:${CDN_PORT}`;
+  const html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      .early-override { box-sizing: content-box; }
+      .early-override::before { content: "b"; display: block; box-sizing: content-box; }
+      .early-override::after { content: "a"; display: block; box-sizing: content-box; }
+    </style>
+    <link rel="stylesheet" href="${cdnOrigin}/index.css" />
+  </head>
+  <body>
+    <div class="early-override" id="early-target"></div>
+  </body>
+</html>`;
+
+  await page.setContent(html);
+  await page.waitForLoadState("networkidle");
+
+  const [elBoxSizing, beforeBoxSizing, afterBoxSizing] = await page.evaluate(() => {
+    const el = document.getElementById("early-target");
+    if (!el) throw new Error("early-target not found");
+    return [
+      getComputedStyle(el).boxSizing,
+      getComputedStyle(el, "::before").boxSizing,
+      getComputedStyle(el, "::after").boxSizing,
+    ];
+  });
+
+  expect(elBoxSizing).toBe("content-box");
+  expect(beforeBoxSizing).toBe("content-box");
+  expect(afterBoxSizing).toBe("content-box");
+});

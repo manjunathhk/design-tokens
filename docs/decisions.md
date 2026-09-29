@@ -458,3 +458,13 @@ changes (new banned values or rules) are MAJOR; looser changes are MINOR.
 - CI adds `ci-windows` and `playwright-windows` jobs as separate jobs, so the
   required check names `ci` and `playwright` are unchanged. Adding the new jobs
   to branch protection is a human action.
+
+## D38. Pseudo-element reset and reduced-motion selectors in base.css: refines D23
+
+2026-09-29. Issue #49. Selectors Level 4 forgiving parsing drops
+pseudo-elements inside `:where(...)` (`:where(*, *::before, *::after)`),
+leaving pseudo-elements unmatched. Universal reset and reduced-motion rules
+target pseudo-elements via `:where(*), :where(*)::before, :where(*)::after`.
+This gives pseudo-elements the lowest possible specificity in CSS (0, 0, 1),
+allowing any consumer element, class, or id selector to override them without
+`!important`, preserving the override intent of D23.
