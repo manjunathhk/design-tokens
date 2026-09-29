@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Published pinned version to promote (for example 1.3.0)
+        description: Final published version to promote (for example 1.3.0); pre-releases are rejected
         required: true
         type: string
 
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: promote-${{ inputs.version }}
+  group: promote
   cancel-in-progress: false
 
 env:
@@ -34,22 +34,15 @@ jobs:
 
       - name: Validate version input
         id: meta
+        env:
+          VERSION_INPUT: ${{ inputs.version }}
         run: |
           set -euo pipefail
-          VERSION="${{ inputs.version }}"
-          if [[ "$VERSION" =~ ^v ]]; then
-            echo "Provide version without v prefix (example: 1.3.0)." >&2
-            exit 1
-          fi
-          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
-            echo "Invalid version format: $VERSION" >&2
-            exit 1
-          fi
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "major=${VERSION%%.*}" >> "$GITHUB_OUTPUT"
+          npx tsx scripts/promote-version.ts >> "$GITHUB_OUTPUT"
 
       - name: Build manifest from pinned objects
         env:
+          VERSION: ${{ steps.meta.outputs.version }}
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -61,14 +54,14 @@ jobs:
 
           aws s3api list-objects-v2 \
             --bucket "$R2_BUCKET" \
-            --prefix "v${{ steps.meta.outputs.version }}/" \
+            --prefix "v$VERSION/" \
             --query 'Contents[].Key' \
             --output json \
             --endpoint-url "$R2_ENDPOINT" > /tmp/pinned-keys.json
 
           node -e 'const fs=require("node:fs");const keys=JSON.parse(fs.readFileSync("/tmp/pinned-keys.json","utf8"));if(!Array.isArray(keys)||keys.length===0){throw new Error("Pinned prefix has no objects; cannot promote.");}'
 
-          npx tsx - "${{ steps.meta.outputs.version }}" <<'TSX'
+          npx tsx - "$VERSION" <<'TSX'
           import { readFileSync, writeFileSync } from "node:fs";
           import { uploadManifest } from "./scripts/upload-manifest.ts";
 
@@ -104,11 +97,12 @@ jobs:
 
       - name: Purge alias URLs in Cloudflare cache
         env:
+          MAJOR: ${{ steps.meta.outputs.major }}
           CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
           set -euo pipefail
-          node -e 'const fs=require("node:fs");const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));const base=process.argv[2];const major=process.argv[3];const urls=m.entries.map((e)=>base + "/v" + major + "/" + e.path);fs.writeFileSync("/tmp/purge-body.json",JSON.stringify({files:urls}));' /tmp/upload-manifest.json "$CDN_BASE_URL" "${{ steps.meta.outputs.major }}"
+          node -e 'const fs=require("node:fs");const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));const base=process.argv[2];const major=process.argv[3];const urls=m.entries.map((e)=>base + "/v" + major + "/" + e.path);fs.writeFileSync("/tmp/purge-body.json",JSON.stringify({files:urls}));' /tmp/upload-manifest.json "$CDN_BASE_URL" "$MAJOR"
 
           node --input-type=module <<'NODE'
           import { readFileSync, writeFileSync } from "node:fs";
@@ -136,8 +130,11 @@ jobs:
           NODE
 
       - name: Verify alias CDN assets
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          MAJOR: ${{ steps.meta.outputs.major }}
         run: |
-          node --input-type=module - "/tmp/upload-manifest.json" "${CDN_BASE_URL}" "v${{ steps.meta.outputs.major }}" "${{ steps.meta.outputs.version }}" <<'NODE'
+          node --input-type=module - "/tmp/upload-manifest.json" "${CDN_BASE_URL}" "v$MAJOR" "$VERSION" <<'NODE'
           import { readFileSync } from "node:fs";
 
           const [manifestPath, baseUrl, prefix, version] = process.argv.slice(2);

@@ -163,7 +163,9 @@ Also check that the **pages** run for the tag succeeded and that
 If the alias promotion needs redoing but the pinned version is already
 published and doesn't need republishing: run `/release <version>
 rollback`. It dispatches **Actions → promote → Run workflow** with the
-version input (without `v`, e.g. `1.3.0`) via the GitHub API, polls the run
+version input (without `v`, e.g. `1.3.0` — a final `X.Y.Z` version only;
+`promote.yml` rejects pre-releases and malformed values before any storage
+or purge step runs) via the GitHub API, polls the run
 to completion, and reports the result. `promote.yml` re-runs promote +
 purge + alias verification against the existing pinned objects, refusing
 if that pinned prefix has zero objects. It does not touch npm. Dispatching
