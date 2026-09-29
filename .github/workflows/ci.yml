@@ -122,5 +122,5 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report
+          name: playwright-report-windows
           path: playwright-report/

@@ -292,14 +292,10 @@ npm test
 
 Linux and Windows are both supported contributor environments (D37). On
 Windows, use Node 24 and Git for Windows. Line endings are pinned to LF by
-.gitattributes, so no global Git configuration change is needed. Run
-
-pm run build before
-pm test: the output tests read the generated dist/.
-Browser tests need Chromium:
-px playwright install chromium, then
-
-pm run test:e2e.
+`.gitattributes`, so no global Git configuration change is needed. Run
+`npm run build` before `npm test`: the output tests read the generated `dist/`.
+Browser tests need Chromium: `npx playwright install chromium`, then
+`npm run test:e2e`.
 
 ### Required status checks
 
