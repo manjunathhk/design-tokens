@@ -468,3 +468,16 @@ target pseudo-elements via `:where(*), :where(*)::before, :where(*)::after`.
 This gives pseudo-elements the lowest possible specificity in CSS (0, 0, 1),
 allowing any consumer element, class, or id selector to override them without
 `!important`, preserving the override intent of D23.
+
+## D39. `.agents/skills/implement/SKILL.md` extends D19 to non-Claude agents
+
+2026-09-29. Owner decision. D19's `.claude/skills/implement/SKILL.md` gives
+Claude Code a real slash command with a parsed `<n>` argument; other coding
+agents match skills by matching a natural-language `description` against the
+request, with no argument-parsing mechanism.
+`.agents/skills/implement/SKILL.md` is a thin wrapper for those agents: its
+`description` lists the trigger phrasing (including "/implement issue #<n>",
+which such an agent reads as plain text, not a parsed command) and its body
+tells the agent to find the issue number in the request text itself, then
+follow `docs/workflow/implement-issue.md`. The procedure stays in that one
+file only, unchanged from D19.
