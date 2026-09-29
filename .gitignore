@@ -4,3 +4,4 @@ docs/index.html
 test-results/
 playwright-report/
 *.tgz
+.abacusai/

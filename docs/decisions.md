@@ -443,3 +443,19 @@ MINOR, but shipping permissive and tightening later would be MAJOR.
 
 Versioning for this config is public API from its first release: stricter
 changes (new banned values or rules) are MAJOR; looser changes are MINOR.
+
+## D37. Windows is a supported contributor environment
+
+2026-09-29. Issue #54. Owner decision. Windows is supported alongside Linux CI.
+
+- .gitattributes sets * text=auto eol=lf, so working trees are LF on every OS
+  without changing a contributor's global Git configuration; Prettier's default
+  endOfLine: lf then matches.
+- .abacusai/ (local agent metadata) is in .gitignore and .prettierignore;
+  it is never published because package.json iles lists only dist.
+- The npm pack test runs npm through a shell on Windows, where 
+pm is a
+  .cmd shim.
+- CI adds ci-windows and playwright-windows jobs as separate jobs, so the
+  required check names ci and playwright are unchanged. Adding the new jobs
+  to branch protection is a human action.
