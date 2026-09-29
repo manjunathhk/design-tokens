@@ -68,7 +68,7 @@ jobs:
 
           node -e 'const fs=require("node:fs");const keys=JSON.parse(fs.readFileSync("/tmp/pinned-keys.json","utf8"));if(!Array.isArray(keys)||keys.length===0){throw new Error("Pinned prefix has no objects; cannot promote.");}'
 
-          npx tsx <<'TSX' "${{ steps.meta.outputs.version }}"
+          npx tsx - "${{ steps.meta.outputs.version }}" <<'TSX'
           import { readFileSync, writeFileSync } from "node:fs";
           import { uploadManifest } from "./scripts/upload-manifest.ts";
 

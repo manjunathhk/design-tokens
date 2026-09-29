@@ -481,3 +481,20 @@ which such an agent reads as plain text, not a parsed command) and its body
 tells the agent to find the issue number in the request text itself, then
 follow `docs/workflow/implement-issue.md`. The procedure stays in that one
 file only, unchanged from D19.
+
+## D40. tsx heredocs need the same `-` stdin sentinel as node
+
+2026-09-29. Issue #50. D32 fixed the `node --input-type=module` heredoc
+invocations but missed `promote.yml`'s manifest step, which feeds a script to
+`npx tsx` the same way: `npx tsx <<'TSX' "$VERSION"`. tsx resolves the first
+positional argument as the entry-point file, so every promotion attempt fails
+loudly at that step with `ERR_MODULE_NOT_FOUND` for a file named after the
+version (for example `1.1.0`), and the stdin script never runs. Fixed with
+the same stdin sentinel D32 used: `npx tsx - "$VERSION" <<'TSX'`, which reads
+the entry point from stdin and puts the version in `process.argv[2]`.
+`test/promote-manifest-invocation.test.ts` is the credential-free regression
+check: it runs both invocation shapes against a local pinned-keys fixture —
+the fixed shape must write a manifest whose content is asserted (version in
+pinned keys and the major alias, not merely exit 0) and the old shape must
+fail with `ERR_MODULE_NOT_FOUND` and no manifest — and it guards the
+workflow line itself, so reverting the sentinel fails CI.
