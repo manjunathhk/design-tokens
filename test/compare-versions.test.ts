@@ -26,6 +26,8 @@ describe("parseVersion", () => {
   it("rejects non-integer components", () => {
     expect(() => parseVersion("1.x.0")).toThrow("Invalid version component");
     expect(() => parseVersion("1.0.a")).toThrow("Invalid version component");
+    expect(() => parseVersion("1x.0.0")).toThrow("Invalid version component");
+    expect(() => parseVersion("1.0.0x")).toThrow("Invalid version component");
   });
 
   it("rejects negative components", () => {

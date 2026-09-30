@@ -1,16 +1,16 @@
 import { pathToFileURL } from "node:url";
 
 /**
- * Semantic version comparison for release ordering.
+ * Semantic version comparison utility for potential release ordering checks.
  *
- * Prevents an older queued release from silently superseding a newer one
- * when both target the same /vMAJOR/ alias. Used in release.yml to check
- * if the current release is newer than the last promoted version.
+ * Compares two X.Y.Z versions and returns their ordering. This is a
+ * credential-free utility for future ordering logic if needed; it is not
+ * currently wired into any workflow.
  *
  * Returns:
- *   1 if current > last (safe to promote)
- *   0 if current == last (already promoted, skip)
- *  -1 if current < last (older release, abort)
+ *   1 if current > last
+ *   0 if current == last
+ *  -1 if current < last
  */
 
 export interface SemanticVersion {
@@ -25,8 +25,12 @@ export function parseVersion(version: string): SemanticVersion {
     throw new Error(`Invalid version format: ${version}. Expected X.Y.Z.`);
   }
   const parsed = parts.map((p) => {
+    // Validate that the component is all digits (no leading zeros except for "0")
+    if (!/^\d+$/.test(p)) {
+      throw new Error(`Invalid version component: ${p}. Expected non-negative integer.`);
+    }
     const num = Number.parseInt(p, 10);
-    if (!Number.isInteger(num) || num < 0) {
+    if (num < 0) {
       throw new Error(`Invalid version component: ${p}. Expected non-negative integer.`);
     }
     return num;

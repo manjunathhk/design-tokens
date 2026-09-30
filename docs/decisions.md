@@ -543,17 +543,19 @@ Both workflows use `cancel-in-progress: false` to prevent cancellation
 mid-copy. The concurrency group is evaluated at the workflow level before any
 steps run.
 
-Ordering semantics: GitHub Actions queues jobs in FIFO order within a
-concurrency group. An older release queued before a newer one will run first
-and promote its version to the alias, then the newer one will run and
-overwrite it. This is acceptable because:
+Queue and cancellation semantics: GitHub Actions with `cancel-in-progress:
+false` keeps at most one pending run per concurrency group. When a new run is
+queued, any previously pending run is cancelled, but in-progress runs are
+allowed to complete. This means:
 
-1. Releases are human-initiated and ordered by intent (a human pushes tags in
-   the order they want them released).
-2. Explicit rollbacks via `promote.yml` are always possible and take
-   precedence (a human can dispatch a rollback to an earlier version at any
-   time).
-3. The concurrency group prevents concurrent writes, which was the risk.
+- If release A is in-progress and release B is queued, then release C is
+  queued, release B is cancelled and release C waits for A to finish.
+- The concurrency group prevents concurrent writes to the alias, which was the
+  risk.
+- Releases are human-initiated and ordered by intent (a human pushes tags in
+  the order they want them released).
+- Explicit rollbacks via `promote.yml` are always possible and take precedence
+  (a human can dispatch a rollback to an earlier version at any time).
 
 A credential-free test (`test/compare-versions.test.ts`) covers version
 comparison logic for future ordering checks if needed. The workflow
