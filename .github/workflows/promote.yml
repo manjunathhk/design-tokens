@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: alias-v${{ inputs.version.split('.')[0] }}
+  group: alias-update
   cancel-in-progress: false
 
 env:

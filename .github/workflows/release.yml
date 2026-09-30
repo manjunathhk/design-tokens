@@ -10,7 +10,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: alias-v${{ github.ref_name.split('.')[0].substring(1) }}
+  group: alias-update
   cancel-in-progress: false
 
 env:
