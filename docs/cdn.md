@@ -207,6 +207,9 @@ failed run and use **Re-run failed jobs**. There's no need to re-tag.
 ## 8) Rollback runbook
 
 Use **Actions → promote → Run workflow** with input `version` (example `1.3.0`).
+The input must be a **final** `X.Y.Z` version: a leading `v`, pre-releases such
+as `1.3.0-rc.1`, and malformed values are rejected before any storage or purge
+step runs — pre-releases are never promoted to the alias (D9).
 
 `promote.yml` re-runs alias promote + purge + alias verification for an already-published pinned version without republishing npm.
 

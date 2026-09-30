@@ -498,3 +498,29 @@ the fixed shape must write a manifest whose content is asserted (version in
 pinned keys and the major alias, not merely exit 0) and the old shape must
 fail with `ERR_MODULE_NOT_FOUND` and no manifest — and it guards the
 workflow line itself, so reverting the sentinel fails CI.
+
+## D41. promote.yml takes final X.Y.Z versions only, passed as environment values
+
+2026-09-29. Issue #51. `promote.yml`'s validate step interpolated
+`inputs.version` straight into shell source and its regex accepted
+pre-releases, so a `1.1.0-rc.1` dispatch could have promoted a
+pre-release pinned prefix to the `/v1/` alias, against D9 and the README
+release policy. Both fixed, with rollback to an earlier final version
+preserved and no new release modes:
+
+- The dispatch input reaches the workflow only as an env value
+  (`VERSION_INPUT: ${{ inputs.version }}`) and is validated by
+  `scripts/promote-version.ts` before any path is built or any storage or
+  purge step runs. It must be semver's final `X.Y.Z` core (no leading
+  zeros, no build metadata): a leading `v`, pre-releases, whitespace, path
+  separators and shell metacharacters are rejected with the failing value
+  named in the error.
+- Downstream steps read the validated `version`/`major` step outputs via
+  env vars too, so no `${{ }}` expression is interpolated into any run
+  script. `test/promote-version-input.test.ts` guards that shape (every
+  expression in promote.yml must sit in a mapping value) plus the accepted
+  and rejected inputs, all credential-free.
+- `concurrency.group` dropped the input (`promote` instead of
+  `promote-${{ inputs.version }}`): promotions rewrite the same `/vMAJOR/`
+  alias, so they serialize, and the raw input now appears on exactly one
+  line, the guard-tested env value.

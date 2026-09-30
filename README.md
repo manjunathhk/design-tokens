@@ -238,7 +238,8 @@ a "Release X.Y.Z" PR before tagging.
 
 Pinned CDN paths (`/vX.Y.Z/`) are immutable; only the alias (`/vMAJOR/`) is
 ever rewritten. Rolling `/v1/` back to an earlier pinned version is one click
-on the `promote` workflow.
+on the `promote` workflow, which accepts a final `X.Y.Z` version only:
+pre-releases are rejected there because they are never promoted to the alias.
 
 ## Theme control
 

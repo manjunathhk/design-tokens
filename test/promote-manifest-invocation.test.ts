@@ -98,7 +98,12 @@ describe("promote workflow manifest invocation", () => {
       .split("\n")
       .map((line) => line.trimStart())
       .filter((line) => line.startsWith("npx tsx"));
-    expect(tsxLines).toHaveLength(1);
-    expect(tsxLines[0]).toMatch(/^npx tsx - /);
+    // The manifest heredoc is the only stdin-fed tsx script and keeps the - sentinel;
+    // the version validator (scripts/promote-version.ts) is a file, not stdin.
+    const manifestLines = tsxLines.filter((line) => line.startsWith("npx tsx - "));
+    const validatorLines = tsxLines.filter((line) => !line.startsWith("npx tsx - "));
+    expect(manifestLines).toHaveLength(1);
+    expect(manifestLines[0]).toMatch(/^npx tsx - /);
+    expect(validatorLines).toEqual(['npx tsx scripts/promote-version.ts >> "$GITHUB_OUTPUT"']);
   });
 });
