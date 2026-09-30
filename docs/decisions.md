@@ -562,3 +562,47 @@ comparison logic for future ordering checks if needed. The workflow
 expressions are guarded by the existing `promote-version-input.test.ts` test,
 which verifies that all `${{ inputs.version }}` expressions sit in mapping
 values (env), never in executable scripts.
+
+## D43. CDN verification is one shared tested verifier covering CORS origin and Cache-Control
+
+2026-09-30. Issue #55. The pinned/alias verification blocks in `release.yml`
+and the alias verification in `promote.yml` were inline heredocs that (a)
+accepted any nonempty `Access-Control-Allow-Origin` on fonts, so a wrong or
+drifted origin passed CI while browsers would reject the font load, (b) only
+checked the first `.woff2` entry and silently skipped the rest, (c) never
+checked the served `Cache-Control` at all, even though the upload sets a
+strict pinned-versus-alias contract, and (d) existed in three near-identical
+copies � the exact shape that let D32's vacuous verification happen once
+already. The served contract is now verified by one script,
+`scripts/verify-cdn.ts`, invoked by all three steps with the upload manifest
+itself (built by `scripts/upload-manifest.ts`) as the source of expected
+values:
+
+- Every entry is fetched over HTTP with the manifest's pinned or alias
+  Cache-Control expectation selected by the invocation's mode argument.
+  Wrong or missing directives fail with the URL and both header values.
+- Every `.woff2` entry is fetched the way a browser fetches a font (D26):
+  with an `Origin` request header, and the response
+  `Access-Control-Allow-Origin` must be exactly `*` � the project's
+  configured wildcard policy committed as `docs/r2-cors.json`. An echo of
+  the request origin would be valid CORS for that one origin only and means
+  the deployed policy drifted from the committed one, so it fails. Changing
+  the CORS policy means changing `docs/r2-cors.json` and this check
+  together. A manifest with no `.woff2` entry still fails loudly.
+- The status, Content-Type and version-banner checks from the old blocks
+  are preserved (banner comes from the manifest's `version` field, so the
+  verifier takes no version argument).
+
+The verifier is proven by `test/verify-cdn.test.ts` against local
+`node:http` fixture servers, credential-free: success for correct pinned
+and alias responses, and failure for wrong origin, missing CORS header, a
+second font with a bad header while the first is fine (the old
+first-font-only gap), wrong and missing Cache-Control for both policies,
+missing banner, wrong MIME type, missing asset, and an empty or fontless
+manifest. One test runs the exact CLI shape the workflows invoke
+(`npx tsx scripts/verify-cdn.ts <manifest> <base-url> <prefix> <mode>`)
+against those fixtures and asserts failure propagates to a non-zero exit;
+further tests assert each of the three workflow steps invokes the verifier
+and that no inline verifier copy remains. The child is spawned
+asynchronously: a blocking `spawnSync` in the test freezes the event loop
+the fixture server needs to answer the child's fetch, deadlocking it.

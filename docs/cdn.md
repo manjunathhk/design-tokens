@@ -199,7 +199,7 @@ failed run and use **Re-run failed jobs**. There's no need to re-tag.
 ## 7) Release flow summary
 
 - Push pre-release tag (`vX.Y.Z-rc.N`) on a `main` commit.
-  - Workflow validates tag/version, tests, uploads pinned `/vX.Y.Z-rc.N/`, verifies HTTPS headers/banner/CORS, publishes npm with `--tag next`, and stops.
+  - Workflow validates tag/version, tests, uploads pinned `/vX.Y.Z-rc.N/`, verifies status, Content-Type, banner, per-font CORS and Cache-Control over HTTPS, publishes npm with `--tag next`, and stops.
 - Push final tag (`vX.Y.Z`) on a `main` commit.
   - Workflow uploads pinned `/vX.Y.Z/`, verifies it, promotes to alias `/vX/`, purges explicit alias URLs, verifies alias, publishes npm, and creates GitHub Release notes from `CHANGELOG.md`.
   - `pages.yml` separately deploys the specimen to GitHub Pages (needs §6).
