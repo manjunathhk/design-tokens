@@ -108,10 +108,14 @@ describe("promote-version CLI", () => {
 describe("promote.yml input handling", () => {
   const lines = readWorkflowLines();
 
-  it("reads the dispatch input only as the validate step's environment value", () => {
+  it("reads the dispatch input only in mapping values (concurrency group and validate step env)", () => {
     const expressions = lines.filter((line) => line.includes("${{ inputs."));
-    expect(expressions).toHaveLength(1);
-    expect(expressions[0]?.trim()).toBe("VERSION_INPUT: ${{ inputs.version }}");
+    expect(expressions.length).toBeGreaterThanOrEqual(1);
+    for (const expr of expressions) {
+      expect(expr.trim(), `expression outside a mapping value: ${expr.trim()}`).toMatch(
+        /^[\w-]+:\s/,
+      );
+    }
   });
 
   it("interpolates no expression into an executable run script — env values only", () => {

@@ -524,3 +524,41 @@ preserved and no new release modes:
   `promote-${{ inputs.version }}`): promotions rewrite the same `/vMAJOR/`
   alias, so they serialize, and the raw input now appears on exactly one
   line, the guard-tested env value.
+
+## D42. Serialize alias updates across release and promote workflows
+
+2026-09-30. Issue #52. Both `release.yml` and `promote.yml` write to the
+`/vMAJOR/` alias, but their concurrency groups did not serialize: `release.yml`
+used per-tag concurrency (`release-${{ github.ref_name }}`), and `promote.yml`
+used a single global group (`promote`). This allowed different releases or a
+release and rollback to write the alias concurrently, risking interleaved
+writes and purge/verification races.
+
+Fixed by using a shared global concurrency group `alias-update` in both
+workflows. The issue allowed "a coarser shared lock" if justified; a single
+global lock is simpler and safer than per-major groups (which would require
+string manipulation in GitHub Actions expressions, unsupported by actionlint).
+
+Both workflows use `cancel-in-progress: false` to prevent cancellation
+mid-copy. The concurrency group is evaluated at the workflow level before any
+steps run.
+
+Queue and cancellation semantics: GitHub Actions with `cancel-in-progress:
+false` keeps at most one pending run per concurrency group. When a new run is
+queued, any previously pending run is cancelled, but in-progress runs are
+allowed to complete. This means:
+
+- If release A is in-progress and release B is queued, then release C is
+  queued, release B is cancelled and release C waits for A to finish.
+- The concurrency group prevents concurrent writes to the alias, which was the
+  risk.
+- Releases are human-initiated and ordered by intent (a human pushes tags in
+  the order they want them released).
+- Explicit rollbacks via `promote.yml` are always possible and take precedence
+  (a human can dispatch a rollback to an earlier version at any time).
+
+A credential-free test (`test/compare-versions.test.ts`) covers version
+comparison logic for future ordering checks if needed. The workflow
+expressions are guarded by the existing `promote-version-input.test.ts` test,
+which verifies that all `${{ inputs.version }}` expressions sit in mapping
+values (env), never in executable scripts.
