@@ -606,3 +606,24 @@ further tests assert each of the three workflow steps invokes the verifier
 and that no inline verifier copy remains. The child is spawned
 asynchronously: a blocking `spawnSync` in the test freezes the event loop
 the fixture server needs to answer the child's fetch, deadlocking it.
+
+## D44. Pages waits for successful final release completion before specimen deploy: refines D15/D27
+
+2026-10-02. Issue #56. `pages.yml` previously deployed on any final-looking tag
+push without depending on `release.yml`. That allowed a specimen publish even if
+the matching release later failed (for example during CDN or npm publish),
+violating D15/D27's intent that the public specimen represent a released
+version.
+
+The workflow stays tag-triggered (`v*.*.*`) and keeps the existing rc skip
+(`if: !contains(github.ref_name, '-')`), so the environment tag-rule setup from
+#43 remains applicable. Before any specimen build/deploy step, `pages.yml` now
+polls the Actions API for the `release.yml` run with the same tag SHA and
+requires `conclusion == success`; otherwise it fails and publishes nothing.
+
+Rerun/competition behavior is explicit:
+
+- Rerunning `release.yml` does not auto-trigger Pages; rerun `pages.yml` on that
+  tag if you need specimen republish.
+- Each pages run checks release success for only its own tag SHA, so one final
+  tag cannot publish specimen content for another tag.

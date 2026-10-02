@@ -202,7 +202,12 @@ failed run and use **Re-run failed jobs**. There's no need to re-tag.
   - Workflow validates tag/version, tests, uploads pinned `/vX.Y.Z-rc.N/`, verifies status, Content-Type, banner, per-font CORS and Cache-Control over HTTPS, publishes npm with `--tag next`, and stops.
 - Push final tag (`vX.Y.Z`) on a `main` commit.
   - Workflow uploads pinned `/vX.Y.Z/`, verifies it, promotes to alias `/vX/`, purges explicit alias URLs, verifies alias, publishes npm, and creates GitHub Release notes from `CHANGELOG.md`.
-  - `pages.yml` separately deploys the specimen to GitHub Pages (needs §6).
+  - `pages.yml` for the same tag waits for the matching `release.yml` run on that exact tag SHA to complete successfully before building/deploying the specimen.
+
+Reruns and competing finals:
+
+- Rerunning `release.yml` alone does not start a new pages deployment. Rerun `pages.yml` for that tag if you need to republish specimen HTML.
+- Separate final tags each get their own pages run; each run checks release success for only its own tag SHA.
 
 ## 8) Rollback runbook
 

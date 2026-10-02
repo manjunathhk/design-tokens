@@ -144,8 +144,9 @@ it, then:
 - creates the GitHub Release, body pulled from `CHANGELOG.md`'s
   `## [1.3.0]` section.
 
-In parallel, `pages.yml` deploys the specimen to GitHub Pages. That needs
-the one-time `github-pages` tag rule in `docs/cdn.md` §6.
+After the tag push starts, `pages.yml` also starts for the same tag but waits
+until the matching `release.yml` run for that exact tag SHA is completed and
+successful. A failed `release.yml` run blocks specimen publication.
 
 The tag push _is_ the release — there is no separate release button or
 draft step.
@@ -159,8 +160,16 @@ alias URL (`design.manjunathhk.in/v1/...`) resolves post-purge, and that
 npm shows the new version as `latest`. Read-only.
 
 Also check that the **pages** run for the tag succeeded and that
-`https://manjunathhk.github.io/design-tokens/` shows the new version. A failed `deploy` job with a passing `build` means the tag rule in
-`docs/cdn.md` §6 is missing.
+`https://manjunathhk.github.io/design-tokens/` shows the new version. The
+pages run now polls `release.yml` and proceeds only after a successful
+completion for the same tag SHA.
+
+Rerun behavior: rerunning `release.yml` does not trigger a fresh pages run by
+itself. If needed, rerun `pages.yml` for the same tag; it re-checks the current
+`release.yml` conclusion for that tag SHA before publishing.
+
+Competing final tags: each tag gets its own pages run keyed to that tag SHA.
+The run for a given tag can never publish against another tag's release result.
 
 ## 8. Roll back a bad alias promotion
 
