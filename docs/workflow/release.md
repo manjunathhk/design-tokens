@@ -78,8 +78,10 @@ Triggers `release.yml`. For an `-rc.N` tag it:
   Playwright e2e;
 - uploads to the **pinned** `/v1.3.0-rc.1/` prefix only, refusing if that
   prefix already has objects (pinned paths are immutable);
-- verifies the upload over HTTP (status, content-type, version banner,
-  font CORS);
+- verifies the upload over HTTP with the shared verifier
+  `scripts/verify-cdn.ts`: status, content-type, version banner, font CORS
+  for every font against the wildcard policy, and the pinned Cache-Control
+  (D43);
 - publishes to npm under the `next` dist-tag via OIDC — no token secret.
 
 An rc never touches the `/vMAJOR/` alias or npm's `latest` tag.
@@ -99,8 +101,9 @@ retag — fix npm access for that same version instead.
 ## 4. Validate the rc
 
 Run `/release verify` after pushing the rc tag: it pulls `next` from npm
-and hits the pinned CDN URLs (status, content-type, version banner, font
-CORS), then reports pass/fail. Read-only, no credential involved — the
+and hits the pinned CDN URLs (status, content-type, version banner,
+per-font CORS against the wildcard policy, Cache-Control), then reports
+pass/fail. Read-only, no credential involved — the
 same checks `release.yml` already ran, confirmed from outside CI. Fix
 forward with a new rc (`-rc.2`, ...) if anything's wrong — don't reuse a
 pinned prefix.
@@ -135,7 +138,8 @@ it, then:
 
 - promotes it to alias `/v1/` (copies pinned objects to alias keys);
 - purges those alias URLs on Cloudflare;
-- verifies the alias resolves;
+- verifies the alias resolves (the same verifier as the pinned step, with
+  the alias Cache-Control policy);
 - publishes to npm as `latest`;
 - creates the GitHub Release, body pulled from `CHANGELOG.md`'s
   `## [1.3.0]` section.

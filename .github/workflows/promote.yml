@@ -131,50 +131,6 @@ jobs:
 
       - name: Verify alias CDN assets
         env:
-          VERSION: ${{ steps.meta.outputs.version }}
           MAJOR: ${{ steps.meta.outputs.major }}
         run: |
-          node --input-type=module - "/tmp/upload-manifest.json" "${CDN_BASE_URL}" "v$MAJOR" "$VERSION" <<'NODE'
-          import { readFileSync } from "node:fs";
-
-          const [manifestPath, baseUrl, prefix, version] = process.argv.slice(2);
-          const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-          const banner = `/*! @manjunathhk/design-tokens v${version} */`;
-          let checkedFontCors = false;
-
-          for (const entry of manifest.entries) {
-            const url = `${baseUrl}/${prefix}/${entry.path}`;
-            const headers = entry.path.endsWith(".woff2")
-              ? { Origin: "https://example.com" }
-              : undefined;
-            const response = await fetch(url, { headers });
-            if (response.status !== 200) {
-              throw new Error(`${url} returned ${response.status}, expected 200.`);
-            }
-            const contentType = (response.headers.get("content-type") ?? "").toLowerCase();
-            if (!contentType.startsWith(entry.contentType.toLowerCase())) {
-              throw new Error(
-                `${url} returned Content-Type ${contentType || "<missing>"}, expected ${entry.contentType}.`,
-              );
-            }
-
-            if (entry.path === "index.css") {
-              const body = await response.text();
-              if (!body.includes(banner)) {
-                throw new Error(`${url} is missing banner ${banner}.`);
-              }
-            }
-
-            if (!checkedFontCors && entry.path.endsWith(".woff2")) {
-              checkedFontCors = true;
-              const origin = response.headers.get("access-control-allow-origin");
-              if (!origin) {
-                throw new Error(`${url} is missing Access-Control-Allow-Origin for font CORS.`);
-              }
-            }
-          }
-
-          if (!checkedFontCors) {
-            throw new Error("Manifest has no .woff2 entry to verify CORS.");
-          }
-          NODE
+          npx tsx scripts/verify-cdn.ts /tmp/upload-manifest.json "${CDN_BASE_URL}" "v$MAJOR" alias
