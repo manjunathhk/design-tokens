@@ -71,23 +71,34 @@ export function jsonNames(json: TokensJson): string[] {
 }
 
 export function parseVersion(version: string): { major: number; minor: number; patch: number } {
-  const normalized = version.trim().replace(/^v/, "").split("-")[0].split("+")[0];
-  const parts = normalized.split(".");
+  const normalized = version.trim().replace(/^v/, "").split("-")[0] ?? "";
+  const withoutBuild = normalized.split("+")[0] ?? "";
+  const parts = withoutBuild.split(".");
   if (parts.length !== 3) {
     throw new Error(
       `Invalid version format: ${version}. Expected X.Y.Z, with optional prerelease.`,
     );
   }
-  const [major, minor, patch] = parts.map((part) => Number.parseInt(part, 10));
+
+  const [majorText, minorText, patchText] = parts;
+  if (majorText === undefined || minorText === undefined || patchText === undefined) {
+    throw new Error(
+      `Invalid version format: ${version}. Expected X.Y.Z, with optional prerelease.`,
+    );
+  }
+
+  const major = Number.parseInt(majorText, 10);
+  const minor = Number.parseInt(minorText, 10);
+  const patch = Number.parseInt(patchText, 10);
+
   if ([major, minor, patch].some((value) => Number.isNaN(value))) {
     throw new Error(
       `Invalid version format: ${version}. Expected X.Y.Z, with optional prerelease.`,
     );
   }
+
   return { major, minor, patch };
 }
-
-const major = (version: string) => parseVersion(version).major;
 
 function bumpLevel(version: string) {
   const parsed = parseVersion(version);
@@ -184,6 +195,7 @@ function colorFunctionSet(value: unknown): Set<string> {
       continue;
     }
     const [, pattern, flags] = regexMatch;
+    if (pattern === undefined || flags === undefined) continue;
     const regex = new RegExp(pattern, flags);
     for (const name of KNOWN_COLOR_FUNCTIONS) {
       if (regex.test(name)) matches.add(name);
