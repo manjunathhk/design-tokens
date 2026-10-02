@@ -125,10 +125,18 @@ describe("tokens.json", () => {
     expect(json.shared["radius.lg"]).toBe("1rem");
     expect(json.shared["radius.xl"]).toBe("1.5rem");
     expect(json.shared["radius.pill"]).toBe("9999px");
-    expect(json.shared["motion.ease"]).toBe("cubic-bezier(0.15, 0.25, 0.35, 1)");
+    expect(json.shared["motion.ease"]).toBe("cubic-bezier(0.42, 0, 0.58, 1)");
     expect(json.shared["shadow.raised"]).toBe("0 15px 30px 0 rgba(0, 0, 0, 0.12)");
     expect("shadow.raised" in json.light).toBe(false);
     expect("shadow.raised" in json.dark).toBe(false);
+  });
+
+  it("preserves the exported SCSS breakpoint and token names", () => {
+    const scss = read("dist/_tokens.scss");
+    expect(scss).toContain("$mk-layout-grid-size: var(--mk-layout-grid-size);");
+    expect(scss).toContain("$mk-breakpoints: (");
+    expect(scss).toContain('"md": $mk-breakpoint-md');
+    expect(scss).toContain("@mixin mk-media($bp)");
   });
 
   it("breakpoints are under their own key and never in the CSS", () => {
