@@ -279,6 +279,78 @@ control outlines (inputs, buttons) where 3:1 against `bg`, `bg-subtle` and
 `surface` is required. Use `border-strong` for decoration, `border-control`
 for anything a user interacts with.
 
+### Portfolio adoption and consumer rollout
+
+The package owns the tokens, the small shared base/reset, and the self-hosted
+font declarations. Consumer applications keep their own site composition,
+components, layout decisions, and any page-specific overrides. The migration
+work is therefore a mapping and handoff exercise: replace duplicated
+foundational variables and Google Fonts loading in each site while leaving the
+site's structure and content in place.
+
+Mapping from the old portfolio variables to the package's token roles:
+
+| Portfolio variable                | Package role                                  |
+| --------------------------------- | --------------------------------------------- |
+| `--paper`, `--paper-2`            | page background / subtle section background   |
+| `--card`                          | surface/card base                             |
+| `--ink`, `--ink-2`, `--mut`       | text / secondary text / muted text            |
+| `--rule`, `--rule-2`              | border / decorative emphasis border           |
+| `--grid`                          | grid line                                     |
+| `--acc`, `--on-acc`, `--acc-soft` | accent / on-accent / subtle accent background |
+| `--err`                           | danger                                        |
+| `--display`, `--sans`, `--mono`   | display / sans / mono font families           |
+| `--gut`                           | layout gutter                                 |
+| `--ease`                          | motion easing                                 |
+
+Decorative-vs-accessible deviations remain intentional in the package:
+
+- `--mk-color-border-strong` intentionally keeps the old decorative `--rule-2`
+  role; it is not treated as a 3:1 accessible border token.
+- `--mk-color-border-control` is the interactive/outlining token for controls
+  and focusable UI; it is the one that meets the accessible 3:1 requirement for
+  non-text UI against the work surfaces.
+- `--mk-font-family-*` values remain a package-level contract; consumer CSS can
+  still choose its own typography scale and local component styling around the
+  shared foundations.
+
+For consumer CSS, the exported stylelint config is the raw-colour guardrail. It
+blocks hex values, named colours and the colour-function family in consumer
+stylesheets so the design system remains the place where colour is defined and
+component CSS stays token-driven.
+
+### Consumer inventory and migration checklist
+
+Known consumers as of this document:
+
+- Portfolio: `https://manjunathhk.in` — adoption still required; duplicated
+  foundational variables and Google Fonts usage must be removed while preserving
+  the page structure and intended look.
+- Social card app: `https://social-card.apps.manjunathhk.in` — adoption is
+  required, but visual regression validation remains mandatory before the rollout
+  is considered complete.
+- All other apps/sites are not yet inventoried and are not marked complete.
+
+For each additional consumer, use the same repeatable checklist before treating
+adoption as done:
+
+1. Inventory the site's current CSS variables, font imports, component spacing,
+   and any raw colour declarations.
+2. Map the old values to the package's `--mk-*` roles and identify any local
+   composition that should remain consumer-owned.
+3. Replace local foundational values and Google Fonts loading with the package's
+   shared tokens and fonts, without changing the content structure.
+4. Validate layout, cross-browser rendering, and any exported/rendered output in
+   the real consumer environment.
+5. Run a visual regression check for the specific page or card output affected,
+   especially for generated images or exported assets.
+6. Confirm the site still renders correctly when the CDN alias (`/v1/`) is used
+   and pinning is not required for the default rollout path.
+
+The package cannot claim a full multi-site unification from package tests alone;
+consumer-specific migrations and visual checks remain the final gate for each
+site.
+
 ## Development
 
 Node 24 LTS (`.nvmrc`).
