@@ -628,7 +628,32 @@ Rerun/competition behavior is explicit:
 - Each pages run checks release success for only its own tag SHA, so one final
   tag cannot publish specimen content for another tag.
 
-## D45. Portfolio standard light/dark is the shared source-of-truth for all sites
+## D45. API diff enforces token value and stylelint config bump policy
+
+2026-10-02. Issue #53. The release-policy validation is not just a naming
+check: it must also enforce the documented contract that value changes and
+new token additions are MINOR, while removals/renames remain MAJOR and the
+exported `@manjunathhk/design-tokens/stylelint` rules follow D36.
+
+The compatibility guard compares the local build against the npm `latest` tag,
+not a pre-release dist-tag, and treats same-version unchanged builds as a
+no-op. Prerelease-to-final and final-to-final comparisons are deliberate and
+accepted as equivalent when no actual API diff exists; a true change still
+requires the documented bump relative to the published baseline.
+
+Token comparisons cover both CSS custom-property names and their emitted
+values, and each JSON token path plus its value. For Stylelint, the exported
+config is treated as a narrow public contract: stricter rules (new bans or
+higher restriction) are MAJOR; looser rules are MINOR. This is checked by
+reading the generated `dist/stylelint.mjs` file directly, so it stays
+credential-free and testable without npm registry access.
+
+Docs or build-only changes are intentionally excluded from these bump checks;
+only token/API or lint-config deltas can fail them. The regression tests live
+in `test/api-diff.test.ts` and cover additions, value changes, removals,
+prerelease handling, and the stricter/looser stylelint rule cases.
+
+## D46. Portfolio standard light/dark is the shared source-of-truth for all sites
 
 2026-10-02. Issue #57/#58. Owner decision: the existing portfolio design is the
 authorized shared foundation for every site and app in this package. The
@@ -661,7 +686,7 @@ to unless a later implementation explicitly records a justified exception:
 | secondary background          | `#EBD6CB`                                                            | `#1F1A17`                                                            | `color.bg-subtle`                                                            |
 | card / panel / field surface  | `#FFFFFF`                                                            | `#3C332E`                                                            | `color.surface`                                                              |
 | primary text                  | `#56453F`                                                            | `#F1F0E5`                                                            | `color.text`                                                                 |
-| decorative primary / link Cue | `#A37764`                                                            | `#C39E88`                                                            | keep as decorative brand cue only, never as the sole accessible action token |
+| decorative primary / link cue | `#A37764`                                                            | `#C39E88`                                                            | keep as decorative brand cue only, never as the sole accessible action token |
 | neutral surface border / rule | `#E2DCD3` (inferred from the current portfolio palette)              | `#403734` (inferred from local dark surfaces)                        | `color.border`                                                               |
 | strong rule / emphasis        | `#D2B7AA` (inferred)                                                 | `#665A56` (inferred)                                                 | `color.border-strong`                                                        |
 | focus / control emphasis      | use separate accessible contrast token, not the decorative brand cue | use separate accessible contrast token, not the decorative brand cue | `color.focus-ring` and `color.border-control`                                |
@@ -752,3 +777,5 @@ an input record. The migration path is therefore:
 
 This is the implementation contract that subsequent issues should treat as the
 source-of-truth for any downstream token migration work.
+
+> > > > > > > origin/main

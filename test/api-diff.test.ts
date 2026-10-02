@@ -2,6 +2,8 @@ import { gzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import {
   diffNames,
+  diffStylelintConfig,
+  diffValues,
   jsonNames,
   readFromTarball,
   tokenNames,
@@ -27,7 +29,15 @@ describe("API diff", () => {
     expect(tokenNames(css)).toEqual(names);
   });
 
-  it("passes when names are only added", () => {
+  it("fails when a token is added without a MINOR bump", () => {
+    const diff = diffNames(
+      { version: "1.2.0", names },
+      { version: "1.2.1", names: [...names, "--mk-color-new"] },
+    );
+    expect(diff).toEqual({ removed: [], added: ["--mk-color-new"], ok: false });
+  });
+
+  it("passes when names are only added with a suitable MINOR bump", () => {
     const diff = diffNames(
       { version: "1.2.0", names },
       { version: "1.3.0", names: [...names, "--mk-color-new"] },
@@ -80,7 +90,7 @@ describe("API diff", () => {
     ]);
   });
 
-  it("passes when a tokens.json key is only added", () => {
+  it("passes when a tokens.json key is only added with a suitable MINOR bump", () => {
     const diff = diffNames(
       { version: "1.2.0", names: jsonNames(tokensJson()) },
       {
@@ -89,6 +99,18 @@ describe("API diff", () => {
       },
     );
     expect(diff.ok).toBe(true);
+    expect(diff.added).toEqual(["breakpoints.breakpoint.md"]);
+  });
+
+  it("fails when a tokens.json key is only added without a MINOR bump", () => {
+    const diff = diffNames(
+      { version: "1.2.0", names: jsonNames(tokensJson()) },
+      {
+        version: "1.2.1",
+        names: jsonNames(tokensJson({ "breakpoint.sm": "560px", "breakpoint.md": "900px" })),
+      },
+    );
+    expect(diff.ok).toBe(false);
     expect(diff.added).toEqual(["breakpoints.breakpoint.md"]);
   });
 
@@ -117,6 +139,48 @@ describe("API diff", () => {
       { version: "2.0.0", names: jsonNames(tokensJson({})) },
     );
     expect(diff.ok).toBe(true);
+  });
+
+  it("allows unchanged same-version builds and compares prerelease to final intentionally", () => {
+    const sameBuild = diffNames({ version: "1.2.0", names }, { version: "1.2.0", names });
+    expect(sameBuild).toEqual({ removed: [], added: [], ok: true });
+
+    const prereleaseToFinal = diffNames(
+      { version: "1.2.0-rc.1", names },
+      { version: "1.2.0", names },
+    );
+    expect(prereleaseToFinal).toEqual({ removed: [], added: [], ok: true });
+  });
+
+  it("requires MINOR for a token value change and MAJOR for a stricter stylelint change", () => {
+    const css = ":root { --mk-color-bg: #fff; --mk-color-accent: #00f; }";
+    const published = {
+      version: "1.2.0",
+      values: { "light.color.bg": "#fff", "dark.color.bg": "#000" },
+    };
+    const local = {
+      version: "1.2.1",
+      values: { "light.color.bg": "#fefefe", "dark.color.bg": "#000" },
+    };
+    const valueDiff = diffValues(published, local);
+    expect(valueDiff.changed).toEqual(["light.color.bg"]);
+    expect(valueDiff.ok).toBe(false);
+
+    const stylelintDiff = diffStylelintConfig(
+      {
+        version: "1.2.0",
+        config: `export default { rules: { "color-no-hex": false, "function-disallowed-list": ["/^(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix)$/i"] } };`,
+      },
+      {
+        version: "1.2.0",
+        config: `export default { rules: { "color-no-hex": true, "function-disallowed-list": ["/^(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix)$/i"] } };`,
+      },
+    );
+    expect(stylelintDiff.ok).toBe(false);
+    expect(stylelintDiff.changes).toEqual([
+      { rule: "color-no-hex", change: "stricter", required: "MAJOR" },
+    ]);
+    expect(tokenNames(css)).toEqual(["--mk-color-accent", "--mk-color-bg"]);
   });
 
   it("reads dist/tokens.json out of an npm tarball, and is absent for a version published before it shipped", () => {
