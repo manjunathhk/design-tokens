@@ -44,20 +44,20 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
   --mk-font-weight-medium: 500;
   --mk-font-weight-regular: 400;
   --mk-font-weight-semibold: 600;
-  --mk-layout-container-max: 1440px;
+  --mk-layout-container-max: 1200px;
   --mk-layout-grid-size: 56px;
   --mk-layout-gutter: clamp(16px, 4vw, 56px);
   --mk-motion-duration-base: 300ms;
   --mk-motion-duration-fast: 150ms;
   --mk-motion-duration-slow: 500ms;
   --mk-motion-duration-slower: 900ms;
-  --mk-motion-ease: cubic-bezier(0.2, 0.7, 0.1, 1);
-  --mk-radius-lg: 12px;
-  --mk-radius-md: 6px;
-  --mk-radius-pill: 999px;
-  --mk-radius-sm: 4px;
-  --mk-radius-xl: 16px;
-  --mk-shadow-raised: 0 16px 40px -20px #00000066;
+  --mk-motion-ease: cubic-bezier(0.42, 0, 0.58, 1);
+  --mk-radius-lg: 1rem;
+  --mk-radius-md: 0.5rem;
+  --mk-radius-pill: 9999px;
+  --mk-radius-sm: 0.25rem;
+  --mk-radius-xl: 1.5rem;
+  --mk-shadow-raised: 0 15px 30px 0 rgba(0, 0, 0, 0.12);
   --mk-spacing-1: 4px;
   --mk-spacing-2: 8px;
   --mk-spacing-3: 12px;
@@ -189,20 +189,20 @@ exports[`dist/tokens.json matches the snapshot 1`] = `
     "font.weight.medium": 500,
     "font.weight.regular": 400,
     "font.weight.semibold": 600,
-    "layout.container-max": "1440px",
+    "layout.container-max": "1200px",
     "layout.grid-size": "56px",
     "layout.gutter": "clamp(16px, 4vw, 56px)",
     "motion.duration.base": "300ms",
     "motion.duration.fast": "150ms",
     "motion.duration.slow": "500ms",
     "motion.duration.slower": "900ms",
-    "motion.ease": "cubic-bezier(0.2, 0.7, 0.1, 1)",
-    "radius.lg": "12px",
-    "radius.md": "6px",
-    "radius.pill": "999px",
-    "radius.sm": "4px",
-    "radius.xl": "16px",
-    "shadow.raised": "0 16px 40px -20px #00000066",
+    "motion.ease": "cubic-bezier(0.42, 0, 0.58, 1)",
+    "radius.lg": "1rem",
+    "radius.md": "0.5rem",
+    "radius.pill": "9999px",
+    "radius.sm": "0.25rem",
+    "radius.xl": "1.5rem",
+    "shadow.raised": "0 15px 30px 0 rgba(0, 0, 0, 0.12)",
     "spacing.1": "4px",
     "spacing.2": "8px",
     "spacing.3": "12px",

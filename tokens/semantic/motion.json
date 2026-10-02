@@ -2,8 +2,8 @@
   "motion": {
     "ease": {
       "$type": "cubicBezier",
-      "$value": [0.2, 0.7, 0.1, 1],
-      "$description": "Default easing."
+      "$value": [0.42, 0, 0.58, 1],
+      "$description": "CSS ease-in-out curve matching the portfolio's shared transition timing."
     },
     "duration": {
       "$type": "duration",

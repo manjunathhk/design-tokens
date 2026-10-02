@@ -1,10 +1,10 @@
 {
   "radius": {
     "$type": "dimension",
-    "sm": { "$value": "4px" },
-    "md": { "$value": "6px" },
-    "lg": { "$value": "12px" },
-    "xl": { "$value": "16px" },
-    "pill": { "$value": "999px" }
+    "sm": { "$value": "0.25rem" },
+    "md": { "$value": "0.5rem" },
+    "lg": { "$value": "1rem" },
+    "xl": { "$value": "1.5rem" },
+    "pill": { "$value": "9999px" }
   }
 }
