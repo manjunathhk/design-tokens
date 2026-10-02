@@ -627,3 +627,128 @@ Rerun/competition behavior is explicit:
   tag if you need specimen republish.
 - Each pages run checks release success for only its own tag SHA, so one final
   tag cannot publish specimen content for another tag.
+
+## D45. Portfolio standard light/dark is the shared source-of-truth for all sites
+
+2026-10-02. Issue #57/#58. Owner decision: the existing portfolio design is the
+authorized shared foundation for every site and app in this package. The
+portfolio is not redesigned to match a separate "Paper & Denim" concept, and the
+IBM Plex / Paper & Denim palette research is superseded for this package's
+public default. The brief's historical choices remain in the record as input,
+but they are not the source of truth once this direction is selected.
+
+This decision fixes the implementation contract for the migration:
+
+- `https://manjunathhk.in` is the approved reference live site, with the
+  standard light/dark modes treated as the canonical defaults for the package.
+- The current portfolio CSS asset hash changes over time; do not lock to a
+  single hashed file name. The authoritative record is the approved 2026-09-29
+  portfolio source capture and the values below, with future revisions checked
+  against the current served asset before any token is generated.
+- The design is intentionally not a new palette vote: standard portfolio
+  authentically wins. All downstream implementation work derives from the
+  portfolio values instead of inventing a separate package palette.
+
+### Required source mapping
+
+The live portfolio observed on 2026-09-29 used the following standard theme
+values (light/dark). These are the values the package's semantic tokens must map
+to unless a later implementation explicitly records a justified exception:
+
+| Role                          | Source value (light)                                                 | Source value (dark)                                                  | Package decision                                                             |
+| ----------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| page background               | `#F1F0E5`                                                            | `#2D2521`                                                            | `color.bg`                                                                   |
+| secondary background          | `#EBD6CB`                                                            | `#1F1A17`                                                            | `color.bg-subtle`                                                            |
+| card / panel / field surface  | `#FFFFFF`                                                            | `#3C332E`                                                            | `color.surface`                                                              |
+| primary text                  | `#56453F`                                                            | `#F1F0E5`                                                            | `color.text`                                                                 |
+| decorative primary / link Cue | `#A37764`                                                            | `#C39E88`                                                            | keep as decorative brand cue only, never as the sole accessible action token |
+| neutral surface border / rule | `#E2DCD3` (inferred from the current portfolio palette)              | `#403734` (inferred from local dark surfaces)                        | `color.border`                                                               |
+| strong rule / emphasis        | `#D2B7AA` (inferred)                                                 | `#665A56` (inferred)                                                 | `color.border-strong`                                                        |
+| focus / control emphasis      | use separate accessible contrast token, not the decorative brand cue | use separate accessible contrast token, not the decorative brand cue | `color.focus-ring` and `color.border-control`                                |
+
+The portfolio's standard theme is not a "full token set" at the package level,
+but the semantic roles above are the only ones the migration must support. The
+package keeps its public names unchanged; unsupported roles are intentionally not
+invented.
+
+### Specific accessible-colour rule
+
+The rejected decorative brand values were measured in the source review and do
+not meet the accessible requirements for text or action surfaces:
+
+- `#A37764` on `#F1F0E5` = 3.41:1, below the 4.5:1 minimum for text.
+- `#FFFFFF` on `#A37764` = 3.90:1, below the 4.5:1 minimum for text-on-fill.
+- `#C39E88` on `#2D2521` is readable as a link text for the dark theme, but it
+  is not an acceptable stand-alone filled action colour because `#F1F0E5` on
+  `#C39E88` measures only ~2.14:1.
+
+The portfolio's decorative primary is therefore kept as a design accent only.
+The package must use a separate accessible action colour for any real text or
+button-role requirement. Candidate values for approval before implementation are:
+
+- Light-mode accessible action foreground: `#5D4944` on `#F1F0E5` = 7.33:1;
+  `#FFFFFF` on `#5D4944` = 8.39:1.
+- Dark-mode accessible action foreground: `#C99373` on `#2D2521` = 5.65:1;
+  `#F1F0E5` on `#C99373` = 2.66:1 (acceptable only as a text role, not as a
+  filled-button role).
+
+No accessible action token is implemented until the owner approves the exact
+implementation pair. The decorative portfolio accent is not itself sufficient
+approval for an invented colour.
+
+### Typography and spacing source mapping
+
+The portfolio uses Inter as the base/display family and JetBrains Mono for code;
+the package's public token naming remains unchanged and the implementation should
+map to the existing semantic names already in the repo:
+
+- `font.family.display`: `"Inter", "Segoe UI", sans-serif` (portfolio base)
+- `font.family.sans`: `"Inter", "Segoe UI", sans-serif`
+- `font.family.mono`: `"JetBrains Mono", "SFMono-Regular", ui-monospace, monospace`
+- `font.weight`: 300/400/500/600/700 as in the live site, preserving the
+  existing package public scale rather than inventing a narrower set
+- `font.size`: `clamp()`-based values as used by the portfolio, not fixed-only
+  sizes; the package's public size tokens stay in clamp-based scale order with
+  the portfolio values as the source-of-truth
+- `line-height`: `tight`/`snug`/`normal`/`relaxed` remain semantic package
+  tokens, but their source justification is the portfolio's live text rhythm,
+  not a separate design exercise
+- `letter-spacing`: preserve the package's `display`/`heading`/`normal`/`label`
+  semantic names, using the portfolio's tracked values for all live text styles
+
+The package's spacing, radius, layout, motion, shadow, z-index and breakpoint
+values remain the existing public API values already committed in the repo; the
+portfolio inspection does not justify shape changes or removals. Any future
+mode-dependent shadow adjustment must keep the shared key name intact unless a
+separate explicit MAJOR decision approves a breaking shape change.
+
+### Fonts, licences and asset treatment
+
+The website's source statements on 2026-09-29 identify the fonts as follows:
+
+- Inter = base/display family.
+- JetBrains Mono = code family.
+- The package keeps the existing IBM Plex family declarations for compatibility
+  with the repo's public contract. The implementation uses the repository's
+  shipped self-hosted font assets and license files, not an unverified CDN or
+  package path assumption.
+
+The package must continue to document the actual distributed assets and their
+licence status in the generated font output, with the origin of each file kept in
+sync with the repo's published assets. Missing or guessed font paths are not
+acceptable for downstream implementation.
+
+### Superseded choices from the brief
+
+This decision supersedes the earlier Paper & Denim / IBM Plex explorations for
+the default package direction while leaving the historical brief text intact as
+an input record. The migration path is therefore:
+
+- `docs/brief.md` remains historical context.
+- `docs/decisions.md` is the authoritative source for the approved Option B
+  mapping and supersession record.
+- No palette switcher or alternative theme is introduced into the package; only
+  the standard light/dark portfolio theme is treated as the shared foundation.
+
+This is the implementation contract that subsequent issues should treat as the
+source-of-truth for any downstream token migration work.
