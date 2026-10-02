@@ -708,32 +708,32 @@ The portfolio's standard light/dark theme is the source-backed mapping for this
 migration. The values below are the approved contract for downstream issues and
 not an implementation in this PR:
 
-| Token path | Source declaration or retained value | Proposed or retained basis | Status |
-| --- | --- | --- | --- |
-| `color.bg` | `#F1F0E5` light / `#2D2521` dark | live portfolio standard theme | approved source mapping |
-| `color.bg-subtle` | `#EBD6CB` light / `#1F1A17` dark | live portfolio standard theme | approved source mapping |
-| `color.surface` | `#FFFFFF` light / `#3C332E` dark | live portfolio standard theme | approved source mapping |
-| `color.text` | `#56453F` light / `#F1F0E5` dark | live portfolio standard theme | approved source mapping |
-| `color.accent` | decorative brand cue `#A37764` light / `#C39E88` dark | portfolio decorative accent only; not the link/action role | approved source mapping for decoration only |
-| `color.on-accent` | pending explicit owner approval | must meet 4.5:1 on `color.accent` in both modes | not implemented |
-| `color.focus-ring` | pending explicit owner approval | must meet 3:1 against `bg`, `bg-subtle` and `surface` | not implemented |
-| `color.border-control` | pending explicit owner approval | must meet the 3:1 non-text rule against `bg`, `bg-subtle` and `surface` | not implemented |
-| `color.border` | retained from package default; no new value here | no source capture in this issue | retained public value |
-| `color.border-strong` | decorative only; distinct from `color.border-control` | must remain separate from the 3:1 control rule | decorative, not control |
-| `color.text-secondary` | no proposed value in this issue | live-source capture or owner approval required before implementation | not implemented |
-| `color.text-muted` | no proposed value in this issue | live-source capture or owner approval required before implementation | not implemented |
-| `font.family.display` | `Inter`, `Segoe UI`, `sans-serif` | portfolio base/display family | approved source mapping |
-| `font.family.sans` | `Inter`, `Segoe UI`, `sans-serif` | portfolio body/UI family | approved source mapping |
-| `font.family.mono` | `JetBrains Mono`, `SFMono-Regular`, `ui-monospace`, `monospace` | portfolio code family | approved source mapping |
-| `font.weight.*` | Inter 300-700; JetBrains Mono 400-600; `clamp()`-driven sizing | portfolio typography source | approved retained source requirements |
-| `font.size.*` | `clamp()`-based scale instead of fixed-only values | portfolio sizing model | approved retained source requirements |
-| `spacing.*` | retained current package values | no new values in this issue | retained package contract |
-| `radius.*` | retained current package values | no new values in this issue | retained package contract |
-| `layout.*` | retained current package values | no new values in this issue | retained package contract |
-| `breakpoint.*` | retained current package values | no new values in this issue | retained package contract |
-| `motion.*` | retained current package values | no new values in this issue | retained package contract |
-| `shadow.raised` | single public key retained | no rename or mode-specific shadow key; fidelity compromise is allowed in dark mode | approved shared key |
-| `z-index.*` | retained current package values | no new values in this issue | retained package contract |
+| Token path             | Source declaration or retained value                            | Proposed or retained basis                                                         | Status                                      |
+| ---------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------- |
+| `color.bg`             | `#F1F0E5` light / `#2D2521` dark                                | live portfolio standard theme                                                      | approved source mapping                     |
+| `color.bg-subtle`      | `#EBD6CB` light / `#1F1A17` dark                                | live portfolio standard theme                                                      | approved source mapping                     |
+| `color.surface`        | `#FFFFFF` light / `#3C332E` dark                                | live portfolio standard theme                                                      | approved source mapping                     |
+| `color.text`           | `#56453F` light / `#F1F0E5` dark                                | live portfolio standard theme                                                      | approved source mapping                     |
+| `color.accent`         | decorative brand cue `#A37764` light / `#C39E88` dark           | portfolio decorative accent only; not the link/action role                         | approved source mapping for decoration only |
+| `color.on-accent`      | pending explicit owner approval                                 | must meet 4.5:1 on `color.accent` in both modes                                    | not implemented                             |
+| `color.focus-ring`     | pending explicit owner approval                                 | must meet 3:1 against `bg`, `bg-subtle` and `surface`                              | not implemented                             |
+| `color.border-control` | pending explicit owner approval                                 | must meet the 3:1 non-text rule against `bg`, `bg-subtle` and `surface`            | not implemented                             |
+| `color.border`         | retained from package default; no new value here                | no source capture in this issue                                                    | retained public value                       |
+| `color.border-strong`  | decorative only; distinct from `color.border-control`           | must remain separate from the 3:1 control rule                                     | decorative, not control                     |
+| `color.text-secondary` | no proposed value in this issue                                 | live-source capture or owner approval required before implementation               | not implemented                             |
+| `color.text-muted`     | no proposed value in this issue                                 | live-source capture or owner approval required before implementation               | not implemented                             |
+| `font.family.display`  | `Inter`, `Segoe UI`, `sans-serif`                               | portfolio base/display family                                                      | approved source mapping                     |
+| `font.family.sans`     | `Inter`, `Segoe UI`, `sans-serif`                               | portfolio body/UI family                                                           | approved source mapping                     |
+| `font.family.mono`     | `JetBrains Mono`, `SFMono-Regular`, `ui-monospace`, `monospace` | portfolio code family                                                              | approved source mapping                     |
+| `font.weight.*`        | Inter 300-700; JetBrains Mono 400-600; `clamp()`-driven sizing  | portfolio typography source                                                        | approved retained source requirements       |
+| `font.size.*`          | `clamp()`-based scale instead of fixed-only values              | portfolio sizing model                                                             | approved retained source requirements       |
+| `spacing.*`            | retained current package values                                 | no new values in this issue                                                        | retained package contract                   |
+| `radius.*`             | retained current package values                                 | no new values in this issue                                                        | retained package contract                   |
+| `layout.*`             | retained current package values                                 | no new values in this issue                                                        | retained package contract                   |
+| `breakpoint.*`         | retained current package values                                 | no new values in this issue                                                        | retained package contract                   |
+| `motion.*`             | retained current package values                                 | no new values in this issue                                                        | retained package contract                   |
+| `shadow.raised`        | single public key retained                                      | no rename or mode-specific shadow key; fidelity compromise is allowed in dark mode | approved shared key                         |
+| `z-index.*`            | retained current package values                                 | no new values in this issue                                                        | retained package contract                   |
 
 This table is intentionally source-backed and conservative. Anything not listed here
 remains intentionally unspecified until the owner approves a source capture or a
