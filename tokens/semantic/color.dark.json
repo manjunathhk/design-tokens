@@ -28,7 +28,7 @@
     "text-muted": {
       "$type": "color",
       "$description": "labels, captions, metadata",
-      "$value": "#A48F82"
+      "$value": "#AE998C"
     },
     "border": {
       "$type": "color",

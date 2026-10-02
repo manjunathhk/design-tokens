@@ -14,8 +14,6 @@ const fontFiles = [
   "jetbrains-mono-latin-500-normal.woff2",
   "jetbrains-mono-latin-600-normal.woff2",
 ] as const;
-const licenseFiles = ["LICENSE", "LICENSE"] as const;
-
 beforeAll(() => {
   if (!existsSync("dist/fonts.css"))
     throw new Error("dist/fonts.css not found. Run npm run build first.");

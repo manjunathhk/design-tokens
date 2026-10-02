@@ -11,7 +11,15 @@
         "$description": "Body text and UI."
       },
       "mono": {
-        "$value": ["JetBrains Mono", "SFMono-Regular", "SFMono", "Menlo", "Consolas", "Liberation Mono", "monospace"],
+        "$value": [
+          "JetBrains Mono",
+          "SFMono-Regular",
+          "SFMono",
+          "Menlo",
+          "Consolas",
+          "Liberation Mono",
+          "monospace"
+        ],
         "$description": "Code and tabular figures."
       }
     },

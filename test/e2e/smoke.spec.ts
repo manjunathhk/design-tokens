@@ -13,7 +13,7 @@
  *   • body background and body colour resolve to the values in dist/tokens.json
  *     in four cases: OS light, OS dark, data-theme="light" under OS dark,
  *     data-theme="dark" under OS light.
-*   • document.fonts reports all Inter and JetBrains Mono faces as loaded.
+ *   • document.fonts reports all Inter and JetBrains Mono faces as loaded.
  *   • Without the CORS header on the font responses, fonts fail to load
  *     (negative CORS check).
  */
@@ -222,7 +222,10 @@ test("document.fonts reports all Inter and JetBrains Mono faces as loaded", asyn
   await page.waitForLoadState("networkidle");
 
   await page.evaluate(async () => {
-    await Promise.all([document.fonts.load('1em "Inter"'), document.fonts.load('1em "JetBrains Mono"')]);
+    await Promise.all([
+      document.fonts.load('1em "Inter"'),
+      document.fonts.load('1em "JetBrains Mono"'),
+    ]);
   });
 
   const loadedFamilies = await page.evaluate(() =>
@@ -259,15 +262,24 @@ test("without CORS header, cross-origin fonts fail to load", async ({ page }) =>
     await page.waitForLoadState("networkidle");
 
     await page.evaluate(async () => {
-      await Promise.allSettled([document.fonts.load('1em "Inter"'), document.fonts.load('1em "JetBrains Mono"')]);
+      await Promise.allSettled([
+        document.fonts.load('1em "Inter"'),
+        document.fonts.load('1em "JetBrains Mono"'),
+      ]);
     });
 
     const loadedFamilies = await page.evaluate(() =>
       [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family),
     );
 
-    const selfHosted = loadedFamilies.filter((f) => f.replace(/['"]/g, "").startsWith("Inter") || f.replace(/['"]/g, "").startsWith("JetBrains Mono"));
-    expect(selfHosted, "Inter/JetBrains Mono fonts should not load without CORS headers").toEqual([]);
+    const selfHosted = loadedFamilies.filter(
+      (f) =>
+        f.replace(/['"]/g, "").startsWith("Inter") ||
+        f.replace(/['"]/g, "").startsWith("JetBrains Mono"),
+    );
+    expect(selfHosted, "Inter/JetBrains Mono fonts should not load without CORS headers").toEqual(
+      [],
+    );
   } finally {
     await stopServer(noCorsPageServer);
   }
