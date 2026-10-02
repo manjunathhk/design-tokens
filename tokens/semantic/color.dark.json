@@ -3,72 +3,72 @@
     "bg": {
       "$type": "color",
       "$description": "page background",
-      "$value": "{color.navy.950}"
+      "$value": "#2D2521"
     },
     "bg-subtle": {
       "$type": "color",
       "$description": "alternate section background",
-      "$value": "{color.navy.925}"
+      "$value": "#1F1A17"
     },
     "surface": {
       "$type": "color",
       "$description": "cards, panels, form fields",
-      "$value": "{color.navy.900}"
+      "$value": "#3C332E"
     },
     "text": {
       "$type": "color",
       "$description": "primary text, headings",
-      "$value": "{color.navy.50}"
+      "$value": "#F1F0E5"
     },
     "text-secondary": {
       "$type": "color",
       "$description": "body copy on subtle backgrounds",
-      "$value": "{color.navy.200}"
+      "$value": "#D9C7BB"
     },
     "text-muted": {
       "$type": "color",
       "$description": "labels, captions, metadata",
-      "$value": "{color.navy.400}"
+      "$value": "#A48F82"
     },
     "border": {
       "$type": "color",
       "$description": "hairlines, dividers (decorative)",
-      "$value": "{color.navy.800}"
+      "$value": "#534D49"
     },
     "border-strong": {
       "$type": "color",
       "$description": "emphasised rules (decorative; not for control outlines)",
-      "$value": "{color.navy.700}"
+      "$value": "#7F6A5F"
     },
     "border-control": {
       "$type": "color",
       "$description": "outlines of form controls and other UI that must be seen (3:1)",
-      "$value": "{color.navy.500}"
+      "$value": "#C39E88"
     },
     "grid-line": {
       "$type": "color",
       "$description": "drafting-grid background lines",
-      "$value": "{color.white}",
+      "$value": "#F1F0E5",
       "$extensions": {
         "in.manjunathhk": {
-          "alpha": 0.04
+          "alpha": 0.05
         }
       }
     },
     "accent": {
       "$type": "color",
       "$description": "links, highlights, primary actions",
-      "$value": "{color.denim.300}"
+      "$value": "#C39E88"
     },
     "on-accent": {
       "$type": "color",
       "$description": "text or icons on accent fills",
-      "$value": "{color.navy.975}"
+      "$value": "#2D2521"
     },
     "accent-subtle": {
       "$type": "color",
       "$description": "tinted backgrounds; accent at 13% alpha",
-      "$value": "{color.denim.300}",
+      "$value": "#C39E88",
       "$extensions": {
         "in.manjunathhk": {
           "alpha": 0.13
@@ -78,22 +78,22 @@
     "danger": {
       "$type": "color",
       "$description": "errors",
-      "$value": "{color.red.300}"
+      "$value": "#FF8A7A"
     },
     "success": {
       "$type": "color",
       "$description": "success states",
-      "$value": "{color.green.300}"
+      "$value": "#86C99A"
     },
     "warning": {
       "$type": "color",
       "$description": "warnings",
-      "$value": "{color.amber.300}"
+      "$value": "#F0B860"
     },
     "focus-ring": {
       "$type": "color",
       "$description": "focus outline; same as accent",
-      "$value": "{color.denim.300}"
+      "$value": "#C39E88"
     }
   }
 }

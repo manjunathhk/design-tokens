@@ -3,15 +3,15 @@
     "family": {
       "$type": "fontFamily",
       "display": {
-        "$value": ["IBM Plex Sans Condensed", "IBM Plex Sans", "Arial Narrow", "sans-serif"],
+        "$value": ["Inter", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
         "$description": "Display headings."
       },
       "sans": {
-        "$value": ["IBM Plex Sans", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
+        "$value": ["Inter", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
         "$description": "Body text and UI."
       },
       "mono": {
-        "$value": ["IBM Plex Mono", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        "$value": ["JetBrains Mono", "SFMono-Regular", "SFMono", "Menlo", "Consolas", "Liberation Mono", "monospace"],
         "$description": "Code and tabular figures."
       }
     },

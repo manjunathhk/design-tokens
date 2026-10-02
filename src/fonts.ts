@@ -3,10 +3,10 @@ import { join } from "node:path";
 import { banner } from "./css.js";
 
 type FontFace = {
-  readonly packageName: "@ibm/plex-sans" | "@ibm/plex-sans-condensed" | "@ibm/plex-mono";
-  readonly family: "IBM Plex Sans" | "IBM Plex Sans Condensed" | "IBM Plex Mono";
+  readonly packageName: "@fontsource/inter" | "@fontsource/jetbrains-mono";
+  readonly family: "Inter" | "JetBrains Mono";
   readonly style: "normal" | "italic";
-  readonly weight: 400 | 500 | 600 | 700;
+  readonly weight: 300 | 400 | 500 | 600 | 700;
   readonly localNames: readonly [string, string];
   readonly file: string;
   readonly unicodeRange: string;
@@ -19,92 +19,91 @@ const MONO_LATIN1 =
 
 const fontFaces: readonly FontFace[] = [
   {
-    packageName: "@ibm/plex-sans",
-    family: "IBM Plex Sans",
+    packageName: "@fontsource/inter",
+    family: "Inter",
+    style: "normal",
+    weight: 300,
+    localNames: ["Inter Light", "Inter-Light"],
+    file: "inter-latin-300-normal.woff2",
+    unicodeRange: SANS_LATIN1,
+  },
+  {
+    packageName: "@fontsource/inter",
+    family: "Inter",
     style: "normal",
     weight: 400,
-    localNames: ["IBM Plex Sans", "IBMPlexSans"],
-    file: "IBMPlexSans-Regular-Latin1.woff2",
+    localNames: ["Inter", "Inter-Regular"],
+    file: "inter-latin-400-normal.woff2",
     unicodeRange: SANS_LATIN1,
   },
   {
-    packageName: "@ibm/plex-sans",
-    family: "IBM Plex Sans",
+    packageName: "@fontsource/inter",
+    family: "Inter",
     style: "normal",
     weight: 500,
-    localNames: ["IBM Plex Sans Medium", "IBMPlexSans-Medium"],
-    file: "IBMPlexSans-Medium-Latin1.woff2",
+    localNames: ["Inter Medium", "Inter-Medium"],
+    file: "inter-latin-500-normal.woff2",
     unicodeRange: SANS_LATIN1,
   },
   {
-    packageName: "@ibm/plex-sans",
-    family: "IBM Plex Sans",
+    packageName: "@fontsource/inter",
+    family: "Inter",
     style: "normal",
     weight: 600,
-    localNames: ["IBM Plex Sans SemiBold", "IBMPlexSans-SemiBold"],
-    file: "IBMPlexSans-SemiBold-Latin1.woff2",
+    localNames: ["Inter SemiBold", "Inter-SemiBold"],
+    file: "inter-latin-600-normal.woff2",
     unicodeRange: SANS_LATIN1,
   },
   {
-    packageName: "@ibm/plex-sans",
-    family: "IBM Plex Sans",
-    style: "italic",
-    weight: 400,
-    localNames: ["IBM Plex Sans Italic", "IBMPlexSans-Italic"],
-    file: "IBMPlexSans-Italic-Latin1.woff2",
-    unicodeRange: SANS_LATIN1,
-  },
-  {
-    packageName: "@ibm/plex-sans-condensed",
-    family: "IBM Plex Sans Condensed",
-    style: "normal",
-    weight: 500,
-    localNames: ["IBM Plex Sans Cond Medium", "IBMPlexSansCond-Medium"],
-    file: "IBMPlexSansCondensed-Medium-Latin1.woff2",
-    unicodeRange: SANS_LATIN1,
-  },
-  {
-    packageName: "@ibm/plex-sans-condensed",
-    family: "IBM Plex Sans Condensed",
-    style: "normal",
-    weight: 600,
-    localNames: ["IBM Plex Sans Cond SemiBold", "IBMPlexSansCond-SemiBold"],
-    file: "IBMPlexSansCondensed-SemiBold-Latin1.woff2",
-    unicodeRange: SANS_LATIN1,
-  },
-  {
-    packageName: "@ibm/plex-sans-condensed",
-    family: "IBM Plex Sans Condensed",
+    packageName: "@fontsource/inter",
+    family: "Inter",
     style: "normal",
     weight: 700,
-    localNames: ["IBM Plex Sans Cond Bold", "IBMPlexSansCond-Bold"],
-    file: "IBMPlexSansCondensed-Bold-Latin1.woff2",
+    localNames: ["Inter Bold", "Inter-Bold"],
+    file: "inter-latin-700-normal.woff2",
     unicodeRange: SANS_LATIN1,
   },
   {
-    packageName: "@ibm/plex-mono",
-    family: "IBM Plex Mono",
+    packageName: "@fontsource/inter",
+    family: "Inter",
+    style: "italic",
+    weight: 400,
+    localNames: ["Inter Italic", "Inter-Italic"],
+    file: "inter-latin-400-italic.woff2",
+    unicodeRange: SANS_LATIN1,
+  },
+  {
+    packageName: "@fontsource/jetbrains-mono",
+    family: "JetBrains Mono",
     style: "normal",
     weight: 400,
-    localNames: ["IBM Plex Mono", "IBMPlexMono"],
-    file: "IBMPlexMono-Regular-Latin1.woff2",
+    localNames: ["JetBrains Mono", "JetBrainsMono-Regular"],
+    file: "jetbrains-mono-latin-400-normal.woff2",
     unicodeRange: MONO_LATIN1,
   },
   {
-    packageName: "@ibm/plex-mono",
-    family: "IBM Plex Mono",
+    packageName: "@fontsource/jetbrains-mono",
+    family: "JetBrains Mono",
     style: "normal",
     weight: 500,
-    localNames: ["IBM Plex Mono Medium", "IBMPlexMono-Medium"],
-    file: "IBMPlexMono-Medium-Latin1.woff2",
+    localNames: ["JetBrains Mono Medium", "JetBrainsMono-Medium"],
+    file: "jetbrains-mono-latin-500-normal.woff2",
+    unicodeRange: MONO_LATIN1,
+  },
+  {
+    packageName: "@fontsource/jetbrains-mono",
+    family: "JetBrains Mono",
+    style: "normal",
+    weight: 600,
+    localNames: ["JetBrains Mono SemiBold", "JetBrainsMono-SemiBold"],
+    file: "jetbrains-mono-latin-600-normal.woff2",
     unicodeRange: MONO_LATIN1,
   },
 ];
 
 const licenses = [
-  { packageName: "@ibm/plex-sans", file: "IBM-Plex-Sans-OFL-1.1.txt" },
-  { packageName: "@ibm/plex-sans-condensed", file: "IBM-Plex-Sans-Condensed-OFL-1.1.txt" },
-  { packageName: "@ibm/plex-mono", file: "IBM-Plex-Mono-OFL-1.1.txt" },
+  { packageName: "@fontsource/inter", file: "inter-LICENSE.txt" },
+  { packageName: "@fontsource/jetbrains-mono", file: "jetbrains-mono-LICENSE.txt" },
 ] as const;
 
 const packagePath = (packageName: string, ...parts: string[]) =>
@@ -122,7 +121,7 @@ export function copyFontAssets(distDir: string): void {
   mkdirSync(licensesDir, { recursive: true });
 
   for (const face of fontFaces) {
-    const source = packagePath(face.packageName, "fonts", "split", "woff2", face.file);
+    const source = packagePath(face.packageName, "files", face.file);
     copyFileSync(
       requireFile(source, `Missing font asset ${face.file} in ${face.packageName}: ${source}.`),
       join(fontsDir, face.file),
@@ -130,7 +129,7 @@ export function copyFontAssets(distDir: string): void {
   }
 
   for (const license of licenses) {
-    const source = packagePath(license.packageName, "LICENSE.txt");
+    const source = packagePath(license.packageName, "LICENSE");
     copyFileSync(
       requireFile(source, `Missing OFL licence for ${license.packageName}: ${source}.`),
       join(licensesDir, license.file),
