@@ -118,6 +118,19 @@ describe("tokens.json", () => {
     expect(fromJson.sort()).toEqual(css);
   });
 
+  it("keeps the approved foundation values and shared shadow compatibility", () => {
+    expect(json.shared["layout.container-max"]).toBe("1200px");
+    expect(json.shared["radius.sm"]).toBe("0.25rem");
+    expect(json.shared["radius.md"]).toBe("0.5rem");
+    expect(json.shared["radius.lg"]).toBe("1rem");
+    expect(json.shared["radius.xl"]).toBe("1.5rem");
+    expect(json.shared["radius.pill"]).toBe("9999px");
+    expect(json.shared["motion.ease"]).toBe("cubic-bezier(0.15, 0.25, 0.35, 1)");
+    expect(json.shared["shadow.raised"]).toBe("0 15px 30px 0 rgba(0, 0, 0, 0.12)");
+    expect("shadow.raised" in json.light).toBe(false);
+    expect("shadow.raised" in json.dark).toBe(false);
+  });
+
   it("breakpoints are under their own key and never in the CSS", () => {
     expect(Object.keys(json.breakpoints).length).toBeGreaterThan(0);
     expect(Object.keys(json.breakpoints).every((k) => k.startsWith("breakpoint."))).toBe(true);

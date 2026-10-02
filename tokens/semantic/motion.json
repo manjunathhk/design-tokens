@@ -2,8 +2,8 @@
   "motion": {
     "ease": {
       "$type": "cubicBezier",
-      "$value": [0.2, 0.7, 0.1, 1],
-      "$description": "Default easing."
+      "$value": [0.15, 0.25, 0.35, 1],
+      "$description": "Portfolio easing curve."
     },
     "duration": {
       "$type": "duration",

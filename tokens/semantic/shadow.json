@@ -2,13 +2,13 @@
   "shadow": {
     "$type": "shadow",
     "raised": {
-      "$description": "Raised surfaces: cards on hover, popovers.",
+      "$description": "Raised surfaces: cards on hover, popovers. Shared across both modes to preserve the public JSON key and keep compatibility with existing consumers.",
       "$value": {
-        "color": "#00000066",
+        "color": "rgba(0, 0, 0, 0.12)",
         "offsetX": "0",
-        "offsetY": "16px",
-        "blur": "40px",
-        "spread": "-20px"
+        "offsetY": "15px",
+        "blur": "30px",
+        "spread": "0"
       }
     }
   }
