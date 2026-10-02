@@ -662,120 +662,154 @@ IBM Plex / Paper & Denim palette research is superseded for this package's
 public default. The brief's historical choices remain in the record as input,
 but they are not the source of truth once this direction is selected.
 
-This decision fixes the implementation contract for the migration:
+This documentation issue records the implementation contract only. It does not
+change the generated dist files or ship any new token values. The exact live-site
+capture still needs a networked owner check: this sandbox could not resolve
+`manjunathhk.in` (`socket.gaierror: [Errno -5] No address associated with
+hostname`), so any final live-asset capture must be confirmed from a machine with
+DNS access. The values below are therefore recorded as the approved mapping from
+the issue statement and the owner-approved direction, not as a new invented
+palette.
 
-- `https://manjunathhk.in` is the approved reference live site, with the
-  standard light/dark modes treated as the canonical defaults for the package.
-- The current portfolio CSS asset hash changes over time; do not lock to a
-  single hashed file name. The authoritative record is the approved 2026-09-29
-  portfolio source capture and the values below, with future revisions checked
-  against the current served asset before any token is generated.
-- The design is intentionally not a new palette vote: standard portfolio
-  authentically wins. All downstream implementation work derives from the
-  portfolio values instead of inventing a separate package palette.
+### Superseded decisions and font policy
+
+This decision supersedes the IBM Plex-specific font decisions for the default
+package direction, while leaving the underlying brief and the historical font
+build decisions in place as context. The superseded decisions are:
+
+- D11: "Licence: MIT" (the IBM Plex shipping and OFL note)
+- D25: IBM telemetry disabling for the IBM Plex packages
+- D26: the IBM Plex Playwright smoke-test and font-loading expectations
+
+The approved portfolio direction requires Inter and JetBrains Mono to be
+recorded as the design source for the downstream mapping, with the earlier IBM
+Plex entries treated as historical implementation details that are superseded for
+this migration. This docs-only PR therefore records the design decision, but it
+does not change the package's shipped font assets or generated CSS until a later
+implementation PR follows it.
 
 ### Required source mapping
 
-The live portfolio observed on 2026-09-29 used the following standard theme
-values (light/dark). These are the values the package's semantic tokens must map
-to unless a later implementation explicitly records a justified exception:
+The issue statement records the portfolio's standard light/dark values as the
+source-backed mapping for this migration. The following mapping is the approved
+contract for downstream issues; no token values are implemented in this PR:
 
-| Role                          | Source value (light)                                                 | Source value (dark)                                                  | Package decision                                                             |
-| ----------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| page background               | `#F1F0E5`                                                            | `#2D2521`                                                            | `color.bg`                                                                   |
-| secondary background          | `#EBD6CB`                                                            | `#1F1A17`                                                            | `color.bg-subtle`                                                            |
-| card / panel / field surface  | `#FFFFFF`                                                            | `#3C332E`                                                            | `color.surface`                                                              |
-| primary text                  | `#56453F`                                                            | `#F1F0E5`                                                            | `color.text`                                                                 |
-| decorative primary / link cue | `#A37764`                                                            | `#C39E88`                                                            | keep as decorative brand cue only, never as the sole accessible action token |
-| neutral surface border / rule | `#E2DCD3` (inferred from the current portfolio palette)              | `#403734` (inferred from local dark surfaces)                        | `color.border`                                                               |
-| strong rule / emphasis        | `#D2B7AA` (inferred)                                                 | `#665A56` (inferred)                                                 | `color.border-strong`                                                        |
-| focus / control emphasis      | use separate accessible contrast token, not the decorative brand cue | use separate accessible contrast token, not the decorative brand cue | `color.focus-ring` and `color.border-control`                                |
+| Token path             | Source declaration or retained value                             | Proposed or retained basis                                           | Status                                          |
+| ---------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------- |
+| `color.bg`             | `#F1F0E5` light / `#2D2521` dark                                 | live portfolio standard theme                                        | approved source mapping                         |
+| `color.bg-subtle`      | `#EBD6CB` light / `#1F1A17` dark                                 | live portfolio standard theme                                        | approved source mapping                         |
+| `color.surface`        | `#FFFFFF` light / `#3C332E` dark                                 | live portfolio standard theme                                        | approved source mapping                         |
+| `color.text`           | `#56453F` light / `#F1F0E5` dark                                 | live portfolio standard theme                                        | approved source mapping                         |
+| `color.accent`         | decorative brand cue `#A37764` light / `#C39E88` dark            | portfolio decorative accent only                                     | decorative only; not an accessible action token |
+| `color.on-accent`      | pending explicit owner approval                                  | must meet 4.5:1 on `color.accent` in both modes                      | not implemented                                 |
+| `color.focus-ring`     | pending explicit owner approval                                  | must meet 3:1 against `bg`, `bg-subtle`, `surface`                   | not implemented                                 |
+| `color.border-control` | pending explicit owner approval                                  | must meet the 3:1 non-text rule against `bg`, `bg-subtle`, `surface` | not implemented                                 |
+| `color.border`         | not yet source-backed in this PR                                 | existing package values retained until source capture is confirmed   | explicit placeholder, no invented colour        |
+| `color.border-strong`  | decorative only; not the 3:1 control token                       | must stay separate from `border-control`                             | decorative, not control                         |
+| `color.text-secondary` | no proposed value in this issue                                  | requires source capture or owner approval before implementation      | not implemented                                 |
+| `color.text-muted`     | no proposed value in this issue                                  | requires source capture or owner approval before implementation      | not implemented                                 |
+| `font.family.display`  | `Inter` / `Segoe UI` / sans-serif                                | portfolio base/display family                                        | approved source mapping                         |
+| `font.family.sans`     | `Inter` / `Segoe UI` / sans-serif                                | portfolio base family                                                | approved source mapping                         |
+| `font.family.mono`     | `JetBrains Mono` / `SFMono-Regular` / `ui-monospace` / monospace | portfolio code family                                                | approved source mapping                         |
+| `font.weight.*`        | 300/400/500/600/700, with live-site use of `clamp()` typography  | portfolio typography source                                          | approved retained values                        |
+| `font.size.*`          | `clamp()`-based scale, not fixed-only values                     | live site sizing model                                               | approved retained values                        |
+| `spacing.*`            | retained from the package's current public API                   | no new values in this issue                                          | retained, source not changed                    |
+| `radius.*`             | retained from the package's current public API                   | no new values in this issue                                          | retained, source not changed                    |
+| `layout.*`             | retained from the package's current public API                   | no new values in this issue                                          | retained, source not changed                    |
+| `breakpoint.*`         | retained from the package's current public API                   | no new values in this issue                                          | retained, source not changed                    |
+| `motion.*`             | retained from the package's current public API                   | no new values in this issue                                          | retained, source not changed                    |
+| `shadow.raised`        | single public key retained; no mode-specific replacement         | fidelity compromise retained to avoid public key breakage            | approved shared key                             |
+| `z-index.*`            | retained from the package's current public API                   | no new values in this issue                                          | retained, source not changed                    |
 
-The portfolio's standard theme is not a "full token set" at the package level,
-but the semantic roles above are the only ones the migration must support. The
-package keeps its public names unchanged; unsupported roles are intentionally not
-invented.
+The portfolio's standard theme is not a "full token set" at the package level. It
+provides the canonical source for the approved shared default, and anything not
+listed here remains intentionally unspecified until an owner-approved source
+capture or follow-up issue records it. No guessed values are introduced into the
+public API in this doc change.
 
-### Specific accessible-colour rule
+### Contrast revalidation and exact approval gate
 
-The rejected decorative brand values were measured in the source review and do
-not meet the accessible requirements for text or action surfaces:
+The issue requires re-measuring every pair in `src/contrast.ts` across both
+modes. The actionable results from the approved source values are:
 
 - `#A37764` on `#F1F0E5` = 3.41:1, below the 4.5:1 minimum for text.
 - `#FFFFFF` on `#A37764` = 3.90:1, below the 4.5:1 minimum for text-on-fill.
-- `#C39E88` on `#2D2521` is readable as a link text for the dark theme, but it
-  is not an acceptable stand-alone filled action colour because `#F1F0E5` on
-  `#C39E88` measures only ~2.14:1.
+- `#C39E88` on `#2D2521` = 6.13:1 for text; `#F1F0E5` on `#C39E88` = 2.14:1,
+  which is not acceptable for a filled action or button state.
+- The approved colour values remain the source values above; the action colour
+  must be distinct from the decorative brand accent and must not be treated as a
+  valid link or action token until the owner explicitly approves the exact pair.
 
-The portfolio's decorative primary is therefore kept as a design accent only.
-The package must use a separate accessible action colour for any real text or
-button-role requirement. Candidate values for approval before implementation are:
+The current issue therefore keeps the decorative brand cue separate from the
+accessible role and does not implement any action colour. The explicit approval
+rule is:
 
-- Light-mode accessible action foreground: `#5D4944` on `#F1F0E5` = 7.33:1;
-  `#FFFFFF` on `#5D4944` = 8.39:1.
-- Dark-mode accessible action foreground: `#C99373` on `#2D2521` = 5.65:1;
-  `#F1F0E5` on `#C99373` = 2.66:1 (acceptable only as a text role, not as a
-  filled-button role).
+- The owner must approve exact `color.accent` / `color.on-accent` and
+  `color.focus-ring` / `color.border-control` values before any token enters the
+  package.
+- Until then, `#58` remains open and this documentation issue is the spec that
+  downstream work should follow, not the implementation itself.
 
-No accessible action token is implemented until the owner approves the exact
-implementation pair. The decorative portfolio accent is not itself sufficient
-approval for an invented colour.
+The candidate values recorded in the issue are only proposals pending approval:
 
-### Typography and spacing source mapping
+- Light mode action pair: `#5D4944` on `#F1F0E5` = 7.33:1; `#FFFFFF` on
+  `#5D4944` = 8.39:1.
+- Dark mode action pair: `#C99373` on `#2D2521` = 5.65:1; this pair does not meet
+  the 4.5:1 requirement for a filled action colour because `#F1F0E5` on
+  `#C99373` = 2.32:1. A dark `on-accent` is therefore likely required in the
+  final approved pair, but no implementation is chosen here.
 
-The portfolio uses Inter as the base/display family and JetBrains Mono for code;
-the package's public token naming remains unchanged and the implementation should
-map to the existing semantic names already in the repo:
+This is intentionally explicit: nothing in this doc is implemented until the
+exact values are approved by the owner.
 
-- `font.family.display`: `"Inter", "Segoe UI", sans-serif` (portfolio base)
-- `font.family.sans`: `"Inter", "Segoe UI", sans-serif`
-- `font.family.mono`: `"JetBrains Mono", "SFMono-Regular", ui-monospace, monospace`
-- `font.weight`: 300/400/500/600/700 as in the live site, preserving the
-  existing package public scale rather than inventing a narrower set
-- `font.size`: `clamp()`-based values as used by the portfolio, not fixed-only
-  sizes; the package's public size tokens stay in clamp-based scale order with
-  the portfolio values as the source-of-truth
-- `line-height`: `tight`/`snug`/`normal`/`relaxed` remain semantic package
-  tokens, but their source justification is the portfolio's live text rhythm,
-  not a separate design exercise
-- `letter-spacing`: preserve the package's `display`/`heading`/`normal`/`label`
-  semantic names, using the portfolio's tracked values for all live text styles
+### Typography and spacing source record
 
-The package's spacing, radius, layout, motion, shadow, z-index and breakpoint
-values remain the existing public API values already committed in the repo; the
-portfolio inspection does not justify shape changes or removals. Any future
-mode-dependent shadow adjustment must keep the shared key name intact unless a
-separate explicit MAJOR decision approves a breaking shape change.
+The portfolio uses Inter as the base/display family and JetBrains Mono as the code
+family. The source requirement is:
 
-### Fonts, licences and asset treatment
+- `font.family.display`: `Inter`, `Segoe UI`, `sans-serif`
+- `font.family.sans`: `Inter`, `Segoe UI`, `sans-serif`
+- `font.family.mono`: `JetBrains Mono`, `SFMono-Regular`, `ui-monospace`, monospace
+- `font.weight`: 300-700 for Inter (covering 300/400/500/600/700) and
+  400-600 for JetBrains Mono
+- `font.style`: roman + italic handling is allowed where the source site uses it;
+  the package must record which public tokens consume italic/bold so a later
+  implementation can preserve or replace them intentionally
+- `font.size`: `clamp()`-based scale, not fixed-only values
+- `line-height`, `letter-spacing`, spacing, layout, motion, radius, shadow,
+  breakpoints and z-index remain retained package values until a follow-up
+  implementation issue maps them from the actual live site and confirms any
+  decisions that would change the public contract
 
-The website's source statements on 2026-09-29 identify the fonts as follows:
+This issue therefore deliberately records the typography intent and the pending
+implementation boundary without inventing any new values.
 
-- Inter = base/display family.
-- JetBrains Mono = code family.
-- The package keeps the existing IBM Plex family declarations for compatibility
-  with the repo's public contract. The implementation uses the repository's
-  shipped self-hosted font assets and license files, not an unverified CDN or
-  package path assumption.
+### Shadow handling and fidelity compromise
 
-The package must continue to document the actual distributed assets and their
-licence status in the generated font output, with the origin of each file kept in
-sync with the repo's published assets. Missing or guessed font paths are not
-acceptable for downstream implementation.
+`shadow.raised` stays as the public key with no rename and no removal. The design
+contract is:
 
-### Superseded choices from the brief
+- Keep one shared public token name for the shadow across modes.
+- Do not introduce a mode-specific `shadow.raised.dark` or a breaking rename,
+  because that would change the public API and require a MAJOR decision.
+- Accept a fidelity compromise in dark mode instead of altering the public key,
+  so the shared token remains stable while the actual site-level shadow can be
+  tuned later without reopening the key contract.
 
-This decision supersedes the earlier Paper & Denim / IBM Plex explorations for
-the default package direction while leaving the historical brief text intact as
-an input record. The migration path is therefore:
+This keeps the public API stable and avoids the shape break described in the
+issue.
 
-- `docs/brief.md` remains historical context.
-- `docs/decisions.md` is the authoritative source for the approved Option B
-  mapping and supersession record.
-- No palette switcher or alternative theme is introduced into the package; only
-  the standard light/dark portfolio theme is treated as the shared foundation.
+### Final completion gate
 
-This is the implementation contract that subsequent issues should treat as the
-source-of-truth for any downstream token migration work.
+This documentation issue closes the design-spec gap, but it does not replace the
+owner approval step for exact action colours. The final completion gate remains:
 
-> > > > > > > origin/main
+- the owner records the final approved accent / on-accent / focus ring values;
+- the owner confirms the live source asset and computed styles from a networked
+  environment; and
+- `#58` remains open until those exact values are recorded and the spec becomes
+  implementation-ready.
+
+Until then, the package should treat D46 as the authoritative documentation of the
+approved direction, but not as an implementation that changes the published token
+values or generated assets.
