@@ -38,9 +38,17 @@ jobs:
           const sha = process.env.GITHUB_SHA ?? "";
           const tag = process.env.GITHUB_REF_NAME ?? "";
           const token = process.env.GITHUB_TOKEN ?? "";
+          const tagLabel = tag || "<unknown-tag>";
 
-          if (!repository || !sha || !tag || !token) {
-            throw new Error("Missing required GitHub Actions context to check release workflow status.");
+          const missingContext = [
+            repository ? null : "GITHUB_REPOSITORY",
+            sha ? null : "GITHUB_SHA",
+            token ? null : "GITHUB_TOKEN",
+          ].filter(Boolean);
+          if (missingContext.length > 0) {
+            throw new Error(
+              `Missing required GitHub Actions context: ${missingContext.join(", ")}.`,
+            );
           }
 
           const [owner, repo] = repository.split("/");
@@ -51,10 +59,19 @@ jobs:
             `https://api.github.com/repos/${owner}/${repo}/actions/workflows/release.yml/runs`,
           );
           url.searchParams.set("event", "push");
-          url.searchParams.set("head_sha", sha);
-          url.searchParams.set("per_page", "30");
+          url.searchParams.set("per_page", "100");
+          const parseRunTime = (value) => {
+            const parsed = Date.parse(value ?? "");
+            return Number.isNaN(parsed) ? 0 : parsed;
+          };
 
           while (true) {
+            if (Date.now() > deadline) {
+              throw new Error(
+                `Timed out waiting for release workflow completion for tag ${tagLabel} at ${sha}.`,
+              );
+            }
+
             const response = await fetch(url, {
               headers: {
                 Accept: "application/vnd.github+json",
@@ -67,31 +84,28 @@ jobs:
             }
 
             const payload = await response.json();
-            const runs = (payload.workflow_runs ?? []).filter((run) => run.name === "release");
+            const runs = (payload.workflow_runs ?? [])
+              .filter((run) => run.head_sha === sha)
+              .slice()
+              .sort((left, right) => {
+                const leftTime = parseRunTime(left.run_started_at ?? left.created_at);
+                const rightTime = parseRunTime(right.run_started_at ?? right.created_at);
+                return rightTime - leftTime;
+              });
             if (runs.length === 0) {
-              if (Date.now() > deadline) {
-                throw new Error(
-                  `Timed out waiting for release workflow run for tag ${tag} at ${sha}.`,
-                );
-              }
               await new Promise((resolve) => setTimeout(resolve, pollMs));
               continue;
             }
 
             const releaseRun = runs[0];
             if (releaseRun.status !== "completed") {
-              if (Date.now() > deadline) {
-                throw new Error(
-                  `Timed out waiting for release workflow completion for tag ${tag} at ${sha}.`,
-                );
-              }
               await new Promise((resolve) => setTimeout(resolve, pollMs));
               continue;
             }
 
             if (releaseRun.conclusion !== "success") {
               throw new Error(
-                `Release workflow ${releaseRun.id} for tag ${tag} concluded ${releaseRun.conclusion}.`,
+                `Release workflow ${releaseRun.id} for tag ${tagLabel} concluded ${releaseRun.conclusion}.`,
               );
             }
 

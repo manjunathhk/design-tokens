@@ -20,8 +20,8 @@ describe("pages workflow release gating", () => {
     expect(workflow).toContain('const sha = process.env.GITHUB_SHA ?? "";');
     expect(workflow).toContain('const tag = process.env.GITHUB_REF_NAME ?? "";');
     expect(workflow).toContain("/actions/workflows/release.yml/runs");
-    expect(workflow).toContain('url.searchParams.set("head_sha", sha);');
     expect(workflow).toContain('url.searchParams.set("event", "push");');
+    expect(workflow).toContain(".filter((run) => run.head_sha === sha)");
     expect(workflow).toContain('if (releaseRun.conclusion !== "success") {');
   });
 
