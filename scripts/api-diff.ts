@@ -47,7 +47,10 @@ export function cssValueMap(css: string): Record<string, string> {
 export function jsonValueMap(json: TokensJson): Record<string, string | number> {
   return Object.fromEntries(
     JSON_GROUPS.flatMap((group) =>
-      Object.entries(json[group]).map(([key, value]) => [`${group}.${key}`, value as string | number]),
+      Object.entries(json[group]).map(([key, value]) => [
+        `${group}.${key}`,
+        value as string | number,
+      ]),
     ),
   );
 }
@@ -69,16 +72,35 @@ export function jsonNames(json: TokensJson): string[] {
 
 export function parseVersion(version: string): { major: number; minor: number; patch: number } {
   const normalized = version.trim().replace(/^v/, "").split("-")[0].split("+")[0];
-  const [major, minor, patch] = normalized.split(".").map((part) => Number.parseInt(part, 10));
+  const parts = normalized.split(".");
+  if (parts.length !== 3) {
+    throw new Error(
+      `Invalid version format: ${version}. Expected X.Y.Z, with optional prerelease.`,
+    );
+  }
+  const [major, minor, patch] = parts.map((part) => Number.parseInt(part, 10));
   if ([major, minor, patch].some((value) => Number.isNaN(value))) {
-    throw new Error(`Invalid version format: ${version}. Expected X.Y.Z, with optional prerelease.`);
+    throw new Error(
+      `Invalid version format: ${version}. Expected X.Y.Z, with optional prerelease.`,
+    );
   }
   return { major, minor, patch };
 }
 
-function versionAtLeast(localVersion: string, publishedVersion: string, minimum: "minor" | "major") {
-  const local = parseVersion(localVersion);
-  const published = parseVersion(publishedVersion);
+const major = (version: string) => parseVersion(version).major;
+
+function bumpLevel(version: string) {
+  const parsed = parseVersion(version);
+  return { major: parsed.major, minor: parsed.minor, patch: parsed.patch };
+}
+
+function versionAtLeast(
+  localVersion: string,
+  publishedVersion: string,
+  minimum: "minor" | "major",
+) {
+  const local = bumpLevel(localVersion);
+  const published = bumpLevel(publishedVersion);
   if (local.major > published.major) return true;
   if (local.major < published.major) return false;
   if (minimum === "major") return false;
@@ -115,7 +137,9 @@ export function diffValues(
   published: { version: string; values: Record<string, string | number> },
   local: { version: string; values: Record<string, string | number> },
 ): ValueDiff {
-  const names = [...new Set([...Object.keys(published.values), ...Object.keys(local.values)])].sort();
+  const names = [
+    ...new Set([...Object.keys(published.values), ...Object.keys(local.values)]),
+  ].sort();
   const changed = names.filter((name) => {
     if (!(name in published.values) || !(name in local.values)) return false;
     return published.values[name] !== local.values[name];
@@ -194,7 +218,9 @@ export function diffStylelintConfig(
   published: { version: string; config: string },
   local: { version: string; config: string },
 ): StylelintDiff {
-  const publishedConfig = parseStylelintConfig(published.config) as { rules?: Record<string, unknown> };
+  const publishedConfig = parseStylelintConfig(published.config) as {
+    rules?: Record<string, unknown>;
+  };
   const localConfig = parseStylelintConfig(local.config) as { rules?: Record<string, unknown> };
   const publishedRules = publishedConfig.rules ?? {};
   const localRules = localConfig.rules ?? {};
@@ -256,8 +282,14 @@ export function readFromTarball(tgz: Buffer, path: string): string | undefined {
 
 async function main(): Promise<void> {
   const local = JSON.parse(readFileSync("package.json", "utf8")) as { version: string };
-  const localNames = tokenNames(readFileSync(CSS_PATH, "utf8"));
-  const localJsonNames = jsonNames(JSON.parse(readFileSync(JSON_PATH, "utf8")) as TokensJson);
+  const localCss = readFileSync(CSS_PATH, "utf8");
+  const localNames = tokenNames(localCss);
+  const localCssValues = cssValueMap(localCss);
+  const localJsonRaw = readFileSync(JSON_PATH, "utf8");
+  const localJson = JSON.parse(localJsonRaw) as TokensJson;
+  const localJsonNames = jsonNames(localJson);
+  const localJsonValues = jsonValueMap(localJson);
+  const localStylelint = readFileSync(STYLELINT_PATH, "utf8");
 
   const res = await fetch(`${REGISTRY}/${PACKAGE.replace("/", "%2F")}`);
   if (res.status === 404) {
@@ -282,49 +314,104 @@ async function main(): Promise<void> {
   const css = readFromTarball(tarball, CSS_PATH);
   if (css === undefined) throw new Error(`${PACKAGE}@${latest} has no ${CSS_PATH}.`);
 
+  const publishedCssValues = cssValueMap(css);
   const cssDiff = diffNames(
     { version: latest, names: tokenNames(css) },
     { version: local.version, names: localNames },
   );
+  const cssValueDiff = diffValues(
+    { version: latest, values: publishedCssValues },
+    { version: local.version, values: localCssValues },
+  );
   console.log(
     `API diff (CSS) against ${PACKAGE}@${latest} (local ${local.version}): ` +
-      `${cssDiff.added.length} added, ${cssDiff.removed.length} removed.`,
+      `${cssDiff.added.length} added, ${cssDiff.removed.length} removed, ${cssValueDiff.changed.length} value changes.`,
   );
   for (const n of cssDiff.added) console.log(`  + ${n}`);
   for (const n of cssDiff.removed) console.log(`  - ${n}`);
+  for (const n of cssValueDiff.changed) console.log(`  ~ ${n}`);
 
   const publishedJsonRaw = readFromTarball(tarball, JSON_PATH);
   let jsonDiff: Diff = { removed: [], added: [], ok: true };
+  let jsonValueDiff: ValueDiff = { changed: [], ok: true };
   if (publishedJsonRaw === undefined) {
     console.log(
       `Notice: ${PACKAGE}@${latest} has no ${JSON_PATH} (published before it shipped); ` +
         `comparing CSS only.`,
     );
   } else {
+    const publishedJson = JSON.parse(publishedJsonRaw) as TokensJson;
     jsonDiff = diffNames(
-      { version: latest, names: jsonNames(JSON.parse(publishedJsonRaw) as TokensJson) },
+      { version: latest, names: jsonNames(publishedJson) },
       { version: local.version, names: localJsonNames },
+    );
+    jsonValueDiff = diffValues(
+      { version: latest, values: jsonValueMap(publishedJson) },
+      { version: local.version, values: localJsonValues },
     );
     console.log(
       `API diff (tokens.json) against ${PACKAGE}@${latest} (local ${local.version}): ` +
-        `${jsonDiff.added.length} added, ${jsonDiff.removed.length} removed.`,
+        `${jsonDiff.added.length} added, ${jsonDiff.removed.length} removed, ${jsonValueDiff.changed.length} value changes.`,
     );
     for (const n of jsonDiff.added) console.log(`  + ${n}`);
     for (const n of jsonDiff.removed) console.log(`  - ${n}`);
+    for (const n of jsonValueDiff.changed) console.log(`  ~ ${n}`);
+  }
+
+  const publishedStylelintRaw = readFromTarball(tarball, STYLELINT_PATH);
+  let stylelintDiff: StylelintDiff = { changes: [], ok: true };
+  if (publishedStylelintRaw === undefined) {
+    console.log(
+      `Notice: ${PACKAGE}@${latest} has no ${STYLELINT_PATH} (published before stylelint export shipped); ` +
+        `comparing only tokens.`,
+    );
+  } else {
+    stylelintDiff = diffStylelintConfig(
+      { version: latest, config: publishedStylelintRaw },
+      { version: local.version, config: localStylelint },
+    );
+    console.log(
+      `Stylelint diff against ${PACKAGE}@${latest} (local ${local.version}): ` +
+        `${stylelintDiff.changes.length} rule changes.`,
+    );
+    for (const change of stylelintDiff.changes) {
+      console.log(`  ${change.change} ${change.rule} (${change.required})`);
+    }
   }
 
   const errors: string[] = [];
   if (!cssDiff.ok) {
-    errors.push(`CSS custom properties: ${cssDiff.removed.join(", ")}.`);
+    errors.push(
+      `CSS custom properties: ${cssDiff.removed.join(", ") || "no removed names"}. ` +
+        `This requires a MAJOR bump or restoration.`,
+    );
+  }
+  if (!cssValueDiff.ok) {
+    errors.push(
+      `CSS values: ${cssValueDiff.changed.join(", ") || "no changed values"}. ` +
+        `This requires a MINOR bump or restoration.`,
+    );
   }
   if (!jsonDiff.ok) {
-    errors.push(`tokens.json keys: ${jsonDiff.removed.join(", ")}.`);
+    errors.push(
+      `tokens.json keys: ${jsonDiff.removed.join(", ") || "no removed keys"}. ` +
+        `This requires a MAJOR bump or restoration.`,
+    );
+  }
+  if (!jsonValueDiff.ok) {
+    errors.push(
+      `tokens.json values: ${jsonValueDiff.changed.join(", ") || "no changed values"}. ` +
+        `This requires a MINOR bump or restoration.`,
+    );
+  }
+  if (!stylelintDiff.ok) {
+    const detail = stylelintDiff.changes
+      .map((change) => `${change.rule} (${change.change}; ${change.required})`)
+      .join(", ");
+    errors.push(`Stylelint config: ${detail}. This requires the documented bump. `);
   }
   if (errors.length > 0) {
-    throw new Error(
-      `Removed or renamed since ${latest} — ${errors.join(" ")} ` +
-        `This is a breaking change: bump package.json to ${major(latest) + 1}.0.0 or restore them.`,
-    );
+    throw new Error(`Compatibility check failed: ${errors.join(" ")}`);
   }
 }
 

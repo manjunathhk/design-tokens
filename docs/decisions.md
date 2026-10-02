@@ -627,3 +627,28 @@ Rerun/competition behavior is explicit:
   tag if you need specimen republish.
 - Each pages run checks release success for only its own tag SHA, so one final
   tag cannot publish specimen content for another tag.
+
+## D45. API diff enforces token value and stylelint config bump policy
+
+2026-10-02. Issue #53. The release-policy validation is not just a naming
+check: it must also enforce the documented contract that value changes and
+new token additions are MINOR, while removals/renames remain MAJOR and the
+exported `@manjunathhk/design-tokens/stylelint` rules follow D36.
+
+The compatibility guard compares the local build against the npm `latest` tag,
+not a pre-release dist-tag, and treats same-version unchanged builds as a
+no-op. Prerelease-to-final and final-to-final comparisons are deliberate and
+accepted as equivalent when no actual API diff exists; a true change still
+requires the documented bump relative to the published baseline.
+
+Token comparisons cover both CSS custom-property names and their emitted
+values, and each JSON token path plus its value. For Stylelint, the exported
+config is treated as a narrow public contract: stricter rules (new bans or
+higher restriction) are MAJOR; looser rules are MINOR. This is checked by
+reading the generated `dist/stylelint.mjs` file directly, so it stays
+credential-free and testable without npm registry access.
+
+Docs or build-only changes are intentionally excluded from these bump checks;
+only token/API or lint-config deltas can fail them. The regression tests live
+in `test/api-diff.test.ts` and cover additions, value changes, removals,
+prerelease handling, and the stricter/looser stylelint rule cases.
