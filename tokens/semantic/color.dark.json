@@ -48,7 +48,7 @@
     "grid-line": {
       "$type": "color",
       "$description": "drafting-grid background lines",
-      "$value": "{color.white}",
+      "$value": "{color.navy.50}",
       "$extensions": {
         "in.manjunathhk": {
           "alpha": 0.04

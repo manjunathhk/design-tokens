@@ -20,9 +20,9 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
   --mk-color-text-muted: #5C6576;
   --mk-color-text-secondary: #3A4556;
   --mk-color-warning: #8C5300;
-  --mk-font-family-display: 'IBM Plex Sans Condensed', 'IBM Plex Sans', 'Arial Narrow', sans-serif;
-  --mk-font-family-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  --mk-font-family-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mk-font-family-display: Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --mk-font-family-mono: 'JetBrains Mono', SFMono-Regular, SFMono, Menlo, Consolas, 'Liberation Mono', monospace;
+  --mk-font-family-sans: Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --mk-font-letter-spacing-display: -0.028em;
   --mk-font-letter-spacing-heading: -0.022em;
   --mk-font-letter-spacing-label: 0.07em;
@@ -88,7 +88,7 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
     --mk-color-border-strong: #334052;
     --mk-color-danger: #FF8A7A;
     --mk-color-focus-ring: #8DB2F2;
-    --mk-color-grid-line: rgba(255, 255, 255, 0.04);
+    --mk-color-grid-line: rgba(231, 235, 241, 0.04);
     --mk-color-on-accent: #0B1422;
     --mk-color-success: #86C99A;
     --mk-color-surface: #18202B;
@@ -110,7 +110,7 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
   --mk-color-border-strong: #334052;
   --mk-color-danger: #FF8A7A;
   --mk-color-focus-ring: #8DB2F2;
-  --mk-color-grid-line: rgba(255, 255, 255, 0.04);
+  --mk-color-grid-line: rgba(231, 235, 241, 0.04);
   --mk-color-on-accent: #0B1422;
   --mk-color-success: #86C99A;
   --mk-color-surface: #18202B;
@@ -155,7 +155,7 @@ exports[`dist/tokens.json matches the snapshot 1`] = `
     "color.border-strong": "#334052",
     "color.danger": "#FF8A7A",
     "color.focus-ring": "#8DB2F2",
-    "color.grid-line": "rgba(255, 255, 255, 0.04)",
+    "color.grid-line": "rgba(231, 235, 241, 0.04)",
     "color.on-accent": "#0B1422",
     "color.success": "#86C99A",
     "color.surface": "#18202B",
@@ -165,9 +165,9 @@ exports[`dist/tokens.json matches the snapshot 1`] = `
     "color.warning": "#F0B860"
   },
   "shared": {
-    "font.family.display": "'IBM Plex Sans Condensed', 'IBM Plex Sans', 'Arial Narrow', sans-serif",
-    "font.family.mono": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
-    "font.family.sans": "'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif",
+    "font.family.display": "Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    "font.family.mono": "'JetBrains Mono', SFMono-Regular, SFMono, Menlo, Consolas, 'Liberation Mono', monospace",
+    "font.family.sans": "Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
     "font.letter-spacing.display": "-0.028em",
     "font.letter-spacing.heading": "-0.022em",
     "font.letter-spacing.label": "0.07em",
