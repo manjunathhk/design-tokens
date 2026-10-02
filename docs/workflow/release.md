@@ -186,7 +186,86 @@ this workflow is not the same as an agent handling an R2 or Cloudflare
 credential: `promote.yml` authenticates with its own repository secrets,
 exactly as it does when a human clicks the button in the Actions UI (D30).
 
-## 9. What's manual, always
+## 9. Staged portfolio and consumer rollout gate
+
+This repo is the package-side migration handoff. It documents the design system
+and release gate, but it does not claim the external apps and sites are already
+migrated. The rollout target remains the one portfolio-derived design across the
+portfolio and the current `/v1/` consumer ecosystem, with portfolio and
+`social-card` the only known targets in scope so far.
+
+### Known consumer inventory
+
+- Portfolio (`https://manjunathhk.in`) — adoption still required. Replace the
+  duplicated foundational variables and Google Fonts loading while preserving the
+  page structure and intended visual look.
+- Social-card consumer (`https://social-card.apps.manjunathhk.in`) — adoption
+  still required, with visual regression validation required before closing the
+  migration task.
+- All other apps/sites — not yet inventoried and not yet marked complete.
+
+The migration is complete for a consumer only after the shared token lookup and
+consumer-owned layout/components are both validated in situ. Package tests alone
+never prove a site is migrated.
+
+### Consumer verification checklist
+
+For each additional consumer, complete the following before calling the rollout
+ready:
+
+1. Confirm the site's current CSS variable and/or Google Fonts usage and map it
+   to the package's `--mk-*` token roles.
+2. Replace duplicated foundational variables and font loading with the package
+   versions without changing the content or page structure.
+3. Keep site composition and component structure in the consumer repository;
+   only the foundational styling layer moves to the shared package.
+4. Validate the page or card output in the real environment, including any
+   exported or rendered snapshots.
+5. For social-card specifically, check layout, text wrapping, and rendered/exported
+   card output when that output exists; do not assume the page and card renderers
+   share the same pipeline.
+6. If a site needs a temporary dependency pin, verify the actual version first
+   and avoid stopping the site by default or changing its dependency/link without
+   explicit intent.
+7. For preview or pinned RC testing, confirm the exact consumer version in use,
+   validate the shared CSS against the preview or pinned URL in a non-production
+   path, and only pin temporarily if the site owners explicitly approve it.
+8. Record the migration status in the consumer issue/PR rather than treating the
+   package-only docs as proof of site completion.
+
+### Release-readiness gate for /v1/
+
+A `/v1/` rollout is only ready after the owner sign-off and the release guards
+for the package are all in place:
+
+- owner visual sign-off from the portfolio adoption task (issue #62);
+- Windows support checks from issue #54;
+- version-policy checks from issue #53;
+- rollback/alias safety from issues #50, #51 and #52;
+- CDN verification from issue #55;
+- specimen sequencing from issue #56.
+
+These gates are release-readiness requirements for the CDN alias and the wider
+migration rollout, but they do not block writing the migration docs in this PR.
+
+### Versioning and human-only release boundaries
+
+Version classification still follows the package contract: adding a token or
+changing a value is MINOR when public compatibility remains intact, while a
+public API removal or rename is MAJOR. The version used for the release must be
+validated against the actual published package state at release time rather than
+assuming the next number.
+
+The human-only boundaries are unchanged:
+
+- a person pushes the rc/final tag;
+- a person runs npm publish if needed through the workflow path;
+- no agent directly handles Cloudflare/R2 credentials or writes to the CDN.
+
+This issue prepares the migration handoff and rollout checklist only. Any actual
+release, consumer implementation, or deployment remains a separate explicit task.
+
+## 10. What's manual, always
 
 Per `AGENTS.md`, three things are never automated and never done by an
 agent, whatever else drives the rest of this procedure:

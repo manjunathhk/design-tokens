@@ -627,3 +627,38 @@ Rerun/competition behavior is explicit:
   tag if you need specimen republish.
 - Each pages run checks release success for only its own tag SHA, so one final
   tag cannot publish specimen content for another tag.
+
+## D45. Portfolio rollout is package-side migration handoff, not site completion
+
+2026-10-02. Issue #63. This repository owns the shared package-level design
+contract but not the final migration or deployment status of every external site.
+The goal remains a single portfolio-derived design across all apps and sites,
+but the package docs and release gate only cover the shared foundations and the
+versioned rollout path; they do not claim a consumer is migrated just because the
+package is updated.
+
+The approved rollout decisions for this handoff are:
+
+- Portfolio adoption is still required, with duplicated foundational variables
+  and Google Fonts loading replaced while preserving the page structure and
+  intended look.
+- Social-card adoption is still required, but visual regression validation is
+  mandatory before the migration is considered complete; layout, text wrapping,
+  and rendered/exported card output must be checked when that output exists.
+- No other app/site is marked complete unless it is specifically inventoried and
+  validated; the package does not claim a complete portfolio-wide rollout from
+  package tests alone.
+- A consumer rollout is considered ready only after the site-specific migration
+  checklist is completed, the shared package variant is validated in the real
+  environment, and any temporary version pin or dependency link change is
+  verified intentionally rather than auto-applied.
+- The package remains the release-readiness gate for `/v1/` only once the
+  owner visual sign-off, Windows support, version policy, rollback/alias safety,
+  CDN checks and specimen sequencing gates are all satisfied. These are required
+  before the design system is rolled out through the alias, but they do not
+  block writing the migration docs in the same PR.
+
+This decision documents the migration handoff as a separate consumer task from
+any actual release, implementation, or deployment, in line with the human-only
+publish and tag boundaries already captured in AGENTS.md and the release
+workflow.
