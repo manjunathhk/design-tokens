@@ -1,6 +1,10 @@
 /**
  * Fails if an emitted token name was removed or renamed since the latest
  * published version, unless package.json has a higher MAJOR version.
+ *
+ * For compatibility checks, the baseline is the npm `latest` dist tag. That
+ * intentionally excludes `next` pre-releases (D20); same-version unchanged
+ * builds are allowed to compare equal and be treated as a no-op.
  */
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
@@ -10,11 +14,42 @@ const PACKAGE = "@manjunathhk/design-tokens";
 const REGISTRY = "https://registry.npmjs.org";
 const CSS_PATH = "dist/tokens.css";
 const JSON_PATH = "dist/tokens.json";
+const STYLELINT_PATH = "dist/stylelint.mjs";
 const JSON_GROUPS = ["light", "dark", "shared", "breakpoints"] as const;
+const KNOWN_COLOR_FUNCTIONS = [
+  "rgb",
+  "rgba",
+  "hsl",
+  "hsla",
+  "hwb",
+  "lab",
+  "lch",
+  "oklab",
+  "oklch",
+  "color",
+  "color-mix",
+] as const;
 
 /** Custom property names declared in a stylesheet, sorted. */
 export function tokenNames(css: string): string[] {
   return [...new Set([...css.matchAll(/(--[^\s:;]+)\s*:/g)].map((m) => m[1] ?? ""))].sort();
+}
+
+export function cssValueMap(css: string): Record<string, string> {
+  return Object.fromEntries(
+    [...css.matchAll(/(--[^\s:;]+)\s*:\s*([^;]+);/g)].map((match) => [
+      match[1] ?? "",
+      (match[2] ?? "").trim(),
+    ]),
+  );
+}
+
+export function jsonValueMap(json: TokensJson): Record<string, string | number> {
+  return Object.fromEntries(
+    JSON_GROUPS.flatMap((group) =>
+      Object.entries(json[group]).map(([key, value]) => [`${group}.${key}`, value as string | number]),
+    ),
+  );
 }
 
 export interface TokensJson {
@@ -32,7 +67,23 @@ export function jsonNames(json: TokensJson): string[] {
   ).sort();
 }
 
-const major = (version: string) => Number(version.split(".")[0]);
+export function parseVersion(version: string): { major: number; minor: number; patch: number } {
+  const normalized = version.trim().replace(/^v/, "").split("-")[0].split("+")[0];
+  const [major, minor, patch] = normalized.split(".").map((part) => Number.parseInt(part, 10));
+  if ([major, minor, patch].some((value) => Number.isNaN(value))) {
+    throw new Error(`Invalid version format: ${version}. Expected X.Y.Z, with optional prerelease.`);
+  }
+  return { major, minor, patch };
+}
+
+function versionAtLeast(localVersion: string, publishedVersion: string, minimum: "minor" | "major") {
+  const local = parseVersion(localVersion);
+  const published = parseVersion(publishedVersion);
+  if (local.major > published.major) return true;
+  if (local.major < published.major) return false;
+  if (minimum === "major") return false;
+  return local.minor > published.minor;
+}
 
 export interface Diff {
   removed: string[];
@@ -48,11 +99,135 @@ export function diffNames(
   const publishedSet = new Set(published.names);
   const removed = published.names.filter((n) => !localSet.has(n));
   const added = local.names.filter((n) => !publishedSet.has(n));
+  const ok =
+    removed.length === 0
+      ? added.length === 0 || versionAtLeast(local.version, published.version, "minor")
+      : versionAtLeast(local.version, published.version, "major");
+  return { removed, added, ok };
+}
+
+export interface ValueDiff {
+  changed: string[];
+  ok: boolean;
+}
+
+export function diffValues(
+  published: { version: string; values: Record<string, string | number> },
+  local: { version: string; values: Record<string, string | number> },
+): ValueDiff {
+  const names = [...new Set([...Object.keys(published.values), ...Object.keys(local.values)])].sort();
+  const changed = names.filter((name) => {
+    if (!(name in published.values) || !(name in local.values)) return false;
+    return published.values[name] !== local.values[name];
+  });
   return {
-    removed,
-    added,
-    ok: removed.length === 0 || major(local.version) > major(published.version),
+    changed,
+    ok: changed.length === 0 || versionAtLeast(local.version, published.version, "minor"),
   };
+}
+
+export interface StylelintRuleChange {
+  rule: string;
+  change: "stricter" | "looser";
+  required: "MAJOR" | "MINOR";
+}
+
+export interface StylelintDiff {
+  changes: StylelintRuleChange[];
+  ok: boolean;
+}
+
+function parseStylelintConfig(raw: string): Record<string, unknown> {
+  const match = raw.match(/export\s+default\s+({[\s\S]*})\s*;?\s*$/m);
+  if (!match) {
+    throw new Error("Expected dist/stylelint.mjs to export a default config object.");
+  }
+  const objectLiteral = match[1];
+  return Function(`"use strict"; return (${objectLiteral});`)() as Record<string, unknown>;
+}
+
+function colorFunctionSet(value: unknown): Set<string> {
+  const patterns = Array.isArray(value) ? value : [value];
+  const matches = new Set<string>();
+
+  for (const entry of patterns) {
+    const text = typeof entry === "string" ? entry : String(entry ?? "");
+    if (text === "") continue;
+    const regexMatch = text.match(/^\/(.*)\/([a-z]*)$/i);
+    if (!regexMatch) {
+      const normalized = text.trim().toLowerCase();
+      if (normalized) matches.add(normalized);
+      continue;
+    }
+    const [, pattern, flags] = regexMatch;
+    const regex = new RegExp(pattern, flags);
+    for (const name of KNOWN_COLOR_FUNCTIONS) {
+      if (regex.test(name)) matches.add(name);
+    }
+  }
+  return matches;
+}
+
+function ruleStrictness(rule: string, value: unknown): number | undefined {
+  if (rule === "color-no-hex") return value === true ? 1 : 0;
+  if (rule === "color-named") {
+    switch (value) {
+      case "never":
+        return 4;
+      case "never-where-possible":
+        return 3;
+      case "always-where-possible":
+        return 2;
+      case "always":
+        return 1;
+      default:
+        return undefined;
+    }
+  }
+  if (rule === "function-disallowed-list") {
+    return colorFunctionSet(value).size;
+  }
+  return undefined;
+}
+
+export function diffStylelintConfig(
+  published: { version: string; config: string },
+  local: { version: string; config: string },
+): StylelintDiff {
+  const publishedConfig = parseStylelintConfig(published.config) as { rules?: Record<string, unknown> };
+  const localConfig = parseStylelintConfig(local.config) as { rules?: Record<string, unknown> };
+  const publishedRules = publishedConfig.rules ?? {};
+  const localRules = localConfig.rules ?? {};
+  const rules = new Set([...Object.keys(publishedRules), ...Object.keys(localRules)]);
+  const changes: StylelintRuleChange[] = [];
+
+  for (const rule of [...rules].sort()) {
+    const prev = publishedRules[rule];
+    const current = localRules[rule];
+    if (prev === current) continue;
+
+    const previousStrictness = ruleStrictness(rule, prev);
+    const currentStrictness = ruleStrictness(rule, current);
+    if (previousStrictness === undefined || currentStrictness === undefined) {
+      continue;
+    }
+
+    if (currentStrictness > previousStrictness) {
+      changes.push({ rule, change: "stricter", required: "MAJOR" });
+    } else if (currentStrictness < previousStrictness) {
+      changes.push({ rule, change: "looser", required: "MINOR" });
+    }
+  }
+
+  const ok =
+    changes.length === 0 ||
+    changes.every((change) =>
+      change.required === "MAJOR"
+        ? versionAtLeast(local.version, published.version, "major")
+        : versionAtLeast(local.version, published.version, "minor"),
+    );
+
+  return { changes, ok };
 }
 
 /** Reads one file from an npm tarball (gzipped ustar). */
