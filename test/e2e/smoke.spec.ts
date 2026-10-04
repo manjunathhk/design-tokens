@@ -277,12 +277,13 @@ test("without CORS header, cross-origin fonts fail to load", async ({ page }) =>
     );
 
     // Without CORS, no self-hosted Inter or JetBrains Mono font should be in loaded state.
-    const allowed = loadedFamilies.filter(
+    const selfHosted = loadedFamilies.filter(
       (f) => f.includes("Inter") || f.includes("JetBrains Mono"),
     );
-    expect(allowed, "Inter and JetBrains Mono fonts should not load without CORS headers").toEqual(
-      [],
-    );
+    expect(
+      selfHosted,
+      "Inter and JetBrains Mono fonts should not load without CORS headers",
+    ).toEqual([]);
   } finally {
     await stopServer(noCorsPageServer);
   }
