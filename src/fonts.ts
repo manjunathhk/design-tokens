@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { banner } from "./css.js";
 
@@ -157,3 +157,13 @@ export function fontOutput(version: string): { body: string; css: string } {
     css: `${banner(version)}\n${body}\n`,
   };
 }
+
+/**
+ * Replace each relative font url() with a base64 data URI read from distDir,
+ * so the specimen is one self-contained file (D34, D50).
+ */
+export const inlineFontUrls = (css: string, distDir: string): string =>
+  css.replace(/url\("(fonts\/[^"]+\.woff2)"\)/g, (_match, file: string) => {
+    const data = readFileSync(join(distDir, file)).toString("base64");
+    return `url("data:font/woff2;base64,${data}")`;
+  });

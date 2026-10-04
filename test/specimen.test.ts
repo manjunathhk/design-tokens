@@ -44,4 +44,38 @@ describe("specimen page", () => {
     expect(html).toContain("color.accent");
     expect(html).toContain(String(tokens.shared["shadow.raised"]));
   });
+
+  it("embeds the generated foundation rather than a hardcoded approximation", () => {
+    const index = read("dist/index.css");
+    const base = read("src/base.css");
+    const tokensCss = read("dist/tokens.css");
+    // Every :root / dark custom-property block and the whole base come through verbatim.
+    expect(html).toContain(base);
+    expect(html).toContain(tokensCss.slice(tokensCss.indexOf(":root {")));
+    // index.css minus font URLs is a prefix-compatible subset of what the page embeds.
+    const withoutFonts = (css: string) => css.replace(/url\("[^"]+"\)/g, "url()");
+    const indexBody = withoutFonts(index).split("\n").slice(1).join("\n").trim();
+    expect(withoutFonts(html)).toContain(indexBody);
+  });
+
+  it("is self-contained: fonts are inlined and no relative font URL remains", () => {
+    expect(html).toContain('url("data:font/woff2;base64,');
+    expect(/url\("fonts\//.test(html), "relative font url() remains").toBe(false);
+    expect(/<(?:link|script|img)\b[^>]*\b(?:href|src)=/.test(html), "external resource tag").toBe(
+      false,
+    );
+  });
+
+  it("has no stale IBM Plex or Paper & Denim presentation copy", () => {
+    const visible = html.replace(/<style>[\s\S]*?<\/style>/, "");
+    expect(visible).not.toMatch(/IBM Plex|Paper (?:&|&amp;) Denim/i);
+  });
+
+  it("demonstrates the Inter and JetBrains Mono families and the weights", () => {
+    expect(html).toContain("<h2>Typography</h2>");
+    expect(html).toContain("font.family.mono");
+    expect(html).toContain("JetBrains Mono");
+    for (const weight of ["regular 400", "medium 500", "semibold 600", "bold 700"])
+      expect(html).toContain(weight);
+  });
 });

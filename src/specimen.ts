@@ -1,4 +1,3 @@
-import { banner } from "./css.js";
 import { measureContrast, type ContrastResult } from "./contrast.js";
 import { MODES, type Mode, type Token, type TokenSet } from "./tokens.js";
 
@@ -17,28 +16,6 @@ const tokenSection = (tokens: Token[], prefix: string) =>
   tokens
     .filter((token) => token.path.startsWith(prefix))
     .sort((a, b) => a.path.localeCompare(b.path, "en"));
-
-const declarations = (tokens: Token[], indent: string) =>
-  tokens.map((token) => `${indent}--${token.name}: ${token.value};`).join("\n");
-
-function tokenRules(set: TokenSet): string {
-  return `:root {
-${declarations([...set.modes.light, ...set.shared], "  ")}
-  color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-${declarations(set.modes.dark, "    ")}
-    color-scheme: dark;
-  }
-}
-
-:root[data-theme="dark"] {
-${declarations(set.modes.dark, "  ")}
-  color-scheme: dark;
-}`;
-}
 
 const modeTitle = (mode: Mode) => mode[0]?.toUpperCase() + mode.slice(1);
 
@@ -74,6 +51,14 @@ const typeRows = (set: TokenSet) =>
     </tr>`,
   );
 
+const weightSamples = (set: TokenSet) =>
+  tokenSection(set.shared, "font.weight.")
+    .map(
+      (token) =>
+        `<span style="font-weight: ${escapeHtml(String(token.value))};">${escapeHtml(token.path.replace("font.weight.", ""))} ${escapeHtml(String(token.value))}</span> &middot; `,
+    )
+    .join("");
+
 const spacingRows = (set: TokenSet) =>
   tokenSection(set.shared, "spacing.").map(
     (token) => `<tr>
@@ -101,7 +86,12 @@ const motionRows = (set: TokenSet) =>
     </tr>`,
   );
 
-export function specimenHtml(set: TokenSet): string {
+/**
+ * `foundation` is the generated index.css (fonts, tokens, base) with font URLs
+ * inlined, so the page renders exactly what consumers get. Only layout rules
+ * for the specimen itself are written here, and they use var(--mk-*) only.
+ */
+export function specimenHtml(set: TokenSet, foundation: string): string {
   const shadow = tokenValue(set.shared, "shadow.raised");
   const major = set.version.split(".")[0] ?? "1";
   const contrast = measureContrast(set);
@@ -112,26 +102,28 @@ export function specimenHtml(set: TokenSet): string {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>@manjunathhk/design-tokens specimen</title>
   <style>
-${banner(set.version)}
-${tokenRules(set)}
-:root { font-family: var(--mk-font-family-sans); }
-body { margin: 0; padding: 2rem; background: var(--mk-color-bg); color: var(--mk-color-text); }
-h1, h2, h3 { margin-top: 0; font-family: var(--mk-font-family-display); }
-main { display: grid; gap: 2rem; max-width: 80rem; margin: 0 auto; }
+${foundation}
+body { padding: var(--mk-spacing-8); }
+h1 { font-size: var(--mk-font-size-2xl); }
+h2 { font-size: var(--mk-font-size-xl); }
+h3 { font-size: var(--mk-font-size-lg); }
+.weights, .family-sample { margin: 0; }
+.mono-sample { font-family: var(--mk-font-family-mono); }
+main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; max-width: 80rem; margin: 0 auto; }
 section { background: var(--mk-color-surface); border: 1px solid var(--mk-color-border); border-radius: var(--mk-radius-lg); padding: 1.25rem; }
-.stack { display: grid; gap: 1rem; }
-.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); }
-table { width: 100%; border-collapse: collapse; }
+.stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr)); }
+table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
 th, td { border-bottom: 1px solid var(--mk-color-border); text-align: left; padding: 0.45rem; vertical-align: middle; }
-code, pre { font-family: var(--mk-font-family-mono); font-size: var(--mk-font-size-sm); }
-pre { margin: 0; white-space: pre-wrap; padding: 0.75rem; border-radius: var(--mk-radius-md); background: var(--mk-color-bg-subtle); }
+code, pre { font-size: var(--mk-font-size-sm); }
+pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; padding: 0.75rem; border-radius: var(--mk-radius-md); background: var(--mk-color-bg-subtle); }
 .swatch { display: inline-block; width: 3rem; height: 1.5rem; border: 1px solid var(--mk-color-border); border-radius: var(--mk-radius-sm); }
 .spacing-sample { display: inline-block; height: 1rem; background: var(--mk-color-accent); border-radius: var(--mk-radius-pill); }
 .radius-sample { display: inline-block; width: 4rem; height: 2rem; border: 1px solid var(--mk-color-border-control); background: var(--mk-color-bg-subtle); }
 .motion-sample { display: inline-block; width: 4rem; height: 1rem; border-radius: var(--mk-radius-pill); background: var(--mk-color-accent); }
 .motion-sample:hover { transform: translateX(1rem); }
-.preview-card { padding: 1rem; border-radius: var(--mk-radius-lg); border: 1px solid var(--mk-color-border); box-shadow: ${shadow}; }
-.preview-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+.preview-card { background: var(--mk-color-surface); padding: 1rem; border-radius: var(--mk-radius-lg); border: 1px solid var(--mk-color-border); box-shadow: ${shadow}; }
+.preview-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr)); }
   </style>
 </head>
 <body>
@@ -174,6 +166,14 @@ pre { margin: 0; white-space: pre-wrap; padding: 0.75rem; border-radius: var(--m
     </section>
 
     <section class="stack">
+      <h2>Typography</h2>
+      <p class="family-sample"><code>font.family.sans</code> and <code>font.family.display</code>: Inter</p>
+      <p class="weights">${weightSamples(set)}<em>Regular italic</em></p>
+      <p class="mono-sample"><code>font.family.mono</code>: JetBrains Mono, 0123456789 {} [] =&gt; !== // fn()</p>
+      <p>Headings on this page use <code>font.size.2xl</code>, <code>xl</code> and <code>lg</code>; resize the window to see the <code>clamp()</code> scale respond.</p>
+    </section>
+
+    <section class="stack">
       <h2>Type scale</h2>
       <table>
         <thead><tr><th>Token</th><th>Value</th><th>Sample</th></tr></thead>
@@ -198,16 +198,16 @@ pre { margin: 0; white-space: pre-wrap; padding: 0.75rem; border-radius: var(--m
     </section>
 
     <section class="stack">
-      <h2>Shadow review (D7)</h2>
+      <h2>Shadow review (D7, D49)</h2>
       <p><code>shadow.raised</code> = <code>${shadow}</code></p>
       <div class="preview-grid">
         <div class="preview-card">
-          <strong>Light surface card</strong>
-          <p>Review raised depth in light mode.</p>
+          <strong>Raised card</strong>
+          <p>Uses <code>shadow.raised</code> on the active theme's surface.</p>
         </div>
         <div class="preview-card">
-          <strong>Dark surface card</strong>
-          <p>Review raised depth in dark mode using the same token.</p>
+          <strong>Raised card, second sample</strong>
+          <p>Switch the theme above to review the same shared shadow in dark mode.</p>
         </div>
       </div>
     </section>

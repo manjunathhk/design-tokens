@@ -14,13 +14,17 @@
  *     in four cases: OS light, OS dark, data-theme="light" under OS dark,
  *     data-theme="dark" under OS light.
  *   • document.fonts reports all Inter and JetBrains Mono faces as loaded.
+ *   • Computed families, weights, responsive sizes, focus ring, a clean network
+ *     (no failed or 4xx/5xx requests) and the self-contained specimen page, with
+ *     light/dark mobile/desktop screenshots written to test-results/screenshots.
  *   • Without the CORS header on the font responses, fonts fail to load
  *     (negative CORS check).
  */
 
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
-import { extname, join } from "node:path";
+import { extname, join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import type { Server } from "node:http";
 import { test, expect } from "@playwright/test";
 
@@ -574,4 +578,160 @@ test("consumer overrides: site rules placed before index.css override pseudo-ele
   expect(elBoxSizing).toBe("content-box");
   expect(beforeBoxSizing).toBe("content-box");
   expect(afterBoxSizing).toBe("content-box");
+});
+
+// ---------------------------------------------------------------------------
+// Portfolio foundation integration (issue #62)
+// ---------------------------------------------------------------------------
+
+const firstFamily = (stack: string) => (stack.split(",")[0] ?? "").trim().replace(/["']/g, "");
+
+test("fixture: no missing assets and Inter / JetBrains Mono are actually used and loaded", async ({
+  page,
+}) => {
+  const problems: string[] = [];
+  page.on("requestfailed", (r) => problems.push(`failed ${r.url()}`));
+  page.on("response", (r) => {
+    if (r.status() >= 400) problems.push(`${r.status()} ${r.url()}`);
+  });
+  await page.goto(`http://127.0.0.1:${PAGE_PORT}/`);
+  await page.waitForLoadState("networkidle");
+
+  const used = await page.evaluate(async () => {
+    const h = getComputedStyle(document.getElementById("heading") as Element);
+    const c = getComputedStyle(document.getElementById("code") as Element);
+    await Promise.all([
+      document.fonts.load(`${h.fontWeight} 1em ${h.fontFamily}`),
+      document.fonts.load(`${c.fontWeight} 1em ${c.fontFamily}`),
+    ]);
+    return {
+      body: getComputedStyle(document.body).fontFamily,
+      heading: h.fontFamily,
+      headingWeight: h.fontWeight,
+      code: c.fontFamily,
+      headingLoaded: document.fonts.check(`${h.fontWeight} 1em ${h.fontFamily}`, "Smoke"),
+      loaded: [...document.fonts]
+        .filter((f) => f.status === "loaded")
+        .map((f) => `${f.family.replace(/["']/g, "")} ${f.weight} ${f.style}`),
+    };
+  });
+
+  expect(firstFamily(used.body)).toBe("Inter");
+  expect(firstFamily(used.heading)).toBe("Inter");
+  expect(used.headingWeight).toBe("600");
+  expect(firstFamily(used.code)).toBe("JetBrains Mono");
+  expect(used.headingLoaded).toBe(true);
+  expect(used.loaded).toContain("Inter 600 normal");
+  expect(used.loaded).toContain("JetBrains Mono 400 normal");
+  expect(problems).toEqual([]);
+});
+
+test("fixture: font-size.2xl is responsive between narrow and wide viewports", async ({ page }) => {
+  const sizeAt = async (width: number) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto(`http://127.0.0.1:${PAGE_PORT}/`);
+    return page.evaluate(
+      () => getComputedStyle(document.getElementById("heading") as Element).fontSize,
+    );
+  };
+  // clamp(34px, 4vw, 64px): the floor at 375px, the ceiling at 1920px.
+  expect(await sizeAt(375)).toBe("34px");
+  expect(await sizeAt(1920)).toBe("64px");
+});
+
+for (const scheme of ["light", "dark"] as const) {
+  test(`focus ring is visible on links and buttons (${scheme})`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.goto(`http://127.0.0.1:${PAGE_PORT}/`);
+    const ring = tok(scheme, "color.focus-ring");
+
+    for (const id of ["link", "button"]) {
+      await page.keyboard.press("Tab");
+      const focus = await page.evaluate(() => {
+        const el = document.activeElement as Element;
+        const s = getComputedStyle(el);
+        return {
+          id: el.id,
+          style: s.outlineStyle,
+          width: s.outlineWidth,
+          offset: s.outlineOffset,
+          color: s.outlineColor,
+        };
+      });
+      expect(focus.id).toBe(id);
+      expect(focus.style).toBe("solid");
+      expect(focus.width).toBe("2px");
+      expect(focus.offset).toBe("2px");
+      expect(rgbToHex(focus.color)).toBe(ring);
+    }
+  });
+}
+
+test("specimen: self-contained, uses the generated foundation, renders in all four views", async ({
+  page,
+}, testInfo) => {
+  const external: string[] = [];
+  page.on("request", (r) => {
+    if (!r.url().startsWith("file:") && !r.url().startsWith("data:")) external.push(r.url());
+  });
+  const failed: string[] = [];
+  page.on("requestfailed", (r) => failed.push(r.url()));
+
+  const specimenUrl = pathToFileURL(resolve("docs/index.html")).href;
+  const views = [
+    { scheme: "light", width: 390, height: 844, name: "light-mobile" },
+    { scheme: "dark", width: 390, height: 844, name: "dark-mobile" },
+    { scheme: "light", width: 1440, height: 900, name: "light-desktop" },
+    { scheme: "dark", width: 1440, height: 900, name: "dark-desktop" },
+  ] as const;
+
+  for (const view of views) {
+    await page.emulateMedia({ colorScheme: view.scheme });
+    await page.setViewportSize({ width: view.width, height: view.height });
+    await page.goto(specimenUrl);
+    await page.evaluate(() => document.fonts.ready);
+
+    const state = await page.evaluate(async () => {
+      await document.fonts.load('600 1em "Inter"');
+      await document.fonts.load('400 1em "JetBrains Mono"');
+      const body = getComputedStyle(document.body);
+      return {
+        bg: body.backgroundColor,
+        color: body.color,
+        family: body.fontFamily,
+        h1: getComputedStyle(document.querySelector("h1") as Element).fontFamily,
+        scrollWidth: document.documentElement.scrollWidth,
+        innerWidth: window.innerWidth,
+        inter: document.fonts.check('600 1em "Inter"'),
+        mono: document.fonts.check('400 1em "JetBrains Mono"'),
+        loaded: [...document.fonts].filter((f) => f.status === "loaded").length,
+      };
+    });
+
+    expect(rgbToHex(state.bg), view.name).toBe(tok(view.scheme, "color.bg"));
+    expect(rgbToHex(state.color), view.name).toBe(tok(view.scheme, "color.text"));
+    expect(firstFamily(state.family), view.name).toBe("Inter");
+    expect(firstFamily(state.h1), view.name).toBe("Inter");
+    expect(state.inter && state.mono, `${view.name}: Inter and JetBrains Mono loaded`).toBe(true);
+    expect(state.loaded, view.name).toBeGreaterThan(0);
+    expect(state.scrollWidth, `${view.name}: no horizontal page scroll`).toBeLessThanOrEqual(
+      state.innerWidth,
+    );
+
+    await page.screenshot({
+      path: join("test-results", "screenshots", `${view.name}.png`),
+      fullPage: view.name.endsWith("mobile") ? false : true,
+    });
+  }
+
+  expect(external, "specimen must not fetch anything over the network").toEqual([]);
+  expect(failed).toEqual([]);
+
+  // Explicit overrides win over the OS preference on the specimen too.
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto(specimenUrl);
+  await page.locator('input[name="theme"][value="light"]').check();
+  const forced = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  expect(rgbToHex(forced)).toBe(LIGHT_BG);
+  testInfo.annotations.push({ type: "screenshots", description: "test-results/screenshots" });
 });

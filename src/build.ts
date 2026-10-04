@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { baseCss, indexCss, tokensCss, tokensScss } from "./css.js";
 import { tokensDts, tokensJson, tokensMjs } from "./data.js";
-import { copyFontAssets, fontOutput } from "./fonts.js";
+import { copyFontAssets, fontOutput, inlineFontUrls } from "./fonts.js";
 import { specimenHtml } from "./specimen.js";
 import { stylelintConfigDts, stylelintConfigMjs } from "./stylelint.js";
 import { loadTokens } from "./tokens.js";
@@ -26,5 +26,6 @@ const outputs: Record<string, string> = {
 };
 for (const [file, content] of Object.entries(outputs)) writeFileSync(`dist/${file}`, content);
 mkdirSync("docs", { recursive: true });
-writeFileSync("docs/index.html", specimenHtml(set));
+const foundation = indexCss(set, inlineFontUrls(fonts.body, "dist"), base);
+writeFileSync("docs/index.html", specimenHtml(set, foundation));
 console.log(`Built @manjunathhk/design-tokens v${set.version} into dist/`);

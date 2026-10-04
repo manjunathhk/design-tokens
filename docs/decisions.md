@@ -865,3 +865,26 @@ and the breakpoints, `grid-size` and z-index are untouched. No token, snapshot
 or dist change; no version bump. A later issue may change any of these values
 (MINOR) once the owner supplies exact portfolio declarations, including the
 easing curve and the light and dark shadows.
+
+## D50. Specimen embeds the generated foundation; screenshots are a CI artifact
+
+2026-10-04. Issue #62. The specimen had its own copy of the theme rules and
+hardcoded page styles, and never loaded a font, so it rendered system type, not
+Inter or JetBrains Mono. `docs/index.html` is now built from the same pieces as
+`dist/index.css` (fonts, tokens, `src/base.css`), with each font `url()`
+replaced by a base64 data URI, so it stays one self-contained file (D34: Pages
+publishes only that file) and fetches nothing. Its own rules only lay the page
+out and use `var(--mk-*)`. This costs about 280 KB of HTML and is never
+committed. `src/base.css` needed no change: it is already token-driven and
+zero-specificity (D23, D38), and heading and body defaults match D46.
+
+The smoke test now also checks computed families and weights, the responsive
+`font.size.2xl` clamp at 375px and 1920px, the focus ring in both modes, a
+fixture network with no failed or 4xx requests, and the specimen itself in
+light and dark at mobile and desktop widths (no network, fonts loaded, no
+horizontal scroll). The last check caught a real bug: the specimen overflowed
+at 390px (552px wide). `test/portfolio-foundation.test.ts` compares
+representative roles to the approved mapping: portfolio values where they pass
+contrast, `#56453F` where the owner approved the accessible deviation (D47).
+The `playwright` job uploads the four screenshots as the `specimen-screenshots`
+artifact for owner visual review; they are not committed.
