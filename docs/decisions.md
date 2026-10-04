@@ -806,3 +806,27 @@ recorded in this document. The final gate remains:
 
 Until then, D46 is the authoritative documentation of the approved direction, but
 it does not implement or publish new token values or generated assets.
+
+## D47. Portfolio colour palette implemented; light-mode roles use #56453F
+
+2026-10-04. Implements the palette half of D46 (issue #59; its earlier PR #74
+merged with an empty diff). Colours come from the owner's portfolio
+`_light.scss` / `_dark.scss`; the owner approved `#56453F` for the light-mode
+roles that otherwise fail the contrast contract. Primitives: cream, blush,
+tan, rose, copper, brown, espresso, plus red/green status stops.
+
+Light: `text`, `text-secondary`, `text-muted`, `accent`, `border-control`,
+`focus-ring`, `success` and `warning` are all `#56453F`; `on-accent` is
+`#F1F0E5`; `danger` is the portfolio's `#A93226`. `border` / `border-strong`
+are the portfolio's `#E4C7B8` / `#BAAB92` (decorative).
+
+Dark: portfolio values (`#C39E88` accent, `#2D2521` bg, `#3C332E` surface).
+`text-secondary` is `#BAAB92` and `text-muted` `#C5AA9B`. `border-control`
+and `border-strong` are `#A37764` (3.2:1 on surface). `danger` is the
+portfolio's `#EF9A9A`, as `#E57373` fails 4.5:1 on surface.
+
+Consequences: `color.accent` stays the accessible link/action role (D46's
+decorative-only reading is superseded for the light accent). Light-mode text
+hierarchy and status hues are flat by design; a darker distinct brown or
+green would need a further approved value. Token values change, names do
+not: MINOR, 1.2.0. Fonts and non-colour tokens are separate issues.
