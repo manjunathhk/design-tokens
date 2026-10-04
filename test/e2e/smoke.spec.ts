@@ -13,7 +13,7 @@
  *   • body background and body colour resolve to the values in dist/tokens.json
  *     in four cases: OS light, OS dark, data-theme="light" under OS dark,
  *     data-theme="dark" under OS light.
- *   • document.fonts reports all IBM Plex faces as loaded.
+ *   • document.fonts reports all Inter and JetBrains Mono faces as loaded.
  *   • Without the CORS header on the font responses, fonts fail to load
  *     (negative CORS check).
  */
@@ -214,9 +214,9 @@ test("data-theme=dark under OS light: resolves to dark tokens", async ({ page })
 // Font assertions
 // ---------------------------------------------------------------------------
 
-const EXPECTED_FACES = ["IBM Plex Sans", "IBM Plex Sans Condensed", "IBM Plex Mono"] as const;
+const EXPECTED_FACES = ["Inter", "JetBrains Mono"] as const;
 
-test("document.fonts reports all IBM Plex faces as loaded", async ({ page }) => {
+test("document.fonts reports all Inter and JetBrains Mono faces as loaded", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "light" });
   await page.goto(`http://127.0.0.1:${PAGE_PORT}/`);
   await page.waitForLoadState("networkidle");
@@ -224,9 +224,8 @@ test("document.fonts reports all IBM Plex faces as loaded", async ({ page }) => 
   // Explicitly request each family so the browser fetches the @font-face files.
   await page.evaluate(async () => {
     await Promise.all([
-      document.fonts.load('1em "IBM Plex Sans"'),
-      document.fonts.load('1em "IBM Plex Sans Condensed"'),
-      document.fonts.load('1em "IBM Plex Mono"'),
+      document.fonts.load('1em "Inter"'),
+      document.fonts.load('1em "JetBrains Mono"'),
     ]);
   });
 
@@ -268,9 +267,8 @@ test("without CORS header, cross-origin fonts fail to load", async ({ page }) =>
     // the font cannot be fetched; we catch any unexpected rejection defensively.
     await page.evaluate(async () => {
       await Promise.allSettled([
-        document.fonts.load('1em "IBM Plex Sans"'),
-        document.fonts.load('1em "IBM Plex Sans Condensed"'),
-        document.fonts.load('1em "IBM Plex Mono"'),
+        document.fonts.load('1em "Inter"'),
+        document.fonts.load('1em "JetBrains Mono"'),
       ]);
     });
 
@@ -278,9 +276,14 @@ test("without CORS header, cross-origin fonts fail to load", async ({ page }) =>
       [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family),
     );
 
-    // Without CORS, no IBM Plex font should be in loaded state.
-    const ibmPlex = loadedFamilies.filter((f) => f.replace(/['"]/g, "").startsWith("IBM Plex"));
-    expect(ibmPlex, "IBM Plex fonts should not load without CORS headers").toEqual([]);
+    // Without CORS, no self-hosted Inter or JetBrains Mono font should be in loaded state.
+    const selfHosted = loadedFamilies.filter(
+      (f) => f.includes("Inter") || f.includes("JetBrains Mono"),
+    );
+    expect(
+      selfHosted,
+      "Inter and JetBrains Mono fonts should not load without CORS headers",
+    ).toEqual([]);
   } finally {
     await stopServer(noCorsPageServer);
   }

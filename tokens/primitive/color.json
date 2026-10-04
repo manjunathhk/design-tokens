@@ -1,52 +1,78 @@
 {
   "color": {
     "$type": "color",
-    "white": { "$value": "#FFFFFF" },
-    "black": { "$value": "#000000" },
-    "paper": {
-      "$description": "Warm paper and sand neutrals used by the light theme.",
-      "50": { "$value": "#FBFAF7" },
-      "100": { "$value": "#F2F0EB" },
-      "200": { "$value": "#E8E5DE" },
-      "300": { "$value": "#D8D4CB" },
-      "400": { "$value": "#BFBAAF" },
-      "600": { "$value": "#87816F" }
+    "white": {
+      "$value": "#FFFFFF"
     },
-    "ink": {
-      "$description": "Ink greys used for text in the light theme.",
-      "500": { "$value": "#5C6576" },
-      "700": { "$value": "#3A4556" },
-      "900": { "$value": "#16202E" }
+    "black": {
+      "$value": "#000000"
     },
-    "navy": {
-      "$description": "Blue-grey scale used by the dark theme, lightest to darkest.",
-      "50": { "$value": "#E7EBF1" },
-      "200": { "$value": "#B3BCC9" },
-      "400": { "$value": "#8792A2" },
-      "500": { "$value": "#5E6D83" },
-      "700": { "$value": "#334052" },
-      "800": { "$value": "#242D3A" },
-      "900": { "$value": "#18202B" },
-      "925": { "$value": "#141A23" },
-      "950": { "$value": "#0F141B" },
-      "975": { "$value": "#0B1422" }
+    "cream": {
+      "$description": "Warm cream used for the light page background and dark-mode text.",
+      "100": {
+        "$value": "#F1F0E5"
+      }
     },
-    "denim": {
-      "$description": "Brand accent.",
-      "300": { "$value": "#8DB2F2" },
-      "600": { "$value": "#2A5AA8" }
+    "blush": {
+      "$description": "Pale blush tints used for light subtle backgrounds and hairlines.",
+      "200": {
+        "$value": "#EBD6CB"
+      },
+      "300": {
+        "$value": "#E4C7B8"
+      }
+    },
+    "tan": {
+      "$description": "Muted tan used for borders and dark-mode secondary text.",
+      "400": {
+        "$value": "#BAAB92"
+      }
+    },
+    "rose": {
+      "$description": "Dusty rose used for dark-mode muted text.",
+      "300": {
+        "$value": "#C5AA9B"
+      }
+    },
+    "copper": {
+      "$description": "Portfolio copper accents.",
+      "300": {
+        "$value": "#C39E88"
+      },
+      "500": {
+        "$value": "#A37764"
+      }
+    },
+    "brown": {
+      "$description": "Dark brown used for light-theme text, actions and controls.",
+      "700": {
+        "$value": "#56453F"
+      }
+    },
+    "espresso": {
+      "$description": "Warm dark browns used by the dark theme backgrounds and surfaces.",
+      "600": {
+        "$value": "#3C332E"
+      },
+      "800": {
+        "$value": "#2D2521"
+      },
+      "950": {
+        "$value": "#1F1A17"
+      }
     },
     "red": {
-      "300": { "$value": "#FF8A7A" },
-      "600": { "$value": "#B42318" }
+      "300": {
+        "$value": "#EF9A9A"
+      },
+      "700": {
+        "$value": "#A93226"
+      }
     },
     "green": {
-      "300": { "$value": "#86C99A" },
-      "700": { "$value": "#1F6B45" }
-    },
-    "amber": {
-      "300": { "$value": "#F0B860" },
-      "700": { "$value": "#8C5300" }
+      "300": {
+        "$value": "#34D399"
+      }
     }
   }
 }

@@ -806,3 +806,45 @@ recorded in this document. The final gate remains:
 
 Until then, D46 is the authoritative documentation of the approved direction, but
 it does not implement or publish new token values or generated assets.
+
+## D47. Portfolio colour palette implemented; light-mode roles use #56453F
+
+2026-10-04. Implements the palette half of D46 (issue #59; its earlier PR #74
+merged with an empty diff). Colours come from the owner's portfolio
+`_light.scss` / `_dark.scss`; the owner approved `#56453F` for the light-mode
+roles that otherwise fail the contrast contract. Primitives: cream, blush,
+tan, rose, copper, brown, espresso, plus red/green status stops.
+
+Light: `text`, `text-secondary`, `text-muted`, `accent`, `border-control`,
+`focus-ring`, `success` and `warning` are all `#56453F`; `on-accent` is
+`#F1F0E5`; `danger` is the portfolio's `#A93226`. `border` / `border-strong`
+are the portfolio's `#E4C7B8` / `#BAAB92` (decorative).
+
+Dark: portfolio values (`#C39E88` accent, `#2D2521` bg, `#3C332E` surface).
+`text-secondary` is `#BAAB92` and `text-muted` `#C5AA9B`. `border-control`
+and `border-strong` are `#A37764` (3.2:1 on surface). `danger` is the
+portfolio's `#EF9A9A`, as `#E57373` fails 4.5:1 on surface.
+
+Consequences: `color.accent` stays the accessible link/action role (D46's
+decorative-only reading is superseded for the light accent). Light-mode text
+hierarchy and status hues are flat by design; a darker distinct brown or
+green would need a further approved value. Token values change, names do
+not: MINOR, 1.2.0. Fonts and non-colour tokens are separate issues.
+
+## D48. Inter and JetBrains Mono replace IBM Plex as the self-hosted fonts
+
+2026-10-04. Implements the font half of D46 (issue #60), taking the work from
+PR #75. `font.family.sans` and `display` resolve to Inter stacks and `mono` to
+JetBrains Mono; token names are unchanged, so this is a value change (MINOR,
+shipped with D47 in 1.2.0). Font binaries come from the pinned
+`@fontsource/inter` and `@fontsource/jetbrains-mono` devDependencies (OFL,
+licence texts copied into dist, lockfile committed), Latin subset, `swap`.
+
+Faces: Inter 400/500/600/700 and 400 italic; JetBrains Mono 400/500/700 and
+400 italic. The IBM Plex and Plex Condensed faces are no longer built into
+`fonts.css`. Pinned older CDN versions keep them (D-immutability); a direct
+`/v1/fonts.css` consumer that named "IBM Plex" explicitly would fall back, but
+tokens consumers get the new families automatically. Inter 300 (D46) is not
+shipped because no token uses it; add it with a token that needs it.
+Previously IBM Plex-specific test mechanics (D25, D26) are superseded by the
+equivalent Inter/JetBrains Mono checks.

@@ -1,6 +1,6 @@
 {
   "name": "@manjunathhk/design-tokens",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Design tokens and a small opt-in base stylesheet shared by Manjunath's websites.",
   "license": "MIT",
   "author": "Manjunath Krishnasa",
@@ -64,9 +64,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@ibm/plex-mono": "2.5.0",
-    "@ibm/plex-sans": "1.1.0",
-    "@ibm/plex-sans-condensed": "2.0.0",
+    "@fontsource/inter": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
     "@playwright/test": "^1.63.0",
     "@types/node": "^24.13.6",
     "eslint": "^10.11.0",

@@ -3,47 +3,47 @@
     "bg": {
       "$type": "color",
       "$description": "page background",
-      "$value": "{color.navy.950}"
+      "$value": "{color.espresso.800}"
     },
     "bg-subtle": {
       "$type": "color",
       "$description": "alternate section background",
-      "$value": "{color.navy.925}"
+      "$value": "{color.espresso.950}"
     },
     "surface": {
       "$type": "color",
       "$description": "cards, panels, form fields",
-      "$value": "{color.navy.900}"
+      "$value": "{color.espresso.600}"
     },
     "text": {
       "$type": "color",
       "$description": "primary text, headings",
-      "$value": "{color.navy.50}"
+      "$value": "{color.cream.100}"
     },
     "text-secondary": {
       "$type": "color",
       "$description": "body copy on subtle backgrounds",
-      "$value": "{color.navy.200}"
+      "$value": "{color.tan.400}"
     },
     "text-muted": {
       "$type": "color",
       "$description": "labels, captions, metadata",
-      "$value": "{color.navy.400}"
+      "$value": "{color.rose.300}"
     },
     "border": {
       "$type": "color",
       "$description": "hairlines, dividers (decorative)",
-      "$value": "{color.navy.800}"
+      "$value": "{color.brown.700}"
     },
     "border-strong": {
       "$type": "color",
       "$description": "emphasised rules (decorative; not for control outlines)",
-      "$value": "{color.navy.700}"
+      "$value": "{color.copper.500}"
     },
     "border-control": {
       "$type": "color",
       "$description": "outlines of form controls and other UI that must be seen (3:1)",
-      "$value": "{color.navy.500}"
+      "$value": "{color.copper.500}"
     },
     "grid-line": {
       "$type": "color",
@@ -58,17 +58,17 @@
     "accent": {
       "$type": "color",
       "$description": "links, highlights, primary actions",
-      "$value": "{color.denim.300}"
+      "$value": "{color.copper.300}"
     },
     "on-accent": {
       "$type": "color",
       "$description": "text or icons on accent fills",
-      "$value": "{color.navy.975}"
+      "$value": "{color.espresso.800}"
     },
     "accent-subtle": {
       "$type": "color",
       "$description": "tinted backgrounds; accent at 13% alpha",
-      "$value": "{color.denim.300}",
+      "$value": "{color.copper.300}",
       "$extensions": {
         "in.manjunathhk": {
           "alpha": 0.13
@@ -88,12 +88,12 @@
     "warning": {
       "$type": "color",
       "$description": "warnings",
-      "$value": "{color.amber.300}"
+      "$value": "{color.tan.400}"
     },
     "focus-ring": {
       "$type": "color",
       "$description": "focus outline; same as accent",
-      "$value": "{color.denim.300}"
+      "$value": "{color.copper.300}"
     }
   }
 }
