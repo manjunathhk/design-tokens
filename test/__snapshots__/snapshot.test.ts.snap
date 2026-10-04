@@ -20,9 +20,9 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
   --mk-color-text-muted: #56453F;
   --mk-color-text-secondary: #56453F;
   --mk-color-warning: #56453F;
-  --mk-font-family-display: 'IBM Plex Sans Condensed', 'IBM Plex Sans', 'Arial Narrow', sans-serif;
-  --mk-font-family-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  --mk-font-family-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mk-font-family-display: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mk-font-family-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --mk-font-family-sans: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mk-font-letter-spacing-display: -0.028em;
   --mk-font-letter-spacing-heading: -0.022em;
   --mk-font-letter-spacing-label: 0.07em;
@@ -165,9 +165,9 @@ exports[`dist/tokens.json matches the snapshot 1`] = `
     "color.warning": "#BAAB92"
   },
   "shared": {
-    "font.family.display": "'IBM Plex Sans Condensed', 'IBM Plex Sans', 'Arial Narrow', sans-serif",
-    "font.family.mono": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
-    "font.family.sans": "'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif",
+    "font.family.display": "Inter, system-ui, -apple-system, 'Segoe UI', sans-serif",
+    "font.family.mono": "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+    "font.family.sans": "Inter, system-ui, -apple-system, 'Segoe UI', sans-serif",
     "font.letter-spacing.display": "-0.028em",
     "font.letter-spacing.heading": "-0.022em",
     "font.letter-spacing.label": "0.07em",

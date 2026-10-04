@@ -830,3 +830,21 @@ decorative-only reading is superseded for the light accent). Light-mode text
 hierarchy and status hues are flat by design; a darker distinct brown or
 green would need a further approved value. Token values change, names do
 not: MINOR, 1.2.0. Fonts and non-colour tokens are separate issues.
+
+## D48. Inter and JetBrains Mono replace IBM Plex as the self-hosted fonts
+
+2026-10-04. Implements the font half of D46 (issue #60), taking the work from
+PR #75. `font.family.sans` and `display` resolve to Inter stacks and `mono` to
+JetBrains Mono; token names are unchanged, so this is a value change (MINOR,
+shipped with D47 in 1.2.0). Font binaries come from the pinned
+`@fontsource/inter` and `@fontsource/jetbrains-mono` devDependencies (OFL,
+licence texts copied into dist, lockfile committed), Latin subset, `swap`.
+
+Faces: Inter 400/500/600/700 and 400 italic; JetBrains Mono 400/500/700 and
+400 italic. The IBM Plex and Plex Condensed faces are no longer built into
+`fonts.css`. Pinned older CDN versions keep them (D-immutability); a direct
+`/v1/fonts.css` consumer that named "IBM Plex" explicitly would fall back, but
+tokens consumers get the new families automatically. Inter 300 (D46) is not
+shipped because no token uses it; add it with a token that needs it.
+Previously IBM Plex-specific test mechanics (D25, D26) are superseded by the
+equivalent Inter/JetBrains Mono checks.
