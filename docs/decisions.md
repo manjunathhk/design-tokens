@@ -848,3 +848,20 @@ tokens consumers get the new families automatically. Inter 300 (D46) is not
 shipped because no token uses it; add it with a token that needs it.
 Previously IBM Plex-specific test mechanics (D25, D26) are superseded by the
 equivalent Inter/JetBrains Mono checks.
+
+## D49. Spacing, layout, radius, breakpoint, motion, shadow and z-index audited and retained
+
+2026-10-04. Issue #61. Owner decision: option B. The seven non-colour,
+non-typographic token files were audited against D46's mapping and no value
+changes. D46 lists every one of them as "retained current package values", and
+no exact source capture exists: the sandbox could not reach `manjunathhk.in`,
+and #61's own observations (1200px container, 0.25/0.5/1/1.5rem radii,
+150/250/350ms durations, `ease-in-out`) are unverified and do not map one to
+one onto our scale (four durations, 4/6/12/16px radii).
+
+Consequences: `layout.container-max` stays 1440px, the radius scale and
+`motion.*` keep their values, `shadow.raised` stays one shared value (D7, D27),
+and the breakpoints, `grid-size` and z-index are untouched. No token, snapshot
+or dist change; no version bump. A later issue may change any of these values
+(MINOR) once the owner supplies exact portfolio declarations, including the
+easing curve and the light and dark shadows.
