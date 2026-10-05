@@ -4,11 +4,51 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- _No unreleased changes yet._
+
+## [1.2.0] - 2026-10-05
+
+Token values change; no token is added, removed or renamed, so `@1` and
+`/v1/` consumers receive this automatically.
+
 ### Changed
 
-- Releases are one final `vX.Y.Z` tag; release candidates and the npm
+- Colour palette now follows the portfolio's light and dark themes (#59,
+  D47). 17 light and 16 dark colour values change. In light mode, `text`,
+  `text-secondary`, `text-muted`, `accent`, `border-control`, `focus-ring`,
+  `success` and `warning` all use `#56453F` so every pair passes the
+  contrast contract.
+- Fonts: Inter (`font.family.sans`, `display`) and JetBrains Mono
+  (`font.family.mono`) replace IBM Plex, self-hosted, Latin subset,
+  `font-display: swap` (#60, D48). `fonts.css` no longer declares any
+  IBM Plex face; a site that names "IBM Plex" directly instead of using the
+  tokens falls back to its next font. Pinned older CDN versions are
+  unchanged.
+
+### Fixed
+
+- `base.css`: the box-sizing reset and reduced-motion rules now also reach
+  `::before` and `::after`, still with the lowest specificity (#49, D38).
+
+### Release pipeline
+
+- One final `vX.Y.Z` tag per release; release candidates and the npm
   `next` dist-tag are retired. A failed release run can be rerun on the
   same tag (#82, D50).
+- CDN verification checks every font's CORS header and the Cache-Control
+  policy on every file (#55, D43).
+- The rollback workflow builds its manifest correctly (#50), accepts only
+  final versions (#51), and never writes the alias concurrently with a
+  release (#52).
+- The API diff enforces MINOR for value changes and the stylelint config
+  versioning policy (#53, D45).
+
+### Repository
+
+- Windows is a supported contributor environment (#54, D37).
+- Simplified: the specimen deploy is a job in `release.yml`, alias
+  promotion is one shared action, `docs/decisions.md` lists only the rules
+  in force, and the Copilot files are removed (#84, D51).
 
 ## [1.1.0] - 2026-09-25
 
