@@ -11,7 +11,13 @@ Token values change; no token is added, removed or renamed (MINOR).
 - Colour palette is now amber on warm off-white (light) and navy-black
   (dark), replacing the brown/copper palette (D47). Light mode has a real
   text hierarchy (`text`, `text-secondary`, `text-muted` are distinct), and
-  `border` is now a translucent tint in both modes.
+  `border` is now a translucent tint in both modes (#89).
+
+### Documentation
+
+- `docs/cdn.md`: the Cloudflare Cache Rule must set Browser TTL to
+  "Respect origin TTL"; left unset, Cloudflare serves the `/vMAJOR/` alias
+  with a 4-hour browser cache instead of 5 minutes (#87).
 
 ## [1.2.0] - 2026-10-05
 
