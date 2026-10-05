@@ -24,12 +24,12 @@ describe("upload manifest", () => {
       "tokens.mjs",
     ];
 
-    const manifest = uploadManifest(files, "1.2.3-rc.1");
+    const manifest = uploadManifest(files, "1.2.3");
     expect(manifest.major).toBe(1);
     expect(manifest.entries).toHaveLength(files.length);
 
     for (const entry of manifest.entries) {
-      expect(entry.pinnedKey).toBe(`v1.2.3-rc.1/${entry.path}`);
+      expect(entry.pinnedKey).toBe(`v1.2.3/${entry.path}`);
       expect(entry.aliasKey).toBe(`v1/${entry.path}`);
       expect(entry.pinnedCacheControl).toBe(PINNED_CACHE_CONTROL);
       expect(entry.aliasCacheControl).toBe(ALIAS_CACHE_CONTROL);

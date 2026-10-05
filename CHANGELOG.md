@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- _No unreleased changes yet._
+### Changed
+
+- Releases are one final `vX.Y.Z` tag; release candidates and the npm
+  `next` dist-tag are retired. A failed release run can be rerun on the
+  same tag (#82, D50).
 
 ## [1.1.0] - 2026-09-25
 

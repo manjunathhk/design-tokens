@@ -38,7 +38,11 @@ jobs:
           set -euo pipefail
           VERSION="${GITHUB_REF_NAME#v}"
           if [[ "$VERSION" == "$GITHUB_REF_NAME" ]]; then
-            echo "Tag must start with v." >&2
+            echo "Tag $GITHUB_REF_NAME must start with v." >&2
+            exit 1
+          fi
+          if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "Tag $GITHUB_REF_NAME is not a final vX.Y.Z tag; pre-release tags are not published (D50)." >&2
             exit 1
           fi
 
@@ -54,13 +58,40 @@ jobs:
             exit 1
           fi
 
-          if [[ "$VERSION" == *-* ]]; then
-            echo "is_rc=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_rc=false" >> "$GITHUB_OUTPUT"
-          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "major=${VERSION%%.*}" >> "$GITHUB_OUTPUT"
+
+      # Fails before anything is uploaded or published, so a missing
+      # CHANGELOG section never leaves a half-finished release (D50).
+      - name: Build GitHub Release notes from CHANGELOG
+        run: |
+          node --input-type=module - "${{ steps.meta.outputs.version }}" <<'NODE'
+          import { readFileSync, writeFileSync } from "node:fs";
+
+          const version = process.argv[2];
+          const changelog = readFileSync("CHANGELOG.md", "utf8");
+          const lines = changelog.split("\n");
+          const sectionHeading = `## [${version}]`;
+          const start = lines.findIndex((line) => line.startsWith(sectionHeading));
+          if (start < 0) {
+            throw new Error(`CHANGELOG.md is missing section ## [${version}] with release notes.`);
+          }
+          let end = lines.length;
+          for (let index = start + 1; index < lines.length; index += 1) {
+            if (lines[index]?.startsWith("## [")) {
+              end = index;
+              break;
+            }
+          }
+          const notes = lines
+            .slice(start + 1, end)
+            .join("\n")
+            .trim();
+          if (!notes) {
+            throw new Error(`CHANGELOG.md section ## [${version}] has no release notes.`);
+          }
+          writeFileSync("/tmp/release-notes.md", notes + "\n");
+          NODE
 
       - run: npm ci
       - run: npm run lint
@@ -75,6 +106,10 @@ jobs:
         run: |
           npx tsx scripts/upload-manifest.ts --version "${{ steps.meta.outputs.version }}" > /tmp/upload-manifest.json
 
+      # Pinned objects are immutable: an existing key is never overwritten.
+      # A key that already holds identical content (same MD5 ETag) is
+      # skipped, so a failed release can be rerun on the same tag; a key
+      # with different content fails the run (D50).
       - name: Upload pinned prefix to R2
         env:
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
@@ -86,37 +121,64 @@ jobs:
           R2_ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
           echo "::add-mask::$R2_ENDPOINT"
 
-          # shellcheck disable=SC2016 # backticks are a JMESPath array literal, not command substitution
-          existing_count="$(aws s3api list-objects-v2 \
-            --bucket "$R2_BUCKET" \
-            --prefix "v${{ steps.meta.outputs.version }}/" \
-            --max-items 1 \
-            --query 'length(Contents || `[]`)' \
-            --output text \
-            --endpoint-url "$R2_ENDPOINT")"
-          if [[ "$existing_count" != "0" ]]; then
-            echo "Pinned prefix v${{ steps.meta.outputs.version }}/ already exists; refusing overwrite." >&2
-            exit 1
-          fi
-
           node -e 'const fs=require("node:fs");const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));for (const e of m.entries) console.log([e.path,e.pinnedKey,e.contentType,e.pinnedCacheControl].join("\t"));' /tmp/upload-manifest.json > /tmp/pinned.tsv
+          # Check every key before uploading any, so a conflict leaves the
+          # prefix untouched.
+          : > /tmp/to-upload.tsv
+          while IFS=$'\t' read -r path key content_type cache_control; do
+            local_md5="$(md5sum "dist/$path" | cut -d' ' -f1)"
+            if remote_etag="$(aws s3api head-object \
+              --bucket "$R2_BUCKET" \
+              --key "$key" \
+              --query ETag \
+              --output text \
+              --endpoint-url "$R2_ENDPOINT" 2>/tmp/head-error.txt)"; then
+              remote_etag="${remote_etag//\"/}"
+              if [[ "$remote_etag" != "$local_md5" ]]; then
+                echo "Pinned object $key already exists with different content (ETag $remote_etag, local MD5 $local_md5); refusing overwrite." >&2
+                exit 1
+              fi
+              echo "Pinned object $key already exists with identical content; skipping."
+            elif grep -qE '404|Not Found' /tmp/head-error.txt; then
+              printf '%s\t%s\t%s\t%s\n' "$path" "$key" "$content_type" "$cache_control" >> /tmp/to-upload.tsv
+            else
+              echo "Could not check pinned object $key:" >&2
+              cat /tmp/head-error.txt >&2
+              exit 1
+            fi
+          done < /tmp/pinned.tsv
+
           while IFS=$'\t' read -r path key content_type cache_control; do
             aws s3 cp "dist/$path" "s3://$R2_BUCKET/$key" \
               --content-type "$content_type" \
               --cache-control "$cache_control" \
               --endpoint-url "$R2_ENDPOINT"
-          done < /tmp/pinned.tsv
+          done < /tmp/to-upload.tsv
 
       - name: Verify pinned CDN assets
         run: |
           npx tsx scripts/verify-cdn.ts /tmp/upload-manifest.json "${CDN_BASE_URL}" "v${{ steps.meta.outputs.version }}" pinned
 
-      - name: Publish release candidate to npm (next tag)
-        if: ${{ steps.meta.outputs.is_rc == 'true' }}
-        run: npm publish --tag next
+      # Publish to npm before touching the alias: if a later alias step
+      # fails, promote.yml repairs it without a new version (D50). An
+      # already-published version is skipped so the run can be rerun.
+      - name: Publish to npm
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          PACKAGE_NAME="$(node -p "JSON.parse(require('node:fs').readFileSync('package.json', 'utf8')).name")"
+          status="$(curl -sS -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/$PACKAGE_NAME/$VERSION")"
+          case "$status" in
+            200) echo "$PACKAGE_NAME@$VERSION is already on npm; skipping publish." ;;
+            404) npm publish ;;
+            *)
+              echo "Could not check whether $PACKAGE_NAME@$VERSION is on npm: registry returned HTTP $status." >&2
+              exit 1
+              ;;
+          esac
 
       - name: Promote pinned to alias prefix
-        if: ${{ steps.meta.outputs.is_rc != 'true' }}
         env:
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -138,7 +200,6 @@ jobs:
           done < /tmp/promote.tsv
 
       - name: Purge alias URLs in Cloudflare cache
-        if: ${{ steps.meta.outputs.is_rc != 'true' }}
         env:
           CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
@@ -172,47 +233,10 @@ jobs:
           NODE
 
       - name: Verify alias CDN assets
-        if: ${{ steps.meta.outputs.is_rc != 'true' }}
         run: |
           npx tsx scripts/verify-cdn.ts /tmp/upload-manifest.json "${CDN_BASE_URL}" "v${{ steps.meta.outputs.major }}" alias
 
-      - name: Publish final release to npm
-        if: ${{ steps.meta.outputs.is_rc != 'true' }}
-        run: npm publish
-
-      - name: Build GitHub Release notes from CHANGELOG
-        if: ${{ steps.meta.outputs.is_rc != 'true' }}
-        run: |
-          node --input-type=module - "${{ steps.meta.outputs.version }}" <<'NODE'
-          import { readFileSync, writeFileSync } from "node:fs";
-
-          const version = process.argv[2];
-          const changelog = readFileSync("CHANGELOG.md", "utf8");
-          const lines = changelog.split("\n");
-          const sectionHeading = `## [${version}]`;
-          const start = lines.findIndex((line) => line.startsWith(sectionHeading));
-          if (start < 0) {
-            throw new Error(`CHANGELOG.md is missing section ## [${version}] with release notes.`);
-          }
-          let end = lines.length;
-          for (let index = start + 1; index < lines.length; index += 1) {
-            if (lines[index]?.startsWith("## [")) {
-              end = index;
-              break;
-            }
-          }
-          const notes = lines
-            .slice(start + 1, end)
-            .join("\n")
-            .trim();
-          if (!notes) {
-            throw new Error(`CHANGELOG.md section ## [${version}] has no release notes.`);
-          }
-          writeFileSync("/tmp/release-notes.md", notes + "\n");
-          NODE
-
       - name: Create GitHub Release
-        if: ${{ steps.meta.outputs.is_rc != 'true' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}

@@ -17,7 +17,6 @@ concurrency:
 
 jobs:
   build:
-    if: ${{ !contains(github.ref_name, '-') }}
     runs-on: ubuntu-latest
     env:
       IBM_TELEMETRY_DISABLED: "true"
@@ -124,7 +123,6 @@ jobs:
           path: _site/
 
   deploy:
-    if: ${{ !contains(github.ref_name, '-') }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
