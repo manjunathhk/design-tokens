@@ -68,6 +68,8 @@ fonts.css, tokens.css and base.css still ship as separate files.
 
 ## D9. Release candidates go to npm under the `next` dist-tag
 
+Superseded by D50.
+
 2026-09-24. Supersedes brief section 8 step 7 for pre-releases. rc tags are
 published to npm with `--tag next` so the npm and provenance leg is proven
 before 1.0.0. They are still never promoted to the CDN alias.
@@ -261,6 +263,8 @@ Caching in the sidebar with Edge/Browser TTL now left unset rather than
 explicitly set to respect the origin. docs/cdn.md §1-3 updated to match.
 
 ## D29. Release PR flow is two PRs, not one: refines D14
+
+Superseded by D50.
 
 2026-09-25. `release.yml` requires the pushed tag (minus its `v`) to
 exactly equal `package.json`'s `version` string. One PR can't cover both
@@ -865,3 +869,42 @@ and the breakpoints, `grid-size` and z-index are untouched. No token, snapshot
 or dist change; no version bump. A later issue may change any of these values
 (MINOR) once the owner supplies exact portfolio declarations, including the
 easing curve and the light and dark shadows.
+
+## D50. No release candidates; release.yml is safe to rerun: supersedes D9 and D29, refines D14
+
+2026-10-05. Issue #82. Owner decision: as a solo maintainer, releases go
+straight to a final `vX.Y.Z` tag. There are no `-rc.N` tags, no npm `next`
+dist-tag and no separate Finalize PR: one Release PR bumps `package.json`
+and adds the `CHANGELOG.md` section, then a human pushes one tag. D14's
+"`vX.Y.Z-rc.N` first, then `vX.Y.Z`" no longer applies; the rest of D14
+stands.
+
+The rc existed to prove the pipeline before the version that mattered,
+because a failed final run could not be repeated: the pinned prefix refused
+any second upload and npm refuses a second publish. The final run is made
+safe on its own instead:
+
+- `release.yml` rejects any tag that is not plain `vX.Y.Z`, and checks the
+  `CHANGELOG.md` section, before anything is uploaded or published.
+- npm publish runs after the pinned CDN is verified and before the alias
+  moves. An alias failure is then repaired with `promote.yml`, with no new
+  version.
+- The pinned upload checks every key first. A key that already holds
+  identical content (its ETag equals the local file's MD5; every file is a
+  single-part upload) is skipped; a key with different content fails the
+  run before anything is written. Nothing is ever overwritten, so pinned
+  immutability holds, and a failed run is rerun on the same tag. This
+  replaces the whole-prefix emptiness check, so D31's `KeyCount` workaround
+  no longer applies.
+- npm publish is skipped when the registry already has that version
+  (HTTP 200 from `registry.npmjs.org/<name>/<version>`); any status other
+  than 200 or 404 fails the step.
+
+A new version is needed only when the fix changes what gets published.
+`pages.yml` drops its rc skip: a non-final tag now fails `release.yml`, so
+D44's wait already keeps it from publishing. `promote.yml` still rejects
+pre-release input, because the pinned prefixes of the rc versions published
+before this decision remain in R2. The first-publish npm bootstrap runbook
+(`docs/cdn.md` §5a, D33) is removed: the package exists, and it only
+applied once. `test/release-workflow.test.ts` guards the tag check, the
+step order and the rerun behaviour.

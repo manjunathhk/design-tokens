@@ -76,7 +76,7 @@ function parseVersionArg(argv: readonly string[]): string {
   if (versionArg) return versionArg.slice("--version=".length);
   const versionIndex = argv.indexOf("--version");
   const value = versionIndex >= 0 ? argv[versionIndex + 1] : undefined;
-  if (!value) throw new Error("Usage: tsx scripts/upload-manifest.ts --version <X.Y.Z[-tag]>");
+  if (!value) throw new Error("Usage: tsx scripts/upload-manifest.ts --version <X.Y.Z>");
   return value;
 }
 

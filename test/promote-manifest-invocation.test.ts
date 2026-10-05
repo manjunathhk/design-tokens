@@ -8,14 +8,14 @@ import type { UploadManifest } from "../scripts/upload-manifest.js";
 
 const repoRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const tsxCli = join(repoRoot, "node_modules", "tsx", "dist", "cli.mjs");
-const VERSION = "1.2.3-rc.1";
+const VERSION = "1.2.3";
 
 const FIXTURE_KEYS = [
-  "v1.2.3-rc.1/_tokens.scss",
-  "v1.2.3-rc.1/fonts/IBMPlexSans-Regular-Latin1.woff2",
-  "v1.2.3-rc.1/index.css",
-  "v1.2.3-rc.1/tokens.json",
-  "v1.2.3-rc.1/tokens.mjs",
+  "v1.2.3/_tokens.scss",
+  "v1.2.3/fonts/IBMPlexSans-Regular-Latin1.woff2",
+  "v1.2.3/index.css",
+  "v1.2.3/tokens.json",
+  "v1.2.3/tokens.mjs",
 ];
 
 const manifestScript = `

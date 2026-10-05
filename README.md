@@ -226,20 +226,16 @@ tag on a `main` commit, pushed by a human only — agents never push tags,
 publish to npm, or upload to R2. The version bump and CHANGELOG entry land in
 a "Release X.Y.Z" PR before tagging.
 
-1. Push a pre-release tag first, `vX.Y.Z-rc.N`. It is built, tested,
-   uploaded to the CDN under the pinned prefix `/vX.Y.Z-rc.N/`, verified over
-   HTTPS, and published to npm under the `next` dist-tag
-   (`npm install @manjunathhk/design-tokens@next`). It is never promoted to
-   the CDN alias.
-2. Once the pipeline is proven, push the final tag, `vX.Y.Z`. It repeats the
-   above, then promotes the pinned files to the alias prefix `/vMAJOR/`,
-   purges that alias from Cloudflare's cache, verifies it, publishes to npm
-   under the default (`latest`) tag, and creates the GitHub Release.
+Pushing the tag `vX.Y.Z` builds and tests the package, uploads it to the
+CDN under the pinned prefix `/vX.Y.Z/` and verifies it over HTTPS, publishes
+to npm, then promotes the pinned files to the alias prefix `/vMAJOR/`,
+purges that alias from Cloudflare's cache, verifies it, and creates the
+GitHub Release. There are no release candidates; a failed run is safe to
+rerun on the same tag. Step by step: [docs/workflow/release.md](docs/workflow/release.md).
 
 Pinned CDN paths (`/vX.Y.Z/`) are immutable; only the alias (`/vMAJOR/`) is
 ever rewritten. Rolling `/v1/` back to an earlier pinned version is one click
-on the `promote` workflow, which accepts a final `X.Y.Z` version only:
-pre-releases are rejected there because they are never promoted to the alias.
+on the `promote` workflow, which accepts a final `X.Y.Z` version only.
 
 ## Theme control
 

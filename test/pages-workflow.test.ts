@@ -7,11 +7,10 @@ const repoRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const workflow = readFileSync(join(repoRoot, ".github", "workflows", "pages.yml"), "utf8");
 
 describe("pages workflow release gating", () => {
-  it("triggers on final-looking tags only", () => {
+  it("triggers on release tags", () => {
     expect(workflow).toContain("push:");
     expect(workflow).toContain("tags:");
     expect(workflow).toContain('- "v*.*.*"');
-    expect(workflow).toContain("if: ${{ !contains(github.ref_name, '-') }}");
   });
 
   it("waits for a successful release.yml run for the exact tag sha before building", () => {

@@ -4,10 +4,10 @@ import { pathToFileURL } from "node:url";
  * Validation for the `version` input of .github/workflows/promote.yml, which
  * re-promotes an already-published pinned prefix to the /vMAJOR/ alias.
  *
- * Only final X.Y.Z versions are accepted: pre-releases are never promoted to
- * the alias (D9), and the input builds object paths and a concurrency group,
- * so it may contain nothing but the semver core digits. Rejections name the
- * failing value and the reason.
+ * Only final X.Y.Z versions are accepted: the pinned prefixes of the
+ * pre-releases published before D50 are never promoted to the alias, and the
+ * input builds object paths, so it may contain nothing but the semver core
+ * digits. Rejections name the failing value and the reason.
  */
 const FINAL_VERSION_PATTERN = /^(?<major>0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/;
 const PRERELEASE_PATTERN = /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)-/;
@@ -38,7 +38,7 @@ export function parsePromoteVersion(input: string): PromoteVersion {
   if (PRERELEASE_PATTERN.test(input)) {
     throw new Error(
       `Version input ${described} is a pre-release; only final X.Y.Z versions are promoted to the ` +
-        "/vMAJOR/ alias (D9). Pre-releases publish to npm's next dist-tag and are never promoted.",
+        "/vMAJOR/ alias; pre-releases are never promoted (D50).",
     );
   }
   const match = FINAL_VERSION_PATTERN.exec(input);
