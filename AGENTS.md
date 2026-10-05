@@ -15,8 +15,8 @@ contract. A change that breaks it does not merge.
 - Two tiers: primitive (raw values, never emitted to CSS) and semantic
   (emitted, references resolved). Consumers only ever see semantic tokens.
 - Every emitted CSS custom property starts with --mk- and is kebab-case.
-- Never invent colour values. Colours come from the brief or from an approved
-  PR description. Every colour change must keep the contrast tests passing.
+- Never invent colour values. Colours come from the palette recorded in
+  docs/decisions.md (D47) or from an approved PR description. Every colour change must keep the contrast tests passing.
 - Every semantic colour has both a light and a dark value.
 
 ## Compatibility
@@ -37,8 +37,9 @@ API diff, Playwright consumption smoke test, lint and format.
 
 ## Releases and the CDN
 - Only a human pushes release tags. Agents never run npm publish, never
-  upload to or delete from R2, never create tags, and never edit the release
-  or promote workflows' publishing steps without being asked.
+  upload to or delete from R2, never create tags, and never edit the
+  publishing steps of release.yml, promote.yml or
+  .github/actions/promote-alias without being asked.
 - Pinned CDN versions (/vX.Y.Z/) are immutable: nothing may overwrite or
   delete them. Only the alias prefix (/vMAJOR/) is ever rewritten, and only by
   release.yml or promote.yml.
@@ -48,9 +49,9 @@ API diff, Playwright consumption smoke test, lint and format.
   Cache-Control header.
 
 ## Workflow
-- Read docs/decisions.md before starting. It records what was decided after
-  docs/brief.md and wins where they disagree. A PR that makes a new decision
-  records it there in the same PR.
+- Read docs/decisions.md before starting. It holds the rules in force behind
+  this contract. A PR that changes or adds a rule edits it there in the same
+  PR.
 - GitHub Flow: short-lived branches off main, merged into main by PR. One
   GitHub issue per unit of work; its PR closes it.
 - A release is a tag on a main commit, pushed by a human (see Releases).

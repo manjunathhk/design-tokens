@@ -31,7 +31,7 @@ describe("release workflow (D50)", () => {
   it("publishes to npm after the pinned CDN is verified and before the alias moves", () => {
     const publish = stepIndex("name: Publish to npm");
     expect(stepIndex("name: Verify pinned CDN assets")).toBeLessThan(publish);
-    expect(publish).toBeLessThan(stepIndex("name: Promote pinned to alias prefix"));
+    expect(publish).toBeLessThan(stepIndex("name: Promote to alias, purge and verify"));
     expect(workflow.match(/npm publish/g)).toHaveLength(1);
   });
 
@@ -40,5 +40,15 @@ describe("release workflow (D50)", () => {
     expect(workflow).toContain("refusing overwrite");
     expect(workflow).toContain("200) echo");
     expect(workflow).toContain("404) npm publish ;;");
+  });
+
+  it("deploys the specimen only after the release job succeeds, specimen-only (D15, D34, D51)", () => {
+    expect(stepIndex("name: Create GitHub Release")).toBeLessThan(
+      stepIndex("name: Stage specimen for GitHub Pages"),
+    );
+    expect(workflow).toContain("cp docs/index.html _site/index.html");
+    expect(workflow).toContain("path: _site/");
+    expect(workflow).toMatch(/\n {2}pages:\n {4}needs: release\n/);
+    expect(workflow).toContain("uses: actions/deploy-pages@v5");
   });
 });

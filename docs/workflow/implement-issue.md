@@ -6,8 +6,8 @@ other agents reach it through AGENTS.md, and a person can follow it by hand.
 
 ## 1. Load the context
 
-Read, in this order: `AGENTS.md`, `docs/decisions.md`, `docs/brief.md`.
-Precedence where they disagree: AGENTS.md, then decisions.md, then the brief.
+Read `AGENTS.md`, then `docs/decisions.md`. Where they disagree, AGENTS.md
+wins.
 
 ## 2. Read the issue
 
@@ -21,7 +21,7 @@ Post the issue's acceptance criteria and your plan in five lines or fewer.
 
 Stop and ask the owner only for what the contract reserves for them:
 
-- any colour value that is not already in the brief or decisions.md;
+- any colour value that is not already in the token files or decisions.md;
 - removing or renaming an emitted token;
 - changing AGENTS.md;
 - anything touching publishing, tags, R2 or credentials;
@@ -44,8 +44,9 @@ Use the branch your environment assigns. If none is assigned, create
 
 ## 6. Record decisions
 
-A choice the issue left open goes into `docs/decisions.md` as a new entry in
-the same PR. Never rewrite an entry; supersede it.
+A choice the issue left open goes into `docs/decisions.md` in the same PR:
+edit the rule it changes in place, or add a new rule with the next free
+number. The file states what is true now; git keeps the history.
 
 ## 7. Open the pull request
 

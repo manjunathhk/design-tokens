@@ -94,8 +94,9 @@ don't add anything under the **Variables** tab — the workflows only read
 
 ## 6) Configure GitHub Pages for the specimen
 
-`pages.yml` deploys the specimen (`docs/index.html`) on release tags, after
-the matching `release.yml` run succeeds (D15, D44). It needs two one-time repository settings:
+The `pages` job in `release.yml` deploys the specimen (`docs/index.html`)
+once the release job has succeeded (D15). It needs two one-time repository
+settings:
 
 1. GitHub → repository **Settings** → **Pages** → **Build and deployment** →
    **Source**: **GitHub Actions**. Leave the suggested Jekyll and Static HTML
@@ -108,7 +109,7 @@ the matching `release.yml` run succeeds (D15, D44). It needs two one-time reposi
 
 GitHub creates the `github-pages` environment when you pick the Actions
 source, and by default it only allows deploys from the default branch.
-Without the tag rule, the `build` job passes and the `deploy` job fails
+Without the tag rule, the `release` job passes and the `pages` job fails
 without starting ("Tag 'vX.Y.Z' is not allowed to deploy to github-pages
 due to environment protection rules"). After adding the rule, open that
 failed run and use **Re-run failed jobs**. There's no need to re-tag.
@@ -118,11 +119,7 @@ failed run and use **Re-run failed jobs**. There's no need to re-tag.
 - Push a final tag (`vX.Y.Z`) on a `main` commit. There are no release candidates (D50).
   - Workflow validates the tag, `package.json` version and `CHANGELOG.md` section, runs the gate, uploads pinned `/vX.Y.Z/` and verifies status, Content-Type, banner, per-font CORS and Cache-Control over HTTPS, publishes npm, promotes to alias `/vX/`, purges explicit alias URLs, verifies the alias, and creates the GitHub Release.
   - A failed run is rerun on the same tag: identical pinned objects and an already-published npm version are skipped.
-  - `pages.yml` for the same tag waits for the matching `release.yml` run on that exact tag SHA to complete successfully before building/deploying the specimen.
-
-Reruns:
-
-- Rerunning `release.yml` alone does not start a new pages deployment. Rerun `pages.yml` for that tag if you need to republish specimen HTML.
+  - The `pages` job then deploys the specimen. It runs only when the release job succeeded, and **Re-run failed jobs** reruns it with the release.
 
 ## 8) Rollback runbook
 

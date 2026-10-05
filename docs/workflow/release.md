@@ -54,10 +54,9 @@ git push origin vX.Y.Z
 4. publishes to npm as `latest` via OIDC;
 5. promotes the pinned files to the `/vMAJOR/` alias, purges those URLs on
    Cloudflare and verifies the alias;
-6. creates the GitHub Release from the `CHANGELOG.md` section.
-
-`pages.yml` starts for the same tag and publishes the specimen only after
-that `release.yml` run succeeds.
+6. creates the GitHub Release from the `CHANGELOG.md` section;
+7. deploys the specimen to GitHub Pages (the `pages` job, which runs only
+   after the release job succeeds).
 
 ### If the run fails
 
@@ -82,7 +81,7 @@ take about 2–4 minutes.
 
 Run `/release verify`. It reads npm's `latest` and the pinned and alias CDN
 URLs, and reports pass or fail. It is read-only and needs no credential.
-Also check that the `pages` run succeeded and
+Also check that the `pages` job succeeded and
 `https://manjunathhk.github.io/design-tokens/` shows the new version.
 
 ## 5. Roll back the alias
