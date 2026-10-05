@@ -99,15 +99,12 @@ describe("promote workflow manifest invocation", () => {
       .map((line) => line.trimStart())
       .filter((line) => line.startsWith("npx tsx"));
     // The manifest heredoc is the only stdin-fed tsx script and keeps the - sentinel;
-    // the version validator (scripts/promote-version.ts) and the CDN verifier
-    // (scripts/verify-cdn.ts, issue #55) are files, not stdin.
+    // the version validator (scripts/promote-version.ts) is a file, not stdin, and the
+    // CDN verifier runs inside the shared promote-alias action (D51).
     const manifestLines = tsxLines.filter((line) => line.startsWith("npx tsx - "));
     const fileScriptLines = tsxLines.filter((line) => !line.startsWith("npx tsx - "));
     expect(manifestLines).toHaveLength(1);
     expect(manifestLines[0]).toMatch(/^npx tsx - /);
-    expect(fileScriptLines).toEqual([
-      'npx tsx scripts/promote-version.ts >> "$GITHUB_OUTPUT"',
-      'npx tsx scripts/verify-cdn.ts /tmp/upload-manifest.json "${CDN_BASE_URL}" "v$MAJOR" alias',
-    ]);
+    expect(fileScriptLines).toEqual(['npx tsx scripts/promote-version.ts >> "$GITHUB_OUTPUT"']);
   });
 });

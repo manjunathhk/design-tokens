@@ -1,0 +1,104 @@
+name: Promote pinned version to alias
+description: >-
+  Copies a pinned version's files to its /vMAJOR/ alias, purges those alias
+  URLs on Cloudflare and verifies them over HTTPS. Shared by release.yml and
+  promote.yml so the alias is written one way only (D42, D43, D51).
+
+inputs:
+  manifest:
+    description: Upload manifest JSON built by scripts/upload-manifest.ts; its major selects the alias.
+    required: true
+  bucket:
+    description: R2 bucket holding the pinned and alias prefixes.
+    required: true
+  cdn-base-url:
+    description: Public CDN origin the alias is verified against.
+    required: true
+  r2-account-id:
+    description: R2 account ID.
+    required: true
+  r2-access-key-id:
+    description: R2 access key ID with Object Read & Write on the bucket.
+    required: true
+  r2-secret-access-key:
+    description: R2 secret access key.
+    required: true
+  cf-zone-id:
+    description: Cloudflare zone ID of the CDN domain.
+    required: true
+  cf-api-token:
+    description: Cloudflare API token with Cache Purge on that zone.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Promote pinned to alias prefix
+      shell: bash
+      env:
+        MANIFEST: ${{ inputs.manifest }}
+        R2_BUCKET: ${{ inputs.bucket }}
+        R2_ACCOUNT_ID: ${{ inputs.r2-account-id }}
+        AWS_ACCESS_KEY_ID: ${{ inputs.r2-access-key-id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.r2-secret-access-key }}
+        AWS_EC2_METADATA_DISABLED: "true"
+      run: |
+        set -euo pipefail
+        R2_ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+        echo "::add-mask::$R2_ENDPOINT"
+
+        node -e 'const fs=require("node:fs");const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));for (const e of m.entries) console.log([e.pinnedKey,e.aliasKey,e.contentType,e.aliasCacheControl].join("\t"));' "$MANIFEST" > /tmp/promote.tsv
+        while IFS=$'\t' read -r from_key to_key content_type cache_control; do
+          aws s3 cp "s3://$R2_BUCKET/$from_key" "s3://$R2_BUCKET/$to_key" \
+            --copy-props none \
+            --metadata-directive REPLACE \
+            --content-type "$content_type" \
+            --cache-control "$cache_control" \
+            --endpoint-url "$R2_ENDPOINT"
+        done < /tmp/promote.tsv
+
+    - name: Purge alias URLs in Cloudflare cache
+      shell: bash
+      env:
+        MANIFEST: ${{ inputs.manifest }}
+        CDN_BASE_URL: ${{ inputs.cdn-base-url }}
+        CF_ZONE_ID: ${{ inputs.cf-zone-id }}
+        CF_API_TOKEN: ${{ inputs.cf-api-token }}
+      run: |
+        set -euo pipefail
+        node --input-type=module - "$MANIFEST" "$CDN_BASE_URL" <<'NODE'
+        import { readFileSync } from "node:fs";
+
+        const [manifestPath, baseUrl] = process.argv.slice(2);
+        const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+        const files = manifest.entries.map((entry) => `${baseUrl}/v${manifest.major}/${entry.path}`);
+        const response = await fetch(
+          `https://api.cloudflare.com/client/v4/zones/${process.env.CF_ZONE_ID ?? ""}/purge_cache`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: "Bearer " + (process.env.CF_API_TOKEN ?? ""),
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ files }),
+          },
+        );
+        const raw = await response.text();
+        if (!response.ok) {
+          throw new Error(`Cloudflare purge request failed with ${response.status}: ${raw}`);
+        }
+        const body = JSON.parse(raw);
+        if (!body.success) {
+          throw new Error(`Cloudflare purge failed: ${JSON.stringify(body.errors ?? body)}`);
+        }
+        console.log(`Purged ${files.length} alias URLs under ${baseUrl}/v${manifest.major}/.`);
+        NODE
+
+    - name: Verify alias CDN assets
+      shell: bash
+      env:
+        MANIFEST: ${{ inputs.manifest }}
+        CDN_BASE_URL: ${{ inputs.cdn-base-url }}
+      run: |
+        MAJOR="$(node -p "JSON.parse(require('node:fs').readFileSync(process.argv[1], 'utf8')).major" "$MANIFEST")"
+        npx tsx scripts/verify-cdn.ts "$MANIFEST" "$CDN_BASE_URL" "v$MAJOR" alias

@@ -211,7 +211,8 @@ Semantic versioning is what makes "change once, reflect everywhere" safe:
 1. Edit `tokens/semantic/color.light.json` and
    `tokens/semantic/color.dark.json` (both files, same keys — see
    [Light and dark](#light-and-dark)). Never invent a colour
-   value; it must come from the brief or from an approved PR description.
+   value; it must come from the palette in `docs/decisions.md` (D47) or from
+   an approved PR description.
 2. Run `npm run build` and open `docs/index.html` (generated, not committed)
    to preview swatches, contrast ratios and the type scale in both modes.
 3. `npm test` must keep the contrast contract passing for every pair in both

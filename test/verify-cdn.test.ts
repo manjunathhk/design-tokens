@@ -362,6 +362,10 @@ describe("workflow verification steps invoke the shared verifier", () => {
     join(repoRoot, ".github", "workflows", "promote.yml"),
     "utf8",
   );
+  const promoteAction = readFileSync(
+    join(repoRoot, ".github", "actions", "promote-alias", "action.yml"),
+    "utf8",
+  );
 
   it("points release.yml's pinned verification at the verifier with the pinned policy", () => {
     expect(stepRun(releaseWorkflow, "Verify pinned CDN assets")).toBe(
@@ -369,24 +373,30 @@ describe("workflow verification steps invoke the shared verifier", () => {
     );
   });
 
-  it("points release.yml's alias verification at the verifier with the alias policy", () => {
-    expect(stepRun(releaseWorkflow, "Verify alias CDN assets")).toBe(
-      'npx tsx scripts/verify-cdn.ts /tmp/upload-manifest.json "${CDN_BASE_URL}" "v${{ steps.meta.outputs.major }}" alias',
+  it("points the shared promote-alias action's verification at the verifier with the alias policy", () => {
+    expect(stepRun(promoteAction, "Verify alias CDN assets")).toContain(
+      'npx tsx scripts/verify-cdn.ts "$MANIFEST" "$CDN_BASE_URL" "v$MAJOR" alias',
     );
   });
 
-  it("points promote.yml's alias verification at the verifier with the alias policy", () => {
-    expect(stepRun(promoteWorkflow, "Verify alias CDN assets")).toBe(
-      'npx tsx scripts/verify-cdn.ts /tmp/upload-manifest.json "${CDN_BASE_URL}" "v$MAJOR" alias',
-    );
-  });
-
-  it("leaves no inline verifier behind in either workflow", () => {
+  it("routes both workflows' alias update through the shared action (D51)", () => {
     for (const [name, workflow] of [
       ["release.yml", releaseWorkflow],
       ["promote.yml", promoteWorkflow],
     ] as const) {
-      expect(workflow, name).not.toContain("checkedFontCors");
+      expect(workflow, name).toContain("uses: ./.github/actions/promote-alias");
+      expect(workflow, name).not.toContain("purge_cache");
+      expect(workflow, name).not.toContain("aliasKey");
+    }
+  });
+
+  it("leaves no inline verifier behind", () => {
+    for (const [name, file] of [
+      ["release.yml", releaseWorkflow],
+      ["promote.yml", promoteWorkflow],
+      ["promote-alias/action.yml", promoteAction],
+    ] as const) {
+      expect(file, name).not.toContain("checkedFontCors");
     }
   });
 });
@@ -401,11 +411,12 @@ function stepRun(workflow: string, stepName: string): string {
   if (stepIndex < 0) throw new Error(`Step not found: ${stepName}`);
   const runIndex = lines.findIndex((line, index) => index > stepIndex && line.trim() === "run: |");
   if (runIndex < 0) throw new Error(`Step ${stepName} has no block-style run script.`);
+  const indent = " ".repeat((lines[runIndex] ?? "").search(/\S/) + 2);
   const script: string[] = [];
   for (let index = runIndex + 1; index < lines.length; index += 1) {
     const line = lines[index] ?? "";
-    if (line.trim() === "" || !line.startsWith(" ".repeat(10))) break;
-    script.push(line.slice(10));
+    if (line.trim() === "" || !line.startsWith(indent)) break;
+    script.push(line.slice(indent.length));
   }
   return script.join("\n").trim();
 }

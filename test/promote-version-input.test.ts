@@ -130,10 +130,12 @@ describe("promote.yml input handling", () => {
   it("validates the input before the storage and purge steps run", () => {
     const validateIndex = lines.findIndex((line) => line.includes("scripts/promote-version.ts"));
     const storageIndex = lines.findIndex((line) => line.includes("aws s3"));
-    const purgeIndex = lines.findIndex((line) => line.includes("purge_cache"));
+    const promoteIndex = lines.findIndex((line) =>
+      line.includes("uses: ./.github/actions/promote-alias"),
+    );
     expect(validateIndex).toBeGreaterThan(-1);
     expect(storageIndex).toBeGreaterThan(validateIndex);
-    expect(purgeIndex).toBeGreaterThan(validateIndex);
+    expect(promoteIndex).toBeGreaterThan(validateIndex);
   });
 });
 
