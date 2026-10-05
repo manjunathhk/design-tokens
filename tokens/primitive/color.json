@@ -7,58 +7,64 @@
     "black": {
       "$value": "#000000"
     },
-    "cream": {
-      "$description": "Warm cream used for the light page background and dark-mode text.",
+    "paper": {
+      "$description": "Warm off-whites used for the light page background and subtle sections.",
+      "50": {
+        "$value": "#F7F7F5"
+      },
       "100": {
-        "$value": "#F1F0E5"
+        "$value": "#F3F3F0"
       }
     },
-    "blush": {
-      "$description": "Pale blush tints used for light subtle backgrounds and hairlines.",
-      "200": {
-        "$value": "#EBD6CB"
-      },
-      "300": {
-        "$value": "#E4C7B8"
-      }
-    },
-    "tan": {
-      "$description": "Muted tan used for borders and dark-mode secondary text.",
-      "400": {
-        "$value": "#BAAB92"
-      }
-    },
-    "rose": {
-      "$description": "Dusty rose used for dark-mode muted text.",
-      "300": {
-        "$value": "#C5AA9B"
-      }
-    },
-    "copper": {
-      "$description": "Portfolio copper accents.",
-      "300": {
-        "$value": "#C39E88"
-      },
+    "ink": {
+      "$description": "Neutral near-blacks and greys used for light-theme text and control outlines.",
       "500": {
-        "$value": "#A37764"
-      }
-    },
-    "brown": {
-      "$description": "Dark brown used for light-theme text, actions and controls.",
-      "700": {
-        "$value": "#56453F"
-      }
-    },
-    "espresso": {
-      "$description": "Warm dark browns used by the dark theme backgrounds and surfaces.",
-      "600": {
-        "$value": "#3C332E"
+        "$value": "#6C6C68"
       },
-      "800": {
-        "$value": "#2D2521"
+      "700": {
+        "$value": "#3F3F3F"
+      },
+      "900": {
+        "$value": "#111111"
+      }
+    },
+    "umber": {
+      "$description": "Warm dark brown used only as the tint behind light-theme hairlines.",
+      "900": {
+        "$value": "#382B1F"
+      }
+    },
+    "night": {
+      "$description": "Deep navy-blacks used by the dark theme backgrounds and surfaces.",
+      "900": {
+        "$value": "#101216"
       },
       "950": {
-        "$value": "#1F1A17"
+        "$value": "#080A0D"
+      },
+      "975": {
+        "$value": "#050608"
+      }
+    },
+    "fog": {
+      "$description": "Light greys used for dark-theme text and control outlines.",
+      "50": {
+        "$value": "#F7F7F7"
+      },
+      "300": {
+        "$value": "#B6B6B6"
+      },
+      "500": {
+        "$value": "#898989"
+      }
+    },
+    "amber": {
+      "$description": "Amber accent: 700 for light backgrounds, 500 for dark.",
+      "500": {
+        "$value": "#F59E0B"
+      },
+      "700": {
+        "$value": "#B45309"
       }
     },
     "red": {

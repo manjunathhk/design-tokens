@@ -58,14 +58,18 @@ breaking one.
 
 ### Values
 
-- **D47. Colour palette.** Colours come from the owner's portfolio
-  `_light.scss` / `_dark.scss`. In light mode `text`, `text-secondary`,
-  `text-muted`, `accent`, `border-control`, `focus-ring`, `success` and
-  `warning` are all `#56453F`, approved by the owner because the portfolio's
-  own values fail the contrast contract; the flat hierarchy is by design until
-  a distinct approved value exists. `color.accent` is the accessible
-  link/action role in both modes. The token files are the record of every
-  current value.
+- **D47. Colour palette.** Amber accent on warm off-white (light) and deep
+  navy-black (dark), from the owner's palette proposal of 2026-10-05. Two
+  values differ from that proposal because it failed the contrast contract:
+  light `accent`, `focus-ring` and `warning` are amber `#B45309` (proposed
+  `#D97706` gave 2.97:1 against `bg`). Values the proposal did not cover are
+  derived: `border-control` and `border-strong` reuse `text-muted`; `danger`
+  and dark `success` keep their earlier approved values; light `success` is
+  `text-secondary`; `bg-subtle` (`#F3F3F0` light, `#050608` dark) needs owner
+  approval; light `warning` (same amber as `accent`) still has to reach 4.5:1
+  on it, which caps how dark it can be. `accent-subtle` follows `accent` at 14% alpha.
+  `color.accent` is the accessible link/action role in both modes. The token
+  files are the record of every current value.
 - **D2. `border-control` and `border-strong` are different roles.**
   `border-control` outlines controls and must meet 3:1; `border-strong` is a
   decorative rule with no contrast requirement.
@@ -84,11 +88,25 @@ breaking one.
 
 `src/contrast.ts`, in both modes, printed as a table in CI:
 
-- 4.5:1 for `text`, `text-secondary`, `text-muted`, `accent`, `danger`,
-  `success` and `warning` against `bg`, `bg-subtle` and `surface`;
+- 4.5:1 for `text`, `text-secondary`, `text-muted`, `danger`, `success` and
+  `warning` against `bg`, `bg-subtle` and `surface`;
+- 4.5:1 for `accent` against `bg` and `surface` (D52);
 - 4.5:1 for `on-accent` against `accent`;
 - 3:1 for `border-control` and `focus-ring` against `bg`, `bg-subtle` and
   `surface`.
+
+- **D52. The contract is WCAG 2.2 level AA, and nothing stricter.** The
+  numbers are not ours: 4.5:1 is SC 1.4.3 Contrast (Minimum) for text below
+  large size, and 3:1 is SC 1.4.11 Non-text Contrast for UI component
+  boundaries and focus indicators. Ratios use the WCAG relative-luminance
+  formula (https://www.w3.org/TR/WCAG22/#dfn-contrast-ratio). We deliberately
+  do not adopt level AAA (SC 1.4.6, 7:1) and we do not apply the 3:1 relaxation
+  for large text (SC 1.4.3), because a token cannot know the size it is used
+  at. `border` and `border-strong` are decorative, hence exempt (D2). `accent`
+  is not checked on `bg-subtle` (owner decision, 2026-10-05): it marks
+  actions, not text in subtle sections. To change any threshold, change this
+  section and `src/contrast.ts` together; never loosen a number to make a
+  colour pass without recording why here.
 
 ## Outputs
 

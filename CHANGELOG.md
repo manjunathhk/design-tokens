@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- _No unreleased changes yet._
+Token values change; no token is added, removed or renamed (MINOR).
+
+### Changed
+
+- Colour palette is now amber on warm off-white (light) and navy-black
+  (dark), replacing the brown/copper palette (D47). Light mode has a real
+  text hierarchy (`text`, `text-secondary`, `text-muted` are distinct), and
+  `border` is now a translucent tint in both modes.
 
 ## [1.2.0] - 2026-10-05
 
