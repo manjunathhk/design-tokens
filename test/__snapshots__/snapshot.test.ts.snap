@@ -1,25 +1,25 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`dist/tokens.css matches the snapshot 1`] = `
-"/*! @manjunathhk/design-tokens v1.2.0 */
+"/*! @manjunathhk/design-tokens v1.3.0 */
 :root {
-  --mk-color-accent: #56453F;
-  --mk-color-accent-subtle: rgba(86, 69, 63, 0.13);
-  --mk-color-bg: #F1F0E5;
-  --mk-color-bg-subtle: #EBD6CB;
-  --mk-color-border: #E4C7B8;
-  --mk-color-border-control: #56453F;
-  --mk-color-border-strong: #BAAB92;
+  --mk-color-accent: #B45309;
+  --mk-color-accent-subtle: rgba(180, 83, 9, 0.14);
+  --mk-color-bg: #F7F7F5;
+  --mk-color-bg-subtle: #F3F3F0;
+  --mk-color-border: rgba(56, 43, 31, 0.13);
+  --mk-color-border-control: #6C6C68;
+  --mk-color-border-strong: #6C6C68;
   --mk-color-danger: #A93226;
-  --mk-color-focus-ring: #56453F;
-  --mk-color-grid-line: rgba(86, 69, 63, 0.05);
-  --mk-color-on-accent: #F1F0E5;
-  --mk-color-success: #56453F;
+  --mk-color-focus-ring: #B45309;
+  --mk-color-grid-line: rgba(17, 17, 17, 0.05);
+  --mk-color-on-accent: #FFFFFF;
+  --mk-color-success: #3F3F3F;
   --mk-color-surface: #FFFFFF;
-  --mk-color-text: #56453F;
-  --mk-color-text-muted: #56453F;
-  --mk-color-text-secondary: #56453F;
-  --mk-color-warning: #56453F;
+  --mk-color-text: #111111;
+  --mk-color-text-muted: #6C6C68;
+  --mk-color-text-secondary: #3F3F3F;
+  --mk-color-warning: #B45309;
   --mk-font-family-display: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mk-font-family-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --mk-font-family-sans: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -79,45 +79,45 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --mk-color-accent: #C39E88;
-    --mk-color-accent-subtle: rgba(195, 158, 136, 0.13);
-    --mk-color-bg: #2D2521;
-    --mk-color-bg-subtle: #1F1A17;
-    --mk-color-border: #56453F;
-    --mk-color-border-control: #A37764;
-    --mk-color-border-strong: #A37764;
+    --mk-color-accent: #F59E0B;
+    --mk-color-accent-subtle: rgba(245, 158, 11, 0.14);
+    --mk-color-bg: #080A0D;
+    --mk-color-bg-subtle: #050608;
+    --mk-color-border: rgba(255, 255, 255, 0.12);
+    --mk-color-border-control: #898989;
+    --mk-color-border-strong: #898989;
     --mk-color-danger: #EF9A9A;
-    --mk-color-focus-ring: #C39E88;
+    --mk-color-focus-ring: #F59E0B;
     --mk-color-grid-line: rgba(255, 255, 255, 0.04);
-    --mk-color-on-accent: #2D2521;
+    --mk-color-on-accent: #111111;
     --mk-color-success: #34D399;
-    --mk-color-surface: #3C332E;
-    --mk-color-text: #F1F0E5;
-    --mk-color-text-muted: #C5AA9B;
-    --mk-color-text-secondary: #BAAB92;
-    --mk-color-warning: #BAAB92;
+    --mk-color-surface: #101216;
+    --mk-color-text: #F7F7F7;
+    --mk-color-text-muted: #898989;
+    --mk-color-text-secondary: #B6B6B6;
+    --mk-color-warning: #F59E0B;
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --mk-color-accent: #C39E88;
-  --mk-color-accent-subtle: rgba(195, 158, 136, 0.13);
-  --mk-color-bg: #2D2521;
-  --mk-color-bg-subtle: #1F1A17;
-  --mk-color-border: #56453F;
-  --mk-color-border-control: #A37764;
-  --mk-color-border-strong: #A37764;
+  --mk-color-accent: #F59E0B;
+  --mk-color-accent-subtle: rgba(245, 158, 11, 0.14);
+  --mk-color-bg: #080A0D;
+  --mk-color-bg-subtle: #050608;
+  --mk-color-border: rgba(255, 255, 255, 0.12);
+  --mk-color-border-control: #898989;
+  --mk-color-border-strong: #898989;
   --mk-color-danger: #EF9A9A;
-  --mk-color-focus-ring: #C39E88;
+  --mk-color-focus-ring: #F59E0B;
   --mk-color-grid-line: rgba(255, 255, 255, 0.04);
-  --mk-color-on-accent: #2D2521;
+  --mk-color-on-accent: #111111;
   --mk-color-success: #34D399;
-  --mk-color-surface: #3C332E;
-  --mk-color-text: #F1F0E5;
-  --mk-color-text-muted: #C5AA9B;
-  --mk-color-text-secondary: #BAAB92;
-  --mk-color-warning: #BAAB92;
+  --mk-color-surface: #101216;
+  --mk-color-text: #F7F7F7;
+  --mk-color-text-muted: #898989;
+  --mk-color-text-secondary: #B6B6B6;
+  --mk-color-warning: #F59E0B;
   color-scheme: dark;
 }
 "
@@ -125,44 +125,44 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
 
 exports[`dist/tokens.json matches the snapshot 1`] = `
 "{
-  "version": "1.2.0",
+  "version": "1.3.0",
   "light": {
-    "color.accent": "#56453F",
-    "color.accent-subtle": "rgba(86, 69, 63, 0.13)",
-    "color.bg": "#F1F0E5",
-    "color.bg-subtle": "#EBD6CB",
-    "color.border": "#E4C7B8",
-    "color.border-control": "#56453F",
-    "color.border-strong": "#BAAB92",
+    "color.accent": "#B45309",
+    "color.accent-subtle": "rgba(180, 83, 9, 0.14)",
+    "color.bg": "#F7F7F5",
+    "color.bg-subtle": "#F3F3F0",
+    "color.border": "rgba(56, 43, 31, 0.13)",
+    "color.border-control": "#6C6C68",
+    "color.border-strong": "#6C6C68",
     "color.danger": "#A93226",
-    "color.focus-ring": "#56453F",
-    "color.grid-line": "rgba(86, 69, 63, 0.05)",
-    "color.on-accent": "#F1F0E5",
-    "color.success": "#56453F",
+    "color.focus-ring": "#B45309",
+    "color.grid-line": "rgba(17, 17, 17, 0.05)",
+    "color.on-accent": "#FFFFFF",
+    "color.success": "#3F3F3F",
     "color.surface": "#FFFFFF",
-    "color.text": "#56453F",
-    "color.text-muted": "#56453F",
-    "color.text-secondary": "#56453F",
-    "color.warning": "#56453F"
+    "color.text": "#111111",
+    "color.text-muted": "#6C6C68",
+    "color.text-secondary": "#3F3F3F",
+    "color.warning": "#B45309"
   },
   "dark": {
-    "color.accent": "#C39E88",
-    "color.accent-subtle": "rgba(195, 158, 136, 0.13)",
-    "color.bg": "#2D2521",
-    "color.bg-subtle": "#1F1A17",
-    "color.border": "#56453F",
-    "color.border-control": "#A37764",
-    "color.border-strong": "#A37764",
+    "color.accent": "#F59E0B",
+    "color.accent-subtle": "rgba(245, 158, 11, 0.14)",
+    "color.bg": "#080A0D",
+    "color.bg-subtle": "#050608",
+    "color.border": "rgba(255, 255, 255, 0.12)",
+    "color.border-control": "#898989",
+    "color.border-strong": "#898989",
     "color.danger": "#EF9A9A",
-    "color.focus-ring": "#C39E88",
+    "color.focus-ring": "#F59E0B",
     "color.grid-line": "rgba(255, 255, 255, 0.04)",
-    "color.on-accent": "#2D2521",
+    "color.on-accent": "#111111",
     "color.success": "#34D399",
-    "color.surface": "#3C332E",
-    "color.text": "#F1F0E5",
-    "color.text-muted": "#C5AA9B",
-    "color.text-secondary": "#BAAB92",
-    "color.warning": "#BAAB92"
+    "color.surface": "#101216",
+    "color.text": "#F7F7F7",
+    "color.text-muted": "#898989",
+    "color.text-secondary": "#B6B6B6",
+    "color.warning": "#F59E0B"
   },
   "shared": {
     "font.family.display": "Inter, system-ui, -apple-system, 'Segoe UI', sans-serif",

@@ -3,47 +3,52 @@
     "bg": {
       "$type": "color",
       "$description": "page background",
-      "$value": "{color.espresso.800}"
+      "$value": "{color.night.950}"
     },
     "bg-subtle": {
       "$type": "color",
       "$description": "alternate section background",
-      "$value": "{color.espresso.950}"
+      "$value": "{color.night.975}"
     },
     "surface": {
       "$type": "color",
       "$description": "cards, panels, form fields",
-      "$value": "{color.espresso.600}"
+      "$value": "{color.night.900}"
     },
     "text": {
       "$type": "color",
       "$description": "primary text, headings",
-      "$value": "{color.cream.100}"
+      "$value": "{color.fog.50}"
     },
     "text-secondary": {
       "$type": "color",
       "$description": "body copy on subtle backgrounds",
-      "$value": "{color.tan.400}"
+      "$value": "{color.fog.300}"
     },
     "text-muted": {
       "$type": "color",
       "$description": "labels, captions, metadata",
-      "$value": "{color.rose.300}"
+      "$value": "{color.fog.500}"
     },
     "border": {
       "$type": "color",
       "$description": "hairlines, dividers (decorative)",
-      "$value": "{color.brown.700}"
+      "$value": "{color.white}",
+      "$extensions": {
+        "in.manjunathhk": {
+          "alpha": 0.12
+        }
+      }
     },
     "border-strong": {
       "$type": "color",
       "$description": "emphasised rules (decorative; not for control outlines)",
-      "$value": "{color.copper.500}"
+      "$value": "{color.fog.500}"
     },
     "border-control": {
       "$type": "color",
       "$description": "outlines of form controls and other UI that must be seen (3:1)",
-      "$value": "{color.copper.500}"
+      "$value": "{color.fog.500}"
     },
     "grid-line": {
       "$type": "color",
@@ -58,20 +63,20 @@
     "accent": {
       "$type": "color",
       "$description": "links, highlights, primary actions",
-      "$value": "{color.copper.300}"
+      "$value": "{color.amber.500}"
     },
     "on-accent": {
       "$type": "color",
       "$description": "text or icons on accent fills",
-      "$value": "{color.espresso.800}"
+      "$value": "{color.ink.900}"
     },
     "accent-subtle": {
       "$type": "color",
-      "$description": "tinted backgrounds; accent at 13% alpha",
-      "$value": "{color.copper.300}",
+      "$description": "tinted backgrounds; accent at 14% alpha",
+      "$value": "{color.amber.500}",
       "$extensions": {
         "in.manjunathhk": {
-          "alpha": 0.13
+          "alpha": 0.14
         }
       }
     },
@@ -88,12 +93,12 @@
     "warning": {
       "$type": "color",
       "$description": "warnings",
-      "$value": "{color.tan.400}"
+      "$value": "{color.amber.500}"
     },
     "focus-ring": {
       "$type": "color",
       "$description": "focus outline; same as accent",
-      "$value": "{color.copper.300}"
+      "$value": "{color.amber.500}"
     }
   }
 }
