@@ -28,12 +28,18 @@ Why `*`: assets are public, credentials are never sent, and we avoid per-origin 
    → **Create rule**.
 2. Match: field `Hostname`, operator `equals`, value `design.manjunathhk.in`.
 3. Cache eligibility: **Eligible for cache**.
-4. Leave **Edge TTL** and **Browser TTL** unset — don't click "Add setting" on
-   either. Unset is what makes Cloudflare respect the origin `Cache-Control`
-   header, which is what `upload-manifest.ts` sets per object. Do not add a
-   Cache Response Rule to rewrite headers at the edge; R2 already serves the
-   right ones.
-5. Deploy.
+4. Leave **Edge TTL** unset.
+5. **Browser TTL**: click **Add setting** and choose **Respect origin TTL**.
+   Do not leave it unset: an unset Browser TTL falls back to the zone's
+   **Browser Cache TTL** (4 hours by default), and Cloudflare then raises any
+   shorter origin `max-age` to that value. The alias objects' `max-age=300`
+   would be served as `max-age=14400`, and `scripts/verify-cdn.ts` fails the
+   release on it (as it did on the first `v1.2.0` run). Setting it here,
+   rather than in the zone-wide Browser Cache TTL, leaves the other sites on
+   the zone untouched.
+6. Do not add a Cache Response Rule to rewrite headers at the edge; R2
+   already serves the right ones (`upload-manifest.ts` sets them per object).
+7. Deploy.
 
 Pinned paths (`/vX.Y.Z/`) use long immutable cache. Alias paths (`/vMAJOR/`) use short cache.
 
