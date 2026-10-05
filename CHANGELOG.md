@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- _No unreleased changes yet._
+### Documentation
+
+- `docs/cdn.md`: the Cloudflare Cache Rule must set Browser TTL to
+  "Respect origin TTL"; left unset, Cloudflare serves the `/vMAJOR/` alias
+  with a 4-hour browser cache instead of 5 minutes (#87).
 
 ## [1.2.0] - 2026-10-05
 
