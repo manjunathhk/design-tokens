@@ -312,7 +312,7 @@ html[data-layout="full"] main { max-width: none; }
 .snippet { display: grid; gap: var(--mk-spacing-2); }
 .snippet-head { display: flex; justify-content: space-between; align-items: center; gap: var(--mk-spacing-3); }
 :focus-visible { outline: 2px solid var(--mk-color-focus-ring); outline-offset: 2px; }
-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mk-spacing-12); max-width: 80rem; margin: 0 auto; padding: var(--mk-spacing-10) var(--mk-layout-gutter) var(--mk-spacing-24); }
+main { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mk-spacing-12); max-width: var(--mk-layout-container-max); margin: 0 auto; padding: var(--mk-spacing-10) var(--mk-layout-gutter) var(--mk-spacing-24); }
 section { background: var(--mk-color-surface); border: 1px solid var(--mk-color-border); border-radius: var(--mk-radius-lg); padding: var(--mk-spacing-6); }
 .stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mk-spacing-4); align-content: start; }
 .grid > * { min-width: 0; }

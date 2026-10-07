@@ -4,7 +4,8 @@
  *   • every preview frame is sized to its content and does not scroll sideways;
  *   • the theme toggle reaches every frame;
  *   • section links collapse behind a menu button at breakpoint.md and below;
- *   • the width toggle lifts the 80rem cap and is remembered across reloads;
+ *   • main is capped at layout.container-max; the width toggle lifts the cap
+ *     and is remembered across reloads;
  *   • forced-state copies draw the focus ring from the tokens.
  */
 
@@ -15,7 +16,7 @@ import { test, expect, type Page } from "@playwright/test";
 
 const SPECIMEN = pathToFileURL(resolve("docs/index.html")).href;
 const tokens = JSON.parse(readFileSync("dist/tokens.json", "utf8")) as Record<
-  "light" | "dark",
+  "light" | "dark" | "shared",
   Record<string, string>
 >;
 
@@ -111,14 +112,19 @@ test("section links show inline and the menu button is hidden at desktop width",
   await expect(page.locator("#toc-links")).toBeVisible();
 });
 
-test("width toggle removes the 80rem cap and is remembered after a reload", async ({ page }) => {
+test("main is capped at layout.container-max until the width toggle lifts it, and stays lifted after a reload", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1920, height: 900 });
   await page.goto(SPECIMEN);
   const mainWidth = () =>
     page.locator("main").evaluate((main) => main.getBoundingClientRect().width);
 
+  await expect(page.locator("main"), "main content width before the toggle").toHaveCSS(
+    "width",
+    tokens.shared["layout.container-max"] ?? "",
+  );
   const capped = await mainWidth();
-  expect(capped, "main width before the toggle").toBeLessThan(1920);
   await page.click("#width-toggle");
   await expect(page.locator("#width-toggle")).toHaveAttribute("aria-pressed", "true");
   const full = await mainWidth();
