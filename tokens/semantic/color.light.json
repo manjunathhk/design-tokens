@@ -60,6 +60,11 @@
       "$description": "links, highlights, primary actions",
       "$value": "{color.amber.700}"
     },
+    "accent-hover": {
+      "$type": "color",
+      "$description": "accent fills on hover; on-accent stays readable on it",
+      "$value": "{color.amber.800}"
+    },
     "on-accent": {
       "$type": "color",
       "$description": "text or icons on accent fills",
@@ -79,6 +84,11 @@
       "$type": "color",
       "$description": "errors",
       "$value": "{color.red.700}"
+    },
+    "on-danger": {
+      "$type": "color",
+      "$description": "text or icons on danger fills",
+      "$value": "{color.white}"
     },
     "success": {
       "$type": "color",

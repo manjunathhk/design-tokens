@@ -4,7 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- _No unreleased changes yet._
+Adds tokens; nothing is removed, renamed or changed (MINOR).
+
+### Added
+
+- `color.accent-hover` (`--mk-color-accent-hover`): accent fills on hover,
+  `amber.800` in light and `amber.300` in dark, with `on-accent` checked at
+  4.5:1 against it.
+- `color.on-danger` (`--mk-color-on-danger`): text and icons on `danger`
+  fills, white in light and `stone.900` in dark, checked at 4.5:1 against
+  `danger`.
 
 ## [1.4.0] - 2026-10-07
 

@@ -62,7 +62,7 @@ export const GROUPS: GroupSpec[] = [
       {
         id: "buttons",
         title: "Button variants",
-        note: "Primary, secondary, quiet and destructive.",
+        note: "Primary, secondary, quiet, and destructive outlined and filled.",
         states: FORCED_STATES,
       },
       {
@@ -260,32 +260,34 @@ export const GROUPS: GroupSpec[] = [
 
 export const GAPS: Gap[] = [
   {
-    pattern: "Primary button hover and pressed",
-    missing: "Hover and pressed shades of color.accent.",
-    fallback: "Hover lifts the button with shadow.raised; pressed moves it down 1px.",
+    pattern: "Filled destructive button hover",
+    missing: "A hover shade of color.danger.",
+    fallback: "Hover underlines the label.",
   },
   {
-    pattern: "Filled destructive button and filled status badges",
+    pattern: "Filled status badges",
     missing:
-      "Text colours for use on danger, success, warning and info fills, checked at 4.5:1 against them.",
+      "Text colours for use on success, warning and info fills, checked at 4.5:1 against them.",
     fallback:
       "Outlined in the status colour, which already meets 4.5:1 on bg, bg-subtle and surface.",
   },
   {
     pattern: "Tinted alert backgrounds",
     missing: "A subtle tint per status colour, like color.accent-subtle for accent.",
-    fallback: "Alerts sit on surface with a status-coloured edge, icon and title.",
+    fallback:
+      "Alerts sit on surface with a status-coloured edge, icon and title. Not planned: at 14% alpha, success and warning text fail 4.5:1 on their own tint in light mode.",
   },
   {
     pattern: "Dialog backdrop",
     missing: "A scrim colour to dim the page behind a modal dialog.",
-    fallback: "The backdrop blurs the page (backdrop-filter) without dimming it.",
+    fallback:
+      "The backdrop blurs the page (backdrop-filter) without dimming it. To be added when a site uses modal dialogs.",
   },
   {
     pattern: "Disabled controls",
     missing: "A disabled foreground and background pair.",
     fallback:
-      "bg-subtle fill, text-muted label and a dashed border-control outline. WCAG 2.2 exempts disabled controls from contrast, so a token here is a design choice, not a compliance fix.",
+      "bg-subtle fill, text-muted label and a dashed border-control outline. Not planned: WCAG 2.2 exempts disabled controls from contrast.",
   },
 ];
 

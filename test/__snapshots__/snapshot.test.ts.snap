@@ -1,9 +1,10 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`dist/tokens.css matches the snapshot 1`] = `
-"/*! @manjunathhk/design-tokens v1.4.0 */
+"/*! @manjunathhk/design-tokens v1.5.0 */
 :root {
   --mk-color-accent: #B45309;
+  --mk-color-accent-hover: #92400E;
   --mk-color-accent-subtle: rgba(180, 83, 9, 0.14);
   --mk-color-bg: #FAFAF9;
   --mk-color-bg-subtle: #F5F5F4;
@@ -15,6 +16,7 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
   --mk-color-grid-line: rgba(28, 25, 23, 0.05);
   --mk-color-info: #1D4ED8;
   --mk-color-on-accent: #FFFFFF;
+  --mk-color-on-danger: #FFFFFF;
   --mk-color-success: #15803D;
   --mk-color-surface: #FFFFFF;
   --mk-color-text: #1C1917;
@@ -81,6 +83,7 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --mk-color-accent: #FBBF24;
+    --mk-color-accent-hover: #FCD34D;
     --mk-color-accent-subtle: rgba(251, 191, 36, 0.14);
     --mk-color-bg: #0C0A09;
     --mk-color-bg-subtle: #1C1917;
@@ -92,6 +95,7 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
     --mk-color-grid-line: rgba(255, 255, 255, 0.04);
     --mk-color-info: #60A5FA;
     --mk-color-on-accent: #1C1917;
+    --mk-color-on-danger: #1C1917;
     --mk-color-success: #4ADE80;
     --mk-color-surface: #292524;
     --mk-color-text: #FAFAF9;
@@ -104,6 +108,7 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
 
 :root[data-theme="dark"] {
   --mk-color-accent: #FBBF24;
+  --mk-color-accent-hover: #FCD34D;
   --mk-color-accent-subtle: rgba(251, 191, 36, 0.14);
   --mk-color-bg: #0C0A09;
   --mk-color-bg-subtle: #1C1917;
@@ -115,6 +120,7 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
   --mk-color-grid-line: rgba(255, 255, 255, 0.04);
   --mk-color-info: #60A5FA;
   --mk-color-on-accent: #1C1917;
+  --mk-color-on-danger: #1C1917;
   --mk-color-success: #4ADE80;
   --mk-color-surface: #292524;
   --mk-color-text: #FAFAF9;
@@ -128,9 +134,10 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
 
 exports[`dist/tokens.json matches the snapshot 1`] = `
 "{
-  "version": "1.4.0",
+  "version": "1.5.0",
   "light": {
     "color.accent": "#B45309",
+    "color.accent-hover": "#92400E",
     "color.accent-subtle": "rgba(180, 83, 9, 0.14)",
     "color.bg": "#FAFAF9",
     "color.bg-subtle": "#F5F5F4",
@@ -142,6 +149,7 @@ exports[`dist/tokens.json matches the snapshot 1`] = `
     "color.grid-line": "rgba(28, 25, 23, 0.05)",
     "color.info": "#1D4ED8",
     "color.on-accent": "#FFFFFF",
+    "color.on-danger": "#FFFFFF",
     "color.success": "#15803D",
     "color.surface": "#FFFFFF",
     "color.text": "#1C1917",
@@ -151,6 +159,7 @@ exports[`dist/tokens.json matches the snapshot 1`] = `
   },
   "dark": {
     "color.accent": "#FBBF24",
+    "color.accent-hover": "#FCD34D",
     "color.accent-subtle": "rgba(251, 191, 36, 0.14)",
     "color.bg": "#0C0A09",
     "color.bg-subtle": "#1C1917",
@@ -162,6 +171,7 @@ exports[`dist/tokens.json matches the snapshot 1`] = `
     "color.grid-line": "rgba(255, 255, 255, 0.04)",
     "color.info": "#60A5FA",
     "color.on-accent": "#1C1917",
+    "color.on-danger": "#1C1917",
     "color.success": "#4ADE80",
     "color.surface": "#292524",
     "color.text": "#FAFAF9",
