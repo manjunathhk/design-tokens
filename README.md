@@ -10,7 +10,7 @@ This package is tokens and a small opt-in base stylesheet, nothing else:
 - design tokens for colour (light and dark), typography, spacing, radius,
   shadow, motion, layout, z-index and a breakpoint reference;
 - `base.css`, a small opt-in base (reset, body, links, selection, focus ring,
-  reduced motion) built only on the tokens;
+  reduced motion, reading defaults) built only on the tokens;
 - self-hosted Inter and JetBrains Mono fonts and `fonts.css`.
 
 It is never a place for UI components (buttons, cards, nav — those are

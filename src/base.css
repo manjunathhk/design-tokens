@@ -48,6 +48,19 @@
   font-weight: var(--mk-font-weight-semibold);
   line-height: var(--mk-font-line-height-snug);
   letter-spacing: var(--mk-font-letter-spacing-heading);
+  text-wrap: balance;
+}
+
+:where(p, li) {
+  max-width: 65ch;
+}
+
+:where(p) {
+  text-wrap: pretty;
+}
+
+:where(table) {
+  font-variant-numeric: tabular-nums;
 }
 
 :where(code, kbd, samp, pre) {

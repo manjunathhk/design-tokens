@@ -130,7 +130,10 @@ CDN verification can prove which version a URL serves.
   cannot sit inside `:where()`, so resets target them as
   `:where(*)::before, :where(*)::after`. Any site rule wins without
   `!important`. stylelint bans colour literals in `src/base.css`;
-  `transparent` is allowed.
+  `transparent` is allowed. It also sets reading defaults: `p` and `li` are
+  capped at `65ch`, headings use `text-wrap: balance`, paragraphs
+  `text-wrap: pretty`, and tables tabular numerals. Set `max-width: none` on
+  an element to opt out.
 - **D36. Shareable stylelint config** at `@manjunathhk/design-tokens/stylelint`
   bans `color-no-hex`, named colours and every colour function
   (`/^(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix)$/i`), including
