@@ -1,7 +1,15 @@
 import { MODES, type Mode, type Token, type TokenSet } from "./tokens.js";
 
 const BACKGROUNDS = ["bg", "bg-subtle", "surface"] as const;
-const TEXT = ["text", "text-secondary", "text-muted", "danger", "success", "warning"] as const;
+const TEXT = [
+  "text",
+  "text-secondary",
+  "text-muted",
+  "danger",
+  "success",
+  "warning",
+  "info",
+] as const;
 // D52: accent is not required on bg-subtle; it is an action colour, not section text.
 const ACCENT_BACKGROUNDS = ["bg", "surface"] as const;
 // D2: border-control, not border-strong, carries the 3:1 non-text rule.

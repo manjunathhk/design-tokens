@@ -28,14 +28,17 @@ describe("specimen page", () => {
     expect(html).toContain("Spacing");
     expect(html).toContain("Radius");
     expect(html).toContain("Motion");
-    expect(html).toContain("Consumption snippets");
   });
 
-  it("contains specimen-only data-theme controls", () => {
-    expect(html).toContain('name="theme" value="system"');
-    expect(html).toContain('name="theme" value="light"');
-    expect(html).toContain('name="theme" value="dark"');
-    expect(html).toContain('root.setAttribute("data-theme", value)');
+  it("contains a specimen-only light/dark theme toggle", () => {
+    expect(html).toContain('id="theme-toggle"');
+    expect(html).toContain('root.setAttribute("data-theme", isDark() ? "light" : "dark")');
+  });
+
+  it("has copyable consumption snippets", () => {
+    expect(html).toContain("Use it");
+    expect(html).toContain("data-copy=");
+    expect(html).toContain("https://design.manjunathhk.in/v1/index.css");
   });
 
   it("includes contrast rows and shadow.raised value from tokens", () => {

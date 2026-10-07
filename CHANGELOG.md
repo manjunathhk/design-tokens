@@ -6,6 +6,23 @@ All notable changes to this project will be documented in this file.
 
 - _No unreleased changes yet._
 
+## [1.4.0] - 2026-10-07
+
+Adds a token and changes values; nothing is removed or renamed (MINOR).
+
+### Added
+
+- `color.info` (`--mk-color-info`) in both modes, with the same contrast
+  checks as `danger`, `success` and `warning`.
+
+### Changed
+
+- Colour palette moves to warm stone greys with Tailwind amber, green,
+  yellow, orange, red and blue (D47). `success`, `warning` and `danger` are
+  now distinct hues; `border` is a solid stone tone, not a translucent tint.
+- Reading defaults in `base.css`: `65ch` measure for `p` and `li`, balanced
+  headings, pretty-wrapped paragraphs, tabular numerals in tables (D23).
+
 ## [1.3.0] - 2026-10-05
 
 Token values change; no token is added, removed or renamed (MINOR).

@@ -1,6 +1,6 @@
 {
   "name": "@manjunathhk/design-tokens",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Design tokens and a small opt-in base stylesheet shared by Manjunath's websites.",
   "license": "MIT",
   "author": "Manjunath Krishnasa",
