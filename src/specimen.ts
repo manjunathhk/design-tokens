@@ -120,11 +120,6 @@ const motionRows = (set: TokenSet) =>
     </tr>`,
   );
 
-const snippet = (title: string, shown: string, copied: string) => `<div class="snippet">
-        <div class="snippet-head"><h3>${title}</h3><button type="button" data-copy="${escapeHtml(copied)}">Copy</button></div>
-        <pre>${shown}</pre>
-      </div>`;
-
 /** Inline stroke icons for the specimen's own controls; drawn in currentColor, hidden from assistive tech. */
 const icon = (name: string, paths: string) =>
   `<svg class="icon icon-${name}" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${paths}</svg>`;
@@ -136,6 +131,20 @@ const SUN_ICON = icon(
   "sun",
   '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
 );
+const COPY_ICON = icon(
+  "copy",
+  '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+);
+const CHECK_ICON = icon("check", '<path d="M20 6 9 17l-5-5"/>');
+
+/** Code with its copy button in the top-right corner of the box. `shown` is already escaped. */
+const codeBox = (label: string, shown: string, copied: string) =>
+  `<div class="code"><pre>${shown}</pre><button type="button" class="icon-button copy-button" aria-label="Copy ${escapeHtml(label)}" title="Copy" data-copy="${escapeHtml(copied)}">${COPY_ICON}${CHECK_ICON}</button></div>`;
+
+const snippet = (title: string, shown: string, copied: string) => `<div class="snippet">
+        <h3>${title}</h3>
+        ${codeBox(title, shown, copied)}
+      </div>`;
 
 const STATE_LABELS: Record<ForcedState, string> = {
   hover: "Hover",
@@ -193,10 +202,8 @@ ${copy(example.html)}${forced}
 </html>`;
 }
 
-const codeBlock = (label: string, code: string) => `<div class="code-block">
-          <details><summary>${escapeHtml(label)}</summary><pre>${escapeHtml(code)}</pre></details>
-          <button type="button" aria-label="Copy ${escapeHtml(label)}" data-copy="${escapeHtml(code)}">Copy</button>
-        </div>`;
+const codeBlock = (label: string, code: string) =>
+  `<details><summary>${escapeHtml(label)}</summary>${codeBox(label, escapeHtml(code), code)}</details>`;
 
 const stateNote = (example: Example) =>
   example.states.length === 0
@@ -288,9 +295,8 @@ h4 { margin: 0; font-size: var(--mk-font-size-md); font-weight: var(--mk-font-we
 .example { padding-top: var(--mk-spacing-4); }
 .preview-row { display: flex; flex-wrap: wrap; gap: var(--mk-spacing-4); align-items: flex-start; }
 .preview { display: block; max-width: 100%; height: 6rem; border: 1px solid var(--mk-color-border); border-radius: var(--mk-radius-md); }
-.code-block { display: flex; gap: var(--mk-spacing-3); align-items: flex-start; }
-.code-block details { flex: 1; min-width: 0; }
-.code-block > button { margin-top: var(--mk-spacing-2); }
+.code { position: relative; }
+.code pre { padding-right: var(--mk-spacing-10); }
 .tokens-used { display: flex; flex-wrap: wrap; gap: var(--mk-spacing-1) var(--mk-spacing-2); align-items: baseline; max-width: none; font-size: var(--mk-font-size-sm); }
 .tokens-used span { color: var(--mk-color-text-muted); font-weight: var(--mk-font-weight-semibold); }
 .tokens-used code { font-size: var(--mk-font-size-xs); }
@@ -310,7 +316,11 @@ button:hover { background: var(--mk-color-accent-subtle); }
 .theme-toggle[data-dark] .icon-sun { display: block; }
 html[data-layout="full"] main { max-width: none; }
 .snippet { display: grid; gap: var(--mk-spacing-2); }
-.snippet-head { display: flex; justify-content: space-between; align-items: center; gap: var(--mk-spacing-3); }
+.copy-button { position: absolute; top: var(--mk-spacing-1); right: var(--mk-spacing-1); border-color: transparent; background: transparent; color: var(--mk-color-text-muted); }
+.copy-button:hover { color: var(--mk-color-text); }
+.icon-button.copy-button .icon { width: 1rem; height: 1rem; }
+.copy-button .icon-check, .copy-button[data-copied] .icon-copy { display: none; }
+.copy-button[data-copied] .icon-check { display: block; }
 :focus-visible { outline: 2px solid var(--mk-color-focus-ring); outline-offset: 2px; }
 main { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mk-spacing-12); max-width: var(--mk-layout-container-max); margin: 0 auto; padding: var(--mk-spacing-10) var(--mk-layout-gutter) var(--mk-spacing-24); }
 section { background: var(--mk-color-surface); border: 1px solid var(--mk-color-border); border-radius: var(--mk-radius-lg); padding: var(--mk-spacing-6); }
@@ -553,13 +563,25 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
 
     for (const button of document.querySelectorAll("[data-copy]")) {
       button.addEventListener("click", async () => {
+        const label = button.getAttribute("aria-label");
+        const say = (text) => {
+          button.setAttribute("aria-label", text);
+          button.title = text;
+        };
         try {
           await navigator.clipboard.writeText(button.dataset.copy);
-          button.textContent = "Copied";
+          button.toggleAttribute("data-copied", true);
+          say("Copied");
         } catch {
-          button.textContent = "Press Ctrl+C";
+          // Select the code so the reader can copy it by hand.
+          getSelection().selectAllChildren(button.parentElement.querySelector("pre"));
+          say("Press Ctrl+C to copy");
         }
-        setTimeout(() => (button.textContent = "Copy"), 1500);
+        setTimeout(() => {
+          button.removeAttribute("data-copied");
+          button.setAttribute("aria-label", label);
+          button.title = "Copy";
+        }, 1500);
       });
     }
   </script>

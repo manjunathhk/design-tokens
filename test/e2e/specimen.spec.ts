@@ -6,6 +6,7 @@
  *   • section links collapse behind a menu button at breakpoint.md and below;
  *   • main is capped at layout.container-max; the width toggle lifts the cap
  *     and is remembered across reloads;
+ *   • copy buttons sit inside their code box and copy the exact snippet;
  *   • forced-state copies draw the focus ring from the tokens.
  */
 
@@ -133,6 +134,46 @@ test("main is capped at layout.container-max until the width toggle lifts it, an
   await page.reload();
   await expect(page.locator("#width-toggle")).toHaveAttribute("aria-pressed", "true");
   expect(await mainWidth(), "main width after a reload").toBe(full);
+});
+
+test("copy buttons sit inside the code box and copy the exact snippet", async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto(SPECIMEN);
+  const panel = page.locator("#in-use details").first();
+  const button = panel.locator(".copy-button");
+  await expect(button, "copy button while the panel is closed").toBeHidden();
+
+  await panel.locator("summary").click();
+  await expect(button, "copy button once the panel is open").toBeVisible();
+  const box = async (selector: string) => {
+    const rect = await panel.locator(selector).boundingBox();
+    if (!rect) throw new Error(`${selector} in the first In use panel has no box.`);
+    return rect;
+  };
+  const pre = await box("pre");
+  const icon = await box(".copy-button");
+  expect(icon.x, "copy button left edge").toBeGreaterThanOrEqual(pre.x);
+  expect(icon.y, "copy button top edge").toBeGreaterThanOrEqual(pre.y);
+  expect(icon.x + icon.width, "copy button right edge").toBeLessThanOrEqual(pre.x + pre.width);
+  expect(icon.y + icon.height, "copy button bottom edge").toBeLessThanOrEqual(pre.y + pre.height);
+
+  await button.click();
+  await expect(button).toHaveAttribute("data-copied", "");
+  await expect(button).toHaveAttribute("aria-label", "Copied");
+  await expect(button.locator(".icon-check")).toBeVisible();
+  await expect(button.locator(".icon-copy")).toBeHidden();
+  // The Windows clipboard stores text with CRLF line endings.
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied.replaceAll("\r\n", "\n"), "clipboard text").toBe(
+    await button.getAttribute("data-copy"),
+  );
+
+  await expect(button, "copy button after the check has shown").not.toHaveAttribute("data-copied");
+  await expect(button.locator(".icon-copy")).toBeVisible();
+  await expect(button).toHaveAttribute("aria-label", /^Copy /);
 });
 
 /**

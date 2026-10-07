@@ -10,6 +10,9 @@ All notable changes to this project will be documented in this file.
   toggle that is remembered across reloads, and a section menu that collapses
   behind a menu button at `breakpoint.md` (900px) and below. The specimen
   only; nothing in the package changes (#102).
+- The specimen's copy buttons are a copy icon in the top-right corner of
+  each code box; it turns into a check mark once the code is copied. The
+  specimen only; nothing in the package changes (#105).
 
 ## [1.5.0] - 2026-10-07
 
