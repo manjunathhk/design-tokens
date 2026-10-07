@@ -111,6 +111,11 @@ const motionRows = (set: TokenSet) =>
     </tr>`,
   );
 
+const snippet = (title: string, shown: string, copied: string) => `<div class="snippet">
+        <div class="snippet-head"><h3>${title}</h3><button type="button" data-copy="${escapeHtml(copied)}">Copy</button></div>
+        <pre>${shown}</pre>
+      </div>`;
+
 export function specimenHtml(set: TokenSet): string {
   const shadow = tokenValue(set.shared, "shadow.raised");
   const major = set.version.split(".")[0] ?? "1";
@@ -135,8 +140,11 @@ p { margin: 0; max-width: 65ch; text-wrap: pretty; }
 .toc { position: sticky; top: 0; z-index: var(--mk-z-index-nav); display: flex; flex-wrap: wrap; gap: var(--mk-spacing-2) var(--mk-spacing-5); align-items: center; padding: var(--mk-spacing-3) var(--mk-layout-gutter); background: var(--mk-color-bg); border-bottom: 1px solid var(--mk-color-border); font-size: var(--mk-font-size-sm); }
 .toc a { color: var(--mk-color-text-secondary); text-decoration: none; }
 .toc a:hover { color: var(--mk-color-accent); text-decoration: underline; }
-.toc .theme { margin-left: auto; display: flex; gap: var(--mk-spacing-3); align-items: center; border: 0; padding: 0; }
-.toc .theme legend { float: left; margin-right: var(--mk-spacing-3); padding: 0; color: var(--mk-color-text-muted); }
+button { cursor: pointer; border: 1px solid var(--mk-color-border-control); border-radius: var(--mk-radius-pill); background: var(--mk-color-surface); color: var(--mk-color-text); padding: var(--mk-spacing-1) var(--mk-spacing-3); font-size: var(--mk-font-size-sm); transition: background-color var(--mk-motion-duration-fast) var(--mk-motion-ease); }
+button:hover { background: var(--mk-color-accent-subtle); }
+.theme-toggle { margin-left: auto; }
+.snippet { display: grid; gap: var(--mk-spacing-2); }
+.snippet-head { display: flex; justify-content: space-between; align-items: center; gap: var(--mk-spacing-3); }
 :focus-visible { outline: 2px solid var(--mk-color-focus-ring); outline-offset: 2px; }
 main { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mk-spacing-12); max-width: 80rem; margin: 0 auto; padding: var(--mk-spacing-10) var(--mk-layout-gutter) var(--mk-spacing-24); }
 section { background: var(--mk-color-surface); border: 1px solid var(--mk-color-border); border-radius: var(--mk-radius-lg); padding: var(--mk-spacing-6); }
@@ -171,32 +179,35 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
 .preview-card.on-bg { background: var(--mk-color-bg); }
 .preview-card.on-subtle { background: var(--mk-color-bg-subtle); }
 .preview-grid { display: grid; gap: var(--mk-spacing-4); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
-@media (max-width: 40rem) { .toc .theme { margin-left: 0; } section { padding: var(--mk-spacing-4); } }
+@media (max-width: 40rem) { .theme-toggle { margin-left: 0; } section { padding: var(--mk-spacing-4); } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   </style>
 </head>
 <body>
   <nav class="toc" aria-label="Sections">
     <strong>Token specimen</strong>
+    <a href="#usage">Use it</a>
     <a href="#colour">Colour</a>
     <a href="#type">Type</a>
     <a href="#spacing">Spacing</a>
     <a href="#radius">Radius</a>
     <a href="#shadow">Shadow</a>
     <a href="#motion">Motion</a>
-    <a href="#usage">Usage</a>
-    <fieldset class="theme">
-      <legend>Theme</legend>
-      <label><input type="radio" name="theme" value="system" checked> system</label>
-      <label><input type="radio" name="theme" value="light"> light</label>
-      <label><input type="radio" name="theme" value="dark"> dark</label>
-    </fieldset>
+    <button type="button" class="theme-toggle" id="theme-toggle"></button>
   </nav>
   <main>
     <header class="stack">
       <h1>Token specimen</h1>
       <p class="lede">Version <code>${set.version}</code>. Every semantic token in both modes. The theme switch is for review only.</p>
     </header>
+
+    <section class="stack" id="usage">
+      <h2>Use it</h2>
+      <p class="lede">Pick one way to load the tokens. Most sites want the CDN link.</p>
+      ${snippet("CDN link", `&lt;link rel="stylesheet" href="https://design.manjunathhk.in/v${major}/index.css"&gt;`, `<link rel="stylesheet" href="https://design.manjunathhk.in/v${major}/index.css">`)}
+      ${snippet("npm CSS import", "@import &quot;@manjunathhk/design-tokens/index.css&quot;;", '@import "@manjunathhk/design-tokens/index.css";')}
+      ${snippet("Theme override", "&lt;html data-theme=&quot;dark&quot;&gt;&lt;/html&gt;", '<html data-theme="dark"></html>')}
+    </section>
 
     <section class="stack" id="colour">
       <h2>Colour swatches and contrast ratios</h2>
@@ -269,25 +280,33 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
         <tbody>${motionRows(set).join("")}</tbody>
       </table></div>
     </section>
-
-    <section class="stack" id="usage">
-      <h2>Consumption snippets</h2>
-      <h3>CDN link</h3>
-      <pre>&lt;link rel="stylesheet" href="https://design.manjunathhk.in/v${major}/index.css"&gt;</pre>
-      <h3>npm CSS import</h3>
-      <pre>@import "@manjunathhk/design-tokens/index.css";</pre>
-      <h3>Theme override</h3>
-      <pre>&lt;html data-theme="dark"&gt;&lt;/html&gt;</pre>
-    </section>
   </main>
 
   <script>
-    for (const control of document.querySelectorAll('input[name="theme"]')) {
-      control.addEventListener("change", () => {
-        const root = document.documentElement;
-        const value = control.value;
-        if (value === "system") root.removeAttribute("data-theme");
-        else root.setAttribute("data-theme", value);
+    const root = document.documentElement;
+    const toggle = document.getElementById("theme-toggle");
+    const dark = window.matchMedia("(prefers-color-scheme: dark)");
+    const isDark = () => (root.dataset.theme ? root.dataset.theme === "dark" : dark.matches);
+    const sync = () => {
+      toggle.textContent = isDark() ? "Light mode" : "Dark mode";
+      toggle.setAttribute("aria-label", isDark() ? "Switch to light theme" : "Switch to dark theme");
+    };
+    toggle.addEventListener("click", () => {
+      root.setAttribute("data-theme", isDark() ? "light" : "dark");
+      sync();
+    });
+    dark.addEventListener("change", sync);
+    sync();
+
+    for (const button of document.querySelectorAll("[data-copy]")) {
+      button.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(button.dataset.copy);
+          button.textContent = "Copied";
+        } catch {
+          button.textContent = "Press Ctrl+C";
+        }
+        setTimeout(() => (button.textContent = "Copy"), 1500);
       });
     }
   </script>
