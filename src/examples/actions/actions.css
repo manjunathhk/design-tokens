@@ -30,8 +30,7 @@
   transform: translateY(1px);
 }
 
-/* Primary: the one main action on a view. No accent-hover token exists yet,
-   so hover lifts the button instead of changing its colour. */
+/* Primary: the one main action on a view. */
 .ex-button-primary {
   border-color: var(--mk-color-accent);
   background-color: var(--mk-color-accent);
@@ -39,12 +38,8 @@
 }
 
 .ex-button-primary:hover {
-  background-color: var(--mk-color-accent);
-  box-shadow: var(--mk-shadow-raised);
-}
-
-.ex-button-primary:active {
-  box-shadow: none;
+  border-color: var(--mk-color-accent-hover);
+  background-color: var(--mk-color-accent-hover);
 }
 
 /* Quiet: low-emphasis actions next to a primary one. */
@@ -60,7 +55,7 @@
   color: var(--mk-color-text);
 }
 
-/* Destructive: outlined, because no on-danger token exists for a filled one. */
+/* Destructive, outlined: a lower-emphasis delete next to other actions. */
 .ex-button-danger {
   border-color: var(--mk-color-danger);
   color: var(--mk-color-danger);
@@ -70,6 +65,19 @@
 .ex-button-danger:hover {
   background-color: var(--mk-color-surface);
   box-shadow: inset 0 0 0 1px var(--mk-color-danger);
+}
+
+/* Destructive, filled: the confirming action for something that cannot be
+   undone. No danger-hover token exists, so hover underlines the label. */
+.ex-button-danger-solid {
+  border-color: var(--mk-color-danger);
+  background-color: var(--mk-color-danger);
+  color: var(--mk-color-on-danger);
+}
+
+.ex-button-danger-solid:hover {
+  background-color: var(--mk-color-danger);
+  text-decoration: underline;
 }
 
 /* Disabled: no disabled colour tokens exist yet, so it is drawn with the

@@ -68,6 +68,11 @@ breaking one.
   a state is never signalled by colour alone being amber or grey. Dark
   `bg-subtle` is `stone.900` and `surface` is `stone.800`; a lighter `surface`
   (the midpoint `#373330`) fails `border-control` at 2.61:1 against it. `accent-subtle` follows `accent` at 14% alpha.
+  `accent-hover` is one step further from the page than `accent`: `amber.800`
+  in light, `amber.300` in dark. `on-danger` uses the same primitives as
+  `on-accent` (white in light, `stone.900` in dark) but is its own role, so
+  `danger` and `accent` can change independently. Both were chosen by the
+  owner from the specimen's "Not yet expressible" list (#99).
   `color.accent` is the accessible link/action role in both modes. The token
   files are the record of every current value.
 - **D2. `border-control` and `border-strong` are different roles.**
@@ -91,7 +96,8 @@ breaking one.
 - 4.5:1 for `text`, `text-secondary`, `text-muted`, `danger`, `success`,
   `warning` and `info` against `bg`, `bg-subtle` and `surface`;
 - 4.5:1 for `accent` against `bg` and `surface` (D52);
-- 4.5:1 for `on-accent` against `accent`;
+- 4.5:1 for `on-accent` against `accent` and `accent-hover`;
+- 4.5:1 for `on-danger` against `danger`;
 - 3:1 for `border-control` and `focus-ring` against `bg`, `bg-subtle` and
   `surface`.
 

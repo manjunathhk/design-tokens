@@ -44,12 +44,18 @@
       }
     },
     "amber": {
-      "$description": "Brand accent: 700 on light backgrounds, 400 on dark (Tailwind amber).",
+      "$description": "Brand accent: 700 on light backgrounds, 400 on dark; 800 and 300 are their hover steps (Tailwind amber).",
+      "300": {
+        "$value": "#FCD34D"
+      },
       "400": {
         "$value": "#FBBF24"
       },
       "700": {
         "$value": "#B45309"
+      },
+      "800": {
+        "$value": "#92400E"
       }
     },
     "green": {

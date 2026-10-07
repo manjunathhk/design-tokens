@@ -25,6 +25,8 @@ export const CONTRAST_PAIRS: ContrastPair[] = [
   ...TEXT.flatMap((fg) => BACKGROUNDS.map((bg) => ({ fg, bg, min: 4.5 }))),
   ...ACCENT_BACKGROUNDS.map((bg) => ({ fg: "accent", bg, min: 4.5 })),
   { fg: "on-accent", bg: "accent", min: 4.5 },
+  { fg: "on-accent", bg: "accent-hover", min: 4.5 },
+  { fg: "on-danger", bg: "danger", min: 4.5 },
   ...NON_TEXT.flatMap((fg) => BACKGROUNDS.map((bg) => ({ fg, bg, min: 3 }))),
 ];
 

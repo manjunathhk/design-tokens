@@ -155,6 +155,11 @@
   font-weight: var(--mk-font-weight-semibold);
 }
 
+.ex-page[aria-current="page"]:hover {
+  border-color: var(--mk-color-accent-hover);
+  background-color: var(--mk-color-accent-hover);
+}
+
 .ex-page[aria-disabled="true"] {
   border-style: dashed;
   background-color: var(--mk-color-bg-subtle);
