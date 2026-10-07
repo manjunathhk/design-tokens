@@ -51,6 +51,21 @@ describe("specimen page", () => {
     expect(html).toContain("https://design.manjunathhk.in/v1/index.css");
   });
 
+  it("puts every copy button inside its code box, as an icon", () => {
+    const buttons = [...html.matchAll(/<button[^>]*data-copy=[^>]*>/g)].map((match) => match[0]);
+    expect(buttons.length).toBeGreaterThan(0);
+    for (const button of buttons) {
+      const label = /aria-label="([^"]*)"/.exec(button)?.[1] ?? button.slice(0, 80);
+      expect(button, `${label}: copy-button class`).toContain('class="icon-button copy-button"');
+      expect(label, `${label}: aria-label`).toMatch(/^Copy /);
+    }
+    const boxed = html.match(/<div class="code"><pre>[^]*?<\/pre><button[^>]*data-copy=/g) ?? [];
+    expect(boxed.length, "copy buttons that directly follow a <pre> inside .code").toBe(
+      buttons.length,
+    );
+    expect(html.match(/class="icon icon-copy"/g)?.length).toBe(buttons.length);
+  });
+
   it("shows every token-in-use example with a preview and exact copy snippets (D53)", () => {
     const unescape = (value: string) =>
       value
