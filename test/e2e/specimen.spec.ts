@@ -79,6 +79,82 @@ test("theme toggle reaches every preview", async ({ page }) => {
   }
 });
 
+/**
+ * Every visible text in every preview, live and forced, against the background
+ * it is actually drawn on: translucent fills such as accent-subtle are
+ * composited over the opaque ancestor below them. 4.5:1 for all text (D52);
+ * disabled controls are exempt, as in WCAG 2.2 SC 1.4.3.
+ */
+for (const colorScheme of ["light", "dark"] as const) {
+  test(`all preview text meets 4.5:1 in OS ${colorScheme}, in every state`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme });
+    await page.goto(SPECIMEN);
+    await page.waitForLoadState("load");
+
+    const failures = await page.$$eval("iframe.preview", (frames) => {
+      type Rgba = [number, number, number, number];
+      const parse = (value: string): Rgba => {
+        const [r = 0, g = 0, b = 0, a = 1] = (value.match(/[\d.]+/g) ?? []).map(Number);
+        return [r, g, b, a];
+      };
+      const over = (top: Rgba, bottom: Rgba): Rgba => [
+        top[0] * top[3] + bottom[0] * (1 - top[3]),
+        top[1] * top[3] + bottom[1] * (1 - top[3]),
+        top[2] * top[3] + bottom[2] * (1 - top[3]),
+        1,
+      ];
+      const channel = (c: number) => {
+        const s = c / 255;
+        return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+      };
+      const luminance = (c: Rgba) =>
+        0.2126 * channel(c[0]) + 0.7152 * channel(c[1]) + 0.0722 * channel(c[2]);
+      const ratio = (a: Rgba, b: Rgba) => {
+        const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number];
+        return (hi + 0.05) / (lo + 0.05);
+      };
+      const backdrop = (element: Element): Rgba => {
+        const layers: Rgba[] = [];
+        for (let node: Element | null = element; node; node = node.parentElement) {
+          const layer = parse(getComputedStyle(node).backgroundColor);
+          if (layer[3] > 0) layers.push(layer);
+          if (layer[3] === 1) break;
+        }
+        return layers.reduceRight<Rgba>((below, layer) => over(layer, below), [255, 255, 255, 1]);
+      };
+
+      const found: string[] = [];
+      for (const frame of frames) {
+        const doc = (frame as HTMLIFrameElement).contentDocument;
+        if (!doc) continue;
+        for (const element of doc.body.querySelectorAll("*")) {
+          const text = [...element.childNodes]
+            .filter((node) => node.nodeType === Node.TEXT_NODE)
+            .map((node) => node.textContent?.trim() ?? "")
+            .join(" ")
+            .trim();
+          if (!text || element.getClientRects().length === 0) continue;
+          if (element.closest(':disabled, [aria-disabled="true"], option')) continue;
+          const fg = parse(getComputedStyle(element).color);
+          const bg = backdrop(element);
+          const measured = ratio(fg, bg);
+          if (measured < 4.5) {
+            const state = element.closest("[data-force]")?.getAttribute("data-force") ?? "live";
+            found.push(
+              `${frame.getAttribute("title")} [${state}] "${text.slice(0, 30)}": rgb(${fg.slice(0, 3).join(", ")}) on rgb(${bg
+                .slice(0, 3)
+                .map(Math.round)
+                .join(", ")}) is ${measured.toFixed(2)}:1`,
+            );
+          }
+        }
+      }
+      return found;
+    });
+    expect(failures).toEqual([]);
+  });
+}
+
 test("forced keyboard-focus copies draw the focus ring", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "light" });
   await page.goto(SPECIMEN);

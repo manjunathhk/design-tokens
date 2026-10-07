@@ -194,6 +194,12 @@ All run in CI on every PR (Linux and Windows) and again in `release.yml`.
     rules, `base.css`, its group CSS and its HTML, so a preview is what a
     site gets from `index.css` plus the snippet. Forced hover, focus and
     active copies are generated from the same CSS and are `inert`.
+  - Examples meet the contrast contract in use, not only as token pairs: a
+    Playwright check measures every visible text in every preview, live and
+    forced, against its composited background at 4.5:1 in both modes.
+    Disabled controls are exempt, as in WCAG 2.2.
+  - Media queries in example CSS repeat breakpoint token values (custom
+    properties cannot be used there); a test fails on any other value.
   - Every example has copy-paste snippets of its HTML and group CSS. Copied
     code belongs to the site that copies it: it is not part of the versioned
     API and carries no compatibility promise. Renaming the `ex-` classes on

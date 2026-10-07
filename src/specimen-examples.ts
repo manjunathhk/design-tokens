@@ -16,8 +16,10 @@ export interface Example {
   states: readonly ForcedState[];
   /** Other groups whose CSS the example also needs. */
   needs: readonly string[];
-  /** For examples positioned against the viewport, such as a toast. */
+  /** Height of each copy, for content positioned out of flow (menu, dialog, toast). */
   minHeight: string;
+  /** One preview per width; "100%" is the full column. */
+  widths: readonly string[];
 }
 
 export interface ExampleGroup {
@@ -41,6 +43,7 @@ interface ExampleSpec {
   states?: readonly ForcedState[];
   needs?: readonly string[];
   minHeight?: string;
+  widths?: readonly string[];
 }
 
 interface GroupSpec {
@@ -156,6 +159,103 @@ export const GROUPS: GroupSpec[] = [
       },
     ],
   },
+  {
+    id: "content",
+    title: "Content",
+    note: "Cards, long-form text and data tables. base.css already sets reading widths and tabular numerals.",
+    examples: [
+      {
+        id: "cards",
+        title: "Cards on a subtle section",
+        note: "surface cards raised with shadow.raised on bg-subtle. The title is the link.",
+        states: ["hover", "focus-visible"],
+      },
+      {
+        id: "prose",
+        title: "Prose",
+        note: "Headings, links, lists, a quotation, inline code, keys and a code block.",
+      },
+      {
+        id: "table",
+        title: "Data table",
+        note: "Caption, column headers, row headers and right-aligned numbers.",
+      },
+    ],
+  },
+  {
+    id: "navigation",
+    title: "Navigation",
+    note: "The current page is marked with aria-current, and shown by more than colour.",
+    examples: [
+      {
+        id: "top-nav",
+        title: "Top navigation",
+        note: "Sticky on z-index.nav. The current page gets the accent and an underline bar.",
+        states: ["hover", "focus-visible"],
+      },
+      {
+        id: "breadcrumbs",
+        title: "Breadcrumbs",
+        note: "Separators are drawn by CSS, so screen readers do not announce them.",
+      },
+      {
+        id: "tabs",
+        title: "Tabs",
+        note: "Markup and styles only; arrow-key behaviour is the site's script.",
+        states: ["hover", "focus-visible"],
+      },
+      {
+        id: "pagination",
+        title: "Pagination",
+        note: "The current page is filled with the accent; an unavailable link is dashed.",
+        states: ["hover", "focus-visible"],
+      },
+      {
+        id: "skip-link",
+        title: "Skip link",
+        note: "Hidden until keyboard focus. Press Tab inside the preview to see the live one.",
+        states: ["focus-visible"],
+        minHeight: "3.5rem",
+      },
+    ],
+  },
+  {
+    id: "overlay",
+    title: "Overlay",
+    note: "Layers above the page. Modal dialogs use the top layer; other overlays use z-index.overlay.",
+    examples: [
+      {
+        id: "dialog",
+        title: "Dialog",
+        note: "Shown open in place; a site opens it with showModal(). Uses the Actions CSS for its buttons.",
+        needs: ["actions"],
+        states: ["hover", "focus-visible"],
+        minHeight: "13rem",
+      },
+      {
+        id: "menu",
+        title: "Menu",
+        note: "Shown open under its button. Uses the Actions CSS for the button.",
+        needs: ["actions"],
+        states: ["hover", "focus-visible"],
+        minHeight: "15rem",
+      },
+    ],
+  },
+  {
+    id: "page",
+    title: "Page",
+    note: "A small site built from the tokens, at phone width and at full width. It reflows at breakpoint.sm and breakpoint.lg.",
+    examples: [
+      {
+        id: "site",
+        title: "Mock site",
+        note: "Sticky header, hero in the display face, a bg-subtle band with .mk-grid-bg, cards and a footer. Uses the Actions CSS for its buttons.",
+        needs: ["actions"],
+        widths: ["375px", "100%"],
+      },
+    ],
+  },
 ];
 
 export const GAPS: Gap[] = [
@@ -175,6 +275,11 @@ export const GAPS: Gap[] = [
     pattern: "Tinted alert backgrounds",
     missing: "A subtle tint per status colour, like color.accent-subtle for accent.",
     fallback: "Alerts sit on surface with a status-coloured edge, icon and title.",
+  },
+  {
+    pattern: "Dialog backdrop",
+    missing: "A scrim colour to dim the page behind a modal dialog.",
+    fallback: "The backdrop blurs the page (backdrop-filter) without dimming it.",
   },
   {
     pattern: "Disabled controls",
@@ -201,6 +306,7 @@ export function loadExamples(): ExampleGroup[] {
       states: spec.states ?? [],
       needs: spec.needs ?? [],
       minHeight: spec.minHeight ?? "0",
+      widths: spec.widths ?? ["100%"],
     })),
   }));
 }

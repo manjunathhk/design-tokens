@@ -133,6 +133,7 @@ const STATE_LABELS: Record<ForcedState, string> = {
 
 /** Styles for the preview frame itself, never part of a snippet. */
 const PREVIEW_CSS = `body { min-height: 0; padding: var(--mk-spacing-5); }
+.preview-copy { position: relative; }
 .preview-state { margin-top: var(--mk-spacing-5); padding-top: var(--mk-spacing-3); border-top: 1px dashed var(--mk-color-border); }
 .preview-state-label { margin-bottom: var(--mk-spacing-3); color: var(--mk-color-text-muted); font-size: var(--mk-font-size-xs); font-weight: var(--mk-font-weight-semibold); letter-spacing: var(--mk-font-letter-spacing-label); text-transform: uppercase; }`;
 
@@ -152,10 +153,14 @@ function previewDoc(
       );
     return css;
   });
+  // Each copy is its own positioned box, so out-of-flow content (menus,
+  // dialogs, skip links) stays inside it instead of overlapping the next one.
+  const copy = (html: string) =>
+    `<div class="preview-copy" style="min-height:${example.minHeight};">${html}</div>`;
   const forced = example.states
     .map(
       (state) =>
-        `<div class="preview-state" inert><p class="preview-state-label">${STATE_LABELS[state]}</p>${forceHtml(example.html, state)}</div>`,
+        `<div class="preview-state" inert><p class="preview-state-label">${STATE_LABELS[state]}</p>${copy(forceHtml(example.html, state))}</div>`,
     )
     .join("");
   return `<!doctype html>
@@ -171,7 +176,7 @@ ${PREVIEW_CSS}
 </style>
 </head>
 <body>
-${example.html}${forced}
+${copy(example.html)}${forced}
 </body>
 </html>`;
 }
@@ -186,6 +191,19 @@ const stateNote = (example: Example) =>
     ? ""
     : ` Forced below it: ${example.states.map((state) => STATE_LABELS[state].toLowerCase()).join(", ")}.`;
 
+/** The full-column preview keeps the plain title; narrower ones name their width. */
+const previewFrame = (
+  set: TokenSet,
+  base: string,
+  groups: ExampleGroup[],
+  group: ExampleGroup,
+  example: Example,
+  width: string,
+) => {
+  const label = width === "100%" ? "" : ` (${width})`;
+  return `<iframe class="preview" title="${escapeHtml(`${group.title}: ${example.title}`)} preview${escapeHtml(label)}" style="width:${escapeHtml(width)};" srcdoc="${escapeHtml(previewDoc(set, base, groups, group, example))}"></iframe>`;
+};
+
 const exampleBlock = (
   set: TokenSet,
   base: string,
@@ -197,7 +215,9 @@ const exampleBlock = (
           <h4>${escapeHtml(example.title)}</h4>
           <p class="note">${escapeHtml(example.note)}${stateNote(example)}</p>
         </div>
-        <iframe class="preview" title="${escapeHtml(`${group.title}: ${example.title}`)} preview" style="min-height:${escapeHtml(example.minHeight)};" srcdoc="${escapeHtml(previewDoc(set, base, groups, group, example))}"></iframe>
+        <div class="preview-row">${example.widths
+          .map((width) => previewFrame(set, base, groups, group, example, width))
+          .join("")}</div>
         ${codeBlock(`${example.title} HTML`, example.html)}
       </article>`;
 
@@ -249,7 +269,8 @@ h4 { margin: 0; font-size: var(--mk-font-size-md); font-weight: var(--mk-font-we
 .note { color: var(--mk-color-text-secondary); font-size: var(--mk-font-size-sm); }
 .example-group + .example-group { margin-top: var(--mk-spacing-8); padding-top: var(--mk-spacing-8); border-top: 1px solid var(--mk-color-border); }
 .example { padding-top: var(--mk-spacing-4); }
-.preview { display: block; width: 100%; height: 6rem; border: 1px solid var(--mk-color-border); border-radius: var(--mk-radius-md); }
+.preview-row { display: flex; flex-wrap: wrap; gap: var(--mk-spacing-4); align-items: flex-start; }
+.preview { display: block; max-width: 100%; height: 6rem; border: 1px solid var(--mk-color-border); border-radius: var(--mk-radius-md); }
 .code-block { display: flex; gap: var(--mk-spacing-3); align-items: flex-start; }
 .code-block details { flex: 1; min-width: 0; }
 .code-block > button { margin-top: var(--mk-spacing-2); }

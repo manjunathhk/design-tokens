@@ -1,0 +1,147 @@
+/* A whole page from tokens alone. Media queries cannot read custom
+   properties, so they repeat the breakpoint tokens' values: 560px is
+   breakpoint.sm and 1000px is breakpoint.lg (a test keeps them in step). */
+.ex-site {
+  min-height: 100%;
+  background-color: var(--mk-color-bg);
+}
+
+.ex-container {
+  width: 100%;
+  max-width: var(--mk-layout-container-max);
+  margin: 0 auto;
+  padding: 0 var(--mk-layout-gutter);
+}
+
+.ex-site-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--mk-z-index-nav);
+  border-bottom: 1px solid var(--mk-color-border);
+  background-color: var(--mk-color-bg);
+}
+
+.ex-site-header .ex-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mk-spacing-2) var(--mk-spacing-6);
+  align-items: center;
+  justify-content: space-between;
+  padding-block: var(--mk-spacing-3);
+}
+
+.ex-site-brand {
+  color: var(--mk-color-text);
+  font-family: var(--mk-font-family-display);
+  font-weight: var(--mk-font-weight-bold);
+  text-decoration: none;
+}
+
+.ex-site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mk-spacing-1) var(--mk-spacing-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--mk-font-size-sm);
+}
+
+.ex-site-nav a {
+  color: var(--mk-color-text-secondary);
+  text-decoration: none;
+}
+
+.ex-site-nav a:hover,
+.ex-site-nav a[aria-current="page"] {
+  color: var(--mk-color-accent);
+}
+
+.ex-hero {
+  display: grid;
+  gap: var(--mk-spacing-5);
+  padding-block: var(--mk-spacing-16) var(--mk-spacing-12);
+}
+
+.ex-hero-title {
+  max-width: 14ch;
+  font-size: var(--mk-font-size-3xl);
+  letter-spacing: var(--mk-font-letter-spacing-display);
+  line-height: var(--mk-font-line-height-tight);
+}
+
+.ex-hero-lede {
+  color: var(--mk-color-text-secondary);
+  font-size: var(--mk-font-size-md);
+}
+
+.ex-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mk-spacing-3);
+}
+
+/* .mk-grid-bg comes from base.css: the drafting grid behind a section. */
+.ex-band {
+  padding-block: var(--mk-spacing-12);
+  border-block: 1px solid var(--mk-color-border);
+  background-color: var(--mk-color-bg-subtle);
+}
+
+.ex-band-title {
+  margin-bottom: var(--mk-spacing-6);
+  font-size: var(--mk-font-size-xl);
+}
+
+.ex-site-grid {
+  display: grid;
+  gap: var(--mk-spacing-4);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (width >= 560px) {
+  .ex-site-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 1000px) {
+  .ex-site-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.ex-site-card {
+  display: grid;
+  gap: var(--mk-spacing-2);
+  padding: var(--mk-spacing-5);
+  border: 1px solid var(--mk-color-border);
+  border-radius: var(--mk-radius-lg);
+  background-color: var(--mk-color-surface);
+  box-shadow: var(--mk-shadow-raised);
+}
+
+.ex-site-card h3 {
+  font-size: var(--mk-font-size-lg);
+}
+
+.ex-site-card p {
+  color: var(--mk-color-text-secondary);
+}
+
+.ex-site-footer {
+  padding-block: var(--mk-spacing-8);
+  color: var(--mk-color-text-muted);
+  font-size: var(--mk-font-size-sm);
+}
+
+.ex-site-footer .ex-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mk-spacing-3) var(--mk-spacing-6);
+  justify-content: space-between;
+}
+
+.ex-site-footer-link {
+  color: var(--mk-color-text-secondary);
+}

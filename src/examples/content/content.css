@@ -1,0 +1,185 @@
+/* Cards sit on surface inside a bg-subtle section, raised by shadow.raised. */
+.ex-section {
+  padding: var(--mk-spacing-6);
+  border-radius: var(--mk-radius-lg);
+  background-color: var(--mk-color-bg-subtle);
+}
+
+.ex-card-grid {
+  display: grid;
+  gap: var(--mk-spacing-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+}
+
+.ex-card {
+  display: grid;
+  gap: var(--mk-spacing-2);
+  align-content: start;
+  padding: var(--mk-spacing-5);
+  border: 1px solid var(--mk-color-border);
+  border-radius: var(--mk-radius-lg);
+  background-color: var(--mk-color-surface);
+  box-shadow: var(--mk-shadow-raised);
+}
+
+.ex-eyebrow {
+  color: var(--mk-color-text-muted);
+  font-size: var(--mk-font-size-xs);
+  font-weight: var(--mk-font-weight-semibold);
+  letter-spacing: var(--mk-font-letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.ex-card-title {
+  font-size: var(--mk-font-size-lg);
+}
+
+.ex-card-text {
+  color: var(--mk-color-text-secondary);
+}
+
+/* A whole card as one link: the title carries the link, the card shows it. */
+.ex-card-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ex-card:has(.ex-card-link:hover) {
+  border-color: var(--mk-color-border-control);
+}
+
+.ex-card-link:hover {
+  color: var(--mk-color-accent);
+  text-decoration: underline;
+}
+
+/* Long-form text. base.css already caps p and li at 65ch. */
+.ex-prose {
+  display: grid;
+  gap: var(--mk-spacing-4);
+  line-height: var(--mk-font-line-height-relaxed);
+}
+
+.ex-prose h1 {
+  font-size: var(--mk-font-size-2xl);
+  letter-spacing: var(--mk-font-letter-spacing-display);
+  line-height: var(--mk-font-line-height-tight);
+}
+
+.ex-prose h2 {
+  margin-top: var(--mk-spacing-4);
+  font-size: var(--mk-font-size-xl);
+}
+
+.ex-prose h3 {
+  font-size: var(--mk-font-size-lg);
+}
+
+.ex-prose h4 {
+  font-size: var(--mk-font-size-md);
+}
+
+.ex-prose ul,
+.ex-prose ol {
+  display: grid;
+  gap: var(--mk-spacing-1);
+  margin: 0;
+  padding-left: var(--mk-spacing-6);
+}
+
+.ex-prose li::marker {
+  color: var(--mk-color-text-muted);
+}
+
+.ex-prose blockquote {
+  padding-left: var(--mk-spacing-4);
+  border-left: 3px solid var(--mk-color-accent);
+  color: var(--mk-color-text-secondary);
+  font-style: italic;
+}
+
+.ex-prose code {
+  padding: 0.125em 0.375em;
+  border-radius: var(--mk-radius-sm);
+  background-color: var(--mk-color-bg-subtle);
+  font-size: 0.9em;
+}
+
+.ex-prose kbd {
+  padding: 0.125em 0.375em;
+  border: 1px solid var(--mk-color-border-control);
+  border-bottom-width: 2px;
+  border-radius: var(--mk-radius-sm);
+  background-color: var(--mk-color-surface);
+  font-size: 0.85em;
+}
+
+.ex-prose pre {
+  margin: 0;
+  padding: var(--mk-spacing-4);
+  overflow-x: auto;
+  border: 1px solid var(--mk-color-border);
+  border-radius: var(--mk-radius-md);
+  background-color: var(--mk-color-bg-subtle);
+  font-size: var(--mk-font-size-sm);
+  line-height: var(--mk-font-line-height-normal);
+}
+
+.ex-prose pre code {
+  padding: 0;
+  background-color: transparent;
+  font-size: inherit;
+}
+
+.ex-prose hr {
+  width: 100%;
+  margin: var(--mk-spacing-2) 0;
+  border: 0;
+  border-top: 1px solid var(--mk-color-border);
+}
+
+/* Data tables: base.css sets tabular numerals; numbers align right. */
+.ex-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--mk-color-border);
+  border-radius: var(--mk-radius-md);
+}
+
+.ex-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--mk-color-surface);
+  font-size: var(--mk-font-size-sm);
+}
+
+.ex-table caption {
+  padding: var(--mk-spacing-3) var(--mk-spacing-4);
+  color: var(--mk-color-text-muted);
+  font-size: var(--mk-font-size-sm);
+  text-align: left;
+}
+
+.ex-table th,
+.ex-table td {
+  padding: var(--mk-spacing-2) var(--mk-spacing-4);
+  border-top: 1px solid var(--mk-color-border);
+  text-align: left;
+}
+
+.ex-table thead th {
+  background-color: var(--mk-color-bg-subtle);
+  color: var(--mk-color-text-muted);
+  font-size: var(--mk-font-size-xs);
+  font-weight: var(--mk-font-weight-semibold);
+  letter-spacing: var(--mk-font-letter-spacing-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ex-table .ex-num {
+  text-align: right;
+}
+
+.ex-table tbody tr:hover {
+  background-color: var(--mk-color-accent-subtle);
+}
