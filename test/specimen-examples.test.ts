@@ -47,6 +47,25 @@ describe("token-in-use examples (D53)", () => {
       expect(unknown).toEqual([]);
     });
 
+    it("uses only breakpoint token values in media queries", () => {
+      const breakpoints = Object.values(
+        (
+          JSON.parse(readFileSync("dist/tokens.json", "utf8")) as {
+            breakpoints: Record<string, string>;
+          }
+        ).breakpoints,
+      );
+      const stray = groups.flatMap((group) =>
+        classesIn(group.css, /@media[^{]*?width\s*[<>]=?\s*([0-9.]+[a-z]+)/g)
+          .filter((value) => !breakpoints.includes(value))
+          .map(
+            (value) =>
+              `${EXAMPLES_DIR}/${group.id}/${group.id}.css has a ${value} media query, which is no breakpoint token (${breakpoints.join(", ")})`,
+          ),
+      );
+      expect(stray).toEqual([]);
+    });
+
     it("defines every ex- class the example HTML uses", () => {
       const missing = groups.flatMap((group) =>
         group.examples.flatMap((example) => {

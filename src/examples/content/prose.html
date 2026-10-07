@@ -1,0 +1,26 @@
+<article class="ex-prose">
+  <h1>Shipping one palette to every site</h1>
+  <p>
+    Each site links one stylesheet. A change to a token reaches every site on the next release, and
+    <a href="#versioning">semantic versioning</a> keeps breaking changes out.
+  </p>
+  <h2>How a release works</h2>
+  <ol>
+    <li>Merge the change into <code>main</code>.</li>
+    <li>Push a tag such as <code>v1.5.0</code>.</li>
+    <li>The workflow uploads, publishes and verifies.</li>
+  </ol>
+  <h3>What sites receive</h3>
+  <ul>
+    <li>Every new token and value change on <code>/v1/</code>.</li>
+    <li>Nothing that renames or removes a token.</li>
+  </ul>
+  <blockquote>
+    <p>Change once, reflect everywhere.</p>
+  </blockquote>
+  <h4>Forcing a theme</h4>
+  <p>Press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>L</kbd>, or set it in markup:</p>
+  <pre><code>&lt;html data-theme="dark"&gt;</code></pre>
+  <hr />
+  <p>Last updated 7 October 2026.</p>
+</article>

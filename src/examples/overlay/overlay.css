@@ -1,0 +1,98 @@
+/* Dialog: open it with showModal() so it sits in the top layer and traps
+   focus. No scrim colour token exists yet, so the backdrop only blurs. */
+.ex-dialog {
+  width: min(28rem, calc(100% - 2 * var(--mk-spacing-4)));
+  padding: var(--mk-spacing-6);
+  border: 1px solid var(--mk-color-border);
+  border-radius: var(--mk-radius-lg);
+  background-color: var(--mk-color-surface);
+  box-shadow: var(--mk-shadow-raised);
+  color: var(--mk-color-text);
+}
+
+.ex-dialog::backdrop {
+  backdrop-filter: blur(2px);
+}
+
+.ex-dialog-body {
+  display: grid;
+  gap: var(--mk-spacing-3);
+}
+
+.ex-dialog-title {
+  font-size: var(--mk-font-size-lg);
+}
+
+.ex-dialog-text {
+  color: var(--mk-color-text-secondary);
+}
+
+.ex-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mk-spacing-3);
+  justify-content: flex-end;
+  margin-top: var(--mk-spacing-3);
+}
+
+/* Menu: a non-modal list under its button, above content on z-index.overlay.
+   Showing and hiding it, and arrow keys, are the site's script. */
+.ex-menu-anchor {
+  position: relative;
+  display: inline-block;
+}
+
+.ex-menu {
+  position: absolute;
+  top: calc(100% + var(--mk-spacing-1));
+  left: 0;
+  z-index: var(--mk-z-index-overlay);
+  display: grid;
+  min-width: 12rem;
+  margin: 0;
+  padding: var(--mk-spacing-1);
+  border: 1px solid var(--mk-color-border);
+  border-radius: var(--mk-radius-md);
+  background-color: var(--mk-color-surface);
+  box-shadow: var(--mk-shadow-raised);
+  list-style: none;
+}
+
+.ex-menu-item {
+  display: block;
+  width: 100%;
+  padding: var(--mk-spacing-2) var(--mk-spacing-3);
+  border: 0;
+  border-radius: var(--mk-radius-sm);
+  background-color: transparent;
+  color: var(--mk-color-text);
+  font-size: var(--mk-font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ex-menu-item:hover {
+  background-color: var(--mk-color-accent-subtle);
+}
+
+/* Items touch, so the focus ring is drawn inside them. */
+.ex-menu-item:focus-visible {
+  outline-offset: -2px;
+}
+
+.ex-menu-item-danger {
+  color: var(--mk-color-danger);
+}
+
+/* danger on accent-subtle over a dark surface is 3.98:1, below 4.5:1, so
+   hover outlines the item instead of tinting it. */
+.ex-menu-item-danger:hover {
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px var(--mk-color-danger);
+}
+
+.ex-menu-separator {
+  height: 1px;
+  margin: var(--mk-spacing-1) 0;
+  background-color: var(--mk-color-border);
+}
