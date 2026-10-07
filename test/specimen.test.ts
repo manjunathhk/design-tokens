@@ -34,6 +34,15 @@ describe("specimen page", () => {
   it("contains a specimen-only light/dark theme toggle", () => {
     expect(html).toContain('id="theme-toggle"');
     expect(html).toContain('root.setAttribute("data-theme", isDark() ? "light" : "dark")');
+    expect(html).toMatch(
+      /id="theme-toggle">\s*<svg class="icon icon-moon"[^]*?<svg class="icon icon-sun"/,
+    );
+  });
+
+  it("has a specimen-only width toggle and a collapsing section menu", () => {
+    expect(html).toMatch(/<button[^>]*id="width-toggle"[^>]*aria-pressed="false"/);
+    expect(html).toMatch(/<button[^>]*id="menu-toggle"[^>]*aria-controls="toc-links"/);
+    expect(html).toContain('<div class="toc-links" id="toc-links">');
   });
 
   it("has copyable consumption snippets", () => {

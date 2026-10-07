@@ -213,8 +213,10 @@ All run in CI on every PR (Linux and Windows) and again in `release.yml`.
   - Examples never invent a colour. A pattern the tokens cannot express is
     drawn with existing tokens and listed under "Not yet expressible" on the
     specimen; adding the missing token is a separate owner decision.
-  - The specimen's own script (theme toggle, copy buttons, preview sizing)
-    is not shipped and does not count as package runtime JavaScript.
+  - The specimen's own script (theme toggle, width toggle, section menu,
+    copy buttons, preview sizing) is not shipped and does not count as
+    package runtime JavaScript. Its icons are inline SVG in the specimen,
+    not an icon package.
 
   This holds until a later decision changes the package scope.
 

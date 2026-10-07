@@ -125,6 +125,18 @@ const snippet = (title: string, shown: string, copied: string) => `<div class="s
         <pre>${shown}</pre>
       </div>`;
 
+/** Inline stroke icons for the specimen's own controls; drawn in currentColor, hidden from assistive tech. */
+const icon = (name: string, paths: string) =>
+  `<svg class="icon icon-${name}" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${paths}</svg>`;
+
+const MENU_ICON = icon("menu", '<path d="M4 6h16M4 12h16M4 18h16"/>');
+const WIDTH_ICON = icon("width", '<path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/>');
+const MOON_ICON = icon("moon", '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>');
+const SUN_ICON = icon(
+  "sun",
+  '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+);
+
 const STATE_LABELS: Record<ForcedState, string> = {
   hover: "Hover",
   "focus-visible": "Keyboard focus",
@@ -255,6 +267,11 @@ export function specimenHtml(set: TokenSet, base: string, groups: ExampleGroup[]
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>@manjunathhk/design-tokens specimen</title>
+  <script>
+    try {
+      if (localStorage.getItem("mk-specimen-layout") === "full") document.documentElement.dataset.layout = "full";
+    } catch {}
+  </script>
   <style>
 ${banner(set.version)}
 ${tokenRules(set)}
@@ -282,13 +299,20 @@ p { margin: 0; max-width: 65ch; text-wrap: pretty; }
 .toc { position: sticky; top: 0; z-index: var(--mk-z-index-nav); display: flex; flex-wrap: wrap; gap: var(--mk-spacing-2) var(--mk-spacing-5); align-items: center; padding: var(--mk-spacing-3) var(--mk-layout-gutter); background: var(--mk-color-bg); border-bottom: 1px solid var(--mk-color-border); font-size: var(--mk-font-size-sm); }
 .toc a { color: var(--mk-color-text-secondary); text-decoration: none; }
 .toc a:hover { color: var(--mk-color-accent); text-decoration: underline; }
+.toc-links { display: flex; flex-wrap: wrap; gap: var(--mk-spacing-2) var(--mk-spacing-5); }
+.toc-actions { display: flex; gap: var(--mk-spacing-2); margin-left: auto; }
 button { cursor: pointer; border: 1px solid var(--mk-color-border-control); border-radius: var(--mk-radius-pill); background: var(--mk-color-surface); color: var(--mk-color-text); padding: var(--mk-spacing-1) var(--mk-spacing-3); font-size: var(--mk-font-size-sm); transition: background-color var(--mk-motion-duration-fast) var(--mk-motion-ease); }
 button:hover { background: var(--mk-color-accent-subtle); }
-.theme-toggle { margin-left: auto; }
+.icon-button { display: inline-grid; place-items: center; padding: var(--mk-spacing-2); }
+.icon-button .icon { width: 1.25rem; height: 1.25rem; }
+.icon-button[aria-pressed="true"] { border-color: var(--mk-color-accent); background: var(--mk-color-accent-subtle); color: var(--mk-color-accent); }
+.menu-toggle, .theme-toggle .icon-sun, .theme-toggle[data-dark] .icon-moon { display: none; }
+.theme-toggle[data-dark] .icon-sun { display: block; }
+html[data-layout="full"] main { max-width: none; }
 .snippet { display: grid; gap: var(--mk-spacing-2); }
 .snippet-head { display: flex; justify-content: space-between; align-items: center; gap: var(--mk-spacing-3); }
 :focus-visible { outline: 2px solid var(--mk-color-focus-ring); outline-offset: 2px; }
-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mk-spacing-12); max-width: 80rem; margin: 0 auto; padding: var(--mk-spacing-10) var(--mk-layout-gutter) var(--mk-spacing-24); }
+main { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mk-spacing-12); max-width: var(--mk-layout-container-max); margin: 0 auto; padding: var(--mk-spacing-10) var(--mk-layout-gutter) var(--mk-spacing-24); }
 section { background: var(--mk-color-surface); border: 1px solid var(--mk-color-border); border-radius: var(--mk-radius-lg); padding: var(--mk-spacing-6); }
 .stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mk-spacing-4); align-content: start; }
 .grid > * { min-width: 0; }
@@ -321,23 +345,38 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
 .preview-card.on-bg { background: var(--mk-color-bg); }
 .preview-card.on-subtle { background: var(--mk-color-bg-subtle); }
 .preview-grid { display: grid; gap: var(--mk-spacing-4); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
-@media (max-width: 40rem) { .theme-toggle { margin-left: 0; } section { padding: var(--mk-spacing-4); } }
+/* breakpoint.md: the section links collapse behind the menu button; full width is a no-op this narrow. */
+@media (max-width: 900px) {
+  .menu-toggle { display: inline-grid; margin-left: auto; }
+  .toc-actions { margin-left: 0; }
+  #width-toggle { display: none; }
+  .toc-links { display: none; order: 1; flex-basis: 100%; flex-direction: column; gap: 0; padding-top: var(--mk-spacing-2); border-top: 1px solid var(--mk-color-border); }
+  .toc[data-open] .toc-links { display: flex; }
+  .toc-links a { padding: var(--mk-spacing-2) 0; }
+}
+@media (max-width: 40rem) { section { padding: var(--mk-spacing-4); } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   </style>
 </head>
 <body>
   <nav class="toc" aria-label="Sections">
     <strong>Token specimen</strong>
-    <a href="#usage">Use it</a>
-    <a href="#colour">Colour</a>
-    <a href="#in-use">In use</a>
-    <a href="#gaps">Gaps</a>
-    <a href="#type">Type</a>
-    <a href="#spacing">Spacing</a>
-    <a href="#radius">Radius</a>
-    <a href="#shadow">Shadow</a>
-    <a href="#motion">Motion</a>
-    <button type="button" class="theme-toggle" id="theme-toggle"></button>
+    <button type="button" class="icon-button menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="toc-links" aria-label="Sections" title="Sections">${MENU_ICON}</button>
+    <div class="toc-links" id="toc-links">
+      <a href="#usage">Use it</a>
+      <a href="#colour">Colour</a>
+      <a href="#in-use">In use</a>
+      <a href="#gaps">Gaps</a>
+      <a href="#type">Type</a>
+      <a href="#spacing">Spacing</a>
+      <a href="#radius">Radius</a>
+      <a href="#shadow">Shadow</a>
+      <a href="#motion">Motion</a>
+    </div>
+    <div class="toc-actions">
+      <button type="button" class="icon-button" id="width-toggle" aria-pressed="false" aria-label="Full width" title="Full width">${WIDTH_ICON}</button>
+      <button type="button" class="icon-button theme-toggle" id="theme-toggle">${MOON_ICON}${SUN_ICON}</button>
+    </div>
   </nav>
   <main>
     <header class="stack">
@@ -448,8 +487,10 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
     const dark = window.matchMedia("(prefers-color-scheme: dark)");
     const isDark = () => (root.dataset.theme ? root.dataset.theme === "dark" : dark.matches);
     const sync = () => {
-      toggle.textContent = isDark() ? "Light mode" : "Dark mode";
-      toggle.setAttribute("aria-label", isDark() ? "Switch to light theme" : "Switch to dark theme");
+      const label = isDark() ? "Switch to light theme" : "Switch to dark theme";
+      toggle.toggleAttribute("data-dark", isDark());
+      toggle.setAttribute("aria-label", label);
+      toggle.title = label;
     };
     const frames = [...document.querySelectorAll("iframe.preview")];
     const themeFrame = (frame) => {
@@ -479,6 +520,36 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
     });
     dark.addEventListener("change", sync);
     sync();
+
+    const widthToggle = document.getElementById("width-toggle");
+    const syncWidth = () => widthToggle.setAttribute("aria-pressed", String(root.dataset.layout === "full"));
+    widthToggle.addEventListener("click", () => {
+      const full = root.dataset.layout !== "full";
+      if (full) root.dataset.layout = "full";
+      else delete root.dataset.layout;
+      try {
+        localStorage.setItem("mk-specimen-layout", full ? "full" : "fit");
+      } catch {}
+      syncWidth();
+    });
+    syncWidth();
+
+    const toc = document.querySelector(".toc");
+    const menuToggle = document.getElementById("menu-toggle");
+    const setMenu = (open) => {
+      toc.toggleAttribute("data-open", open);
+      menuToggle.setAttribute("aria-expanded", String(open));
+    };
+    menuToggle.addEventListener("click", () => setMenu(!toc.hasAttribute("data-open")));
+    document.getElementById("toc-links").addEventListener("click", (event) => {
+      if (event.target.closest("a")) setMenu(false);
+    });
+    toc.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || !toc.hasAttribute("data-open")) return;
+      setMenu(false);
+      menuToggle.focus();
+    });
+    window.matchMedia("(max-width: 900px)").addEventListener("change", () => setMenu(false));
 
     for (const button of document.querySelectorAll("[data-copy]")) {
       button.addEventListener("click", async () => {
