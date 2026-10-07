@@ -138,10 +138,11 @@ p { margin: 0; max-width: 65ch; text-wrap: pretty; }
 .toc .theme { margin-left: auto; display: flex; gap: var(--mk-spacing-3); align-items: center; border: 0; padding: 0; }
 .toc .theme legend { float: left; margin-right: var(--mk-spacing-3); padding: 0; color: var(--mk-color-text-muted); }
 :focus-visible { outline: 2px solid var(--mk-color-focus-ring); outline-offset: 2px; }
-main { display: grid; gap: var(--mk-spacing-12); max-width: 80rem; margin: 0 auto; padding: var(--mk-spacing-10) var(--mk-layout-gutter) var(--mk-spacing-24); }
+main { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mk-spacing-12); max-width: 80rem; margin: 0 auto; padding: var(--mk-spacing-10) var(--mk-layout-gutter) var(--mk-spacing-24); }
 section { background: var(--mk-color-surface); border: 1px solid var(--mk-color-border); border-radius: var(--mk-radius-lg); padding: var(--mk-spacing-6); }
-.stack { display: grid; gap: var(--mk-spacing-4); align-content: start; }
-.grid { display: grid; gap: var(--mk-spacing-6); grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); }
+.stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mk-spacing-4); align-content: start; }
+.grid > * { min-width: 0; }
+.grid { display: grid; gap: var(--mk-spacing-6); grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr)); }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th, td { border-bottom: 1px solid var(--mk-color-border); text-align: left; padding: var(--mk-spacing-2) var(--mk-spacing-3); vertical-align: middle; }
@@ -152,7 +153,7 @@ tbody tr:hover { background: var(--mk-color-accent-subtle); }
 .pass { color: var(--mk-color-success); font-weight: var(--mk-font-weight-semibold); white-space: nowrap; }
 .fail { color: var(--mk-color-danger); font-weight: var(--mk-font-weight-semibold); white-space: nowrap; }
 code, pre { font-family: var(--mk-font-family-mono); font-size: var(--mk-font-size-sm); }
-pre { margin: 0; white-space: pre-wrap; padding: var(--mk-spacing-3); border-radius: var(--mk-radius-md); background: var(--mk-color-bg-subtle); }
+pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; padding: var(--mk-spacing-3); border-radius: var(--mk-radius-md); background: var(--mk-color-bg-subtle); }
 details { border: 1px solid var(--mk-color-border); border-radius: var(--mk-radius-md); padding: 0 var(--mk-spacing-4); }
 details[open] { padding-bottom: var(--mk-spacing-4); }
 summary { cursor: pointer; padding: var(--mk-spacing-3) 0; font-weight: var(--mk-font-weight-semibold); }
