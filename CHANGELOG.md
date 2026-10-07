@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- _No unreleased changes yet._
+
+## [1.4.0] - 2026-10-07
+
 Adds a token and changes values; nothing is removed or renamed (MINOR).
 
 ### Added
