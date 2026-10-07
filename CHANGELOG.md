@@ -22,6 +22,14 @@ Adds a token and changes values; nothing is removed or renamed (MINOR).
   now distinct hues; `border` is a solid stone tone, not a translucent tint.
 - Reading defaults in `base.css`: `65ch` measure for `p` and `li`, balanced
   headings, pretty-wrapped paragraphs, tabular numerals in tables (D23).
+- Dark `surface` is `stone.800` (`#292524`), lighter than the `stone.900`
+  `bg-subtle`, so cards separate from subtle sections.
+
+### Documentation
+
+- The specimen page has a sticky section nav, swatch cards, collapsible
+  contrast tables with pass/fail results, copyable usage snippets at the top,
+  a light/dark toggle, and no horizontal overflow from 320px up (#93).
 
 ## [1.3.0] - 2026-10-05
 
