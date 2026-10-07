@@ -93,7 +93,7 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
     --mk-color-info: #60A5FA;
     --mk-color-on-accent: #1C1917;
     --mk-color-success: #4ADE80;
-    --mk-color-surface: #1C1917;
+    --mk-color-surface: #292524;
     --mk-color-text: #FAFAF9;
     --mk-color-text-muted: #A8A29E;
     --mk-color-text-secondary: #D6D3D1;
@@ -116,7 +116,7 @@ exports[`dist/tokens.css matches the snapshot 1`] = `
   --mk-color-info: #60A5FA;
   --mk-color-on-accent: #1C1917;
   --mk-color-success: #4ADE80;
-  --mk-color-surface: #1C1917;
+  --mk-color-surface: #292524;
   --mk-color-text: #FAFAF9;
   --mk-color-text-muted: #A8A29E;
   --mk-color-text-secondary: #D6D3D1;
@@ -163,7 +163,7 @@ exports[`dist/tokens.json matches the snapshot 1`] = `
     "color.info": "#60A5FA",
     "color.on-accent": "#1C1917",
     "color.success": "#4ADE80",
-    "color.surface": "#1C1917",
+    "color.surface": "#292524",
     "color.text": "#FAFAF9",
     "color.text-muted": "#A8A29E",
     "color.text-secondary": "#D6D3D1",

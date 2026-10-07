@@ -66,8 +66,8 @@ breaking one.
   `danger` (red) and `info` (blue); dark mode uses step 400, with orange for
   `warning`. Status colours are distinct from `accent` and from each other, so
   a state is never signalled by colour alone being amber or grey. Dark
-  `bg-subtle` and `surface` are both `stone.900`, so a card on a subtle section
-  relies on its border. `accent-subtle` follows `accent` at 14% alpha.
+  `bg-subtle` is `stone.900` and `surface` is `stone.800`; a lighter `surface`
+  (the midpoint `#373330`) fails `border-control` at 2.61:1 against it. `accent-subtle` follows `accent` at 14% alpha.
   `color.accent` is the accessible link/action role in both modes. The token
   files are the record of every current value.
 - **D2. `border-control` and `border-strong` are different roles.**

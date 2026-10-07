@@ -13,7 +13,7 @@
     "surface": {
       "$type": "color",
       "$description": "cards, panels, form fields",
-      "$value": "{color.stone.900}"
+      "$value": "{color.stone.800}"
     },
     "text": {
       "$type": "color",
