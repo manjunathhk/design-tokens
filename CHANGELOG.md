@@ -4,16 +4,30 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- _No unreleased changes yet._
+
+## [1.5.0] - 2026-10-07
+
 Adds tokens; nothing is removed, renamed or changed (MINOR).
 
 ### Added
 
 - `color.accent-hover` (`--mk-color-accent-hover`): accent fills on hover,
   `amber.800` in light and `amber.300` in dark, with `on-accent` checked at
-  4.5:1 against it.
+  4.5:1 against it (#100).
 - `color.on-danger` (`--mk-color-on-danger`): text and icons on `danger`
   fills, white in light and `stone.900` in dark, checked at 4.5:1 against
-  `danger`.
+  `danger` (#100).
+
+### Documentation
+
+- The specimen has an "In use" section: actions, forms, feedback, content,
+  navigation and overlay examples and a mock page, each in an isolated
+  preview with forced hover, focus and pressed states and copy-paste HTML
+  and CSS snippets. The examples are specimen-only, not part of the package,
+  and carry no compatibility promise (D53; #97, #98).
+- A "Not yet expressible" list on the specimen records patterns the tokens
+  cannot draw yet and the fallback the examples use.
 
 ## [1.4.0] - 2026-10-07
 
