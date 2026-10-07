@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
+import { loadExamples } from "../src/specimen-examples.js";
 
 const read = (file: string) => readFileSync(file, "utf8");
 
@@ -39,6 +40,30 @@ describe("specimen page", () => {
     expect(html).toContain("Use it");
     expect(html).toContain("data-copy=");
     expect(html).toContain("https://design.manjunathhk.in/v1/index.css");
+  });
+
+  it("shows every token-in-use example with a preview and exact copy snippets (D53)", () => {
+    const unescape = (value: string) =>
+      value
+        .replaceAll("&quot;", '"')
+        .replaceAll("&#39;", "'")
+        .replaceAll("&lt;", "<")
+        .replaceAll("&gt;", ">")
+        .replaceAll("&amp;", "&");
+    const copied = [...html.matchAll(/data-copy="([^"]*)"/g)].map((match) =>
+      unescape(match[1] ?? ""),
+    );
+    expect(html).toContain('id="in-use"');
+    expect(html).toContain("Not yet expressible");
+    for (const group of loadExamples()) {
+      expect(copied, `${group.id} CSS snippet`).toContain(group.css);
+      for (const example of group.examples) {
+        expect(html, `${group.id}/${example.id} preview`).toContain(
+          `title="${group.title}: ${example.title} preview"`,
+        );
+        expect(copied, `${group.id}/${example.id} HTML snippet`).toContain(example.html);
+      }
+    }
   });
 
   it("includes contrast rows and shadow.raised value from tokens", () => {

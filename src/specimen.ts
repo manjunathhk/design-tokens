@@ -1,5 +1,14 @@
 import { banner } from "./css.js";
 import { measureContrast, type ContrastResult } from "./contrast.js";
+import {
+  GAPS,
+  forceHtml,
+  forceStates,
+  usedProperties,
+  type Example,
+  type ExampleGroup,
+  type ForcedState,
+} from "./specimen-examples.js";
 import { MODES, type Mode, type Token, type TokenSet } from "./tokens.js";
 
 const escapeHtml = (value: string) =>
@@ -116,7 +125,107 @@ const snippet = (title: string, shown: string, copied: string) => `<div class="s
         <pre>${shown}</pre>
       </div>`;
 
-export function specimenHtml(set: TokenSet): string {
+const STATE_LABELS: Record<ForcedState, string> = {
+  hover: "Hover",
+  "focus-visible": "Keyboard focus",
+  active: "Pressed",
+};
+
+/** Styles for the preview frame itself, never part of a snippet. */
+const PREVIEW_CSS = `body { min-height: 0; padding: var(--mk-spacing-5); }
+.preview-state { margin-top: var(--mk-spacing-5); padding-top: var(--mk-spacing-3); border-top: 1px dashed var(--mk-color-border); }
+.preview-state-label { margin-bottom: var(--mk-spacing-3); color: var(--mk-color-text-muted); font-size: var(--mk-font-size-xs); font-weight: var(--mk-font-weight-semibold); letter-spacing: var(--mk-font-letter-spacing-label); text-transform: uppercase; }`;
+
+/** A standalone page: token rules, base.css and the example's CSS, nothing from the specimen (D53). */
+function previewDoc(
+  set: TokenSet,
+  base: string,
+  groups: ExampleGroup[],
+  group: ExampleGroup,
+  example: Example,
+): string {
+  const needed = example.needs.map((id) => {
+    const css = groups.find((candidate) => candidate.id === id)?.css;
+    if (css === undefined)
+      throw new Error(
+        `Example ${group.id}/${example.id} needs group "${id}", which does not exist.`,
+      );
+    return css;
+  });
+  const forced = example.states
+    .map(
+      (state) =>
+        `<div class="preview-state" inert><p class="preview-state-label">${STATE_LABELS[state]}</p>${forceHtml(example.html, state)}</div>`,
+    )
+    .join("");
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+${tokenRules(set)}
+${forceStates(base)}
+${[...needed, group.css].map(forceStates).join("\n")}
+${PREVIEW_CSS}
+</style>
+</head>
+<body>
+${example.html}${forced}
+</body>
+</html>`;
+}
+
+const codeBlock = (label: string, code: string) => `<div class="code-block">
+          <details><summary>${escapeHtml(label)}</summary><pre>${escapeHtml(code)}</pre></details>
+          <button type="button" aria-label="Copy ${escapeHtml(label)}" data-copy="${escapeHtml(code)}">Copy</button>
+        </div>`;
+
+const stateNote = (example: Example) =>
+  example.states.length === 0
+    ? ""
+    : ` Forced below it: ${example.states.map((state) => STATE_LABELS[state].toLowerCase()).join(", ")}.`;
+
+const exampleBlock = (
+  set: TokenSet,
+  base: string,
+  groups: ExampleGroup[],
+  group: ExampleGroup,
+  example: Example,
+) => `<article class="example stack">
+        <div class="stack tight">
+          <h4>${escapeHtml(example.title)}</h4>
+          <p class="note">${escapeHtml(example.note)}${stateNote(example)}</p>
+        </div>
+        <iframe class="preview" title="${escapeHtml(`${group.title}: ${example.title}`)} preview" style="min-height:${escapeHtml(example.minHeight)};" srcdoc="${escapeHtml(previewDoc(set, base, groups, group, example))}"></iframe>
+        ${codeBlock(`${example.title} HTML`, example.html)}
+      </article>`;
+
+const groupBlock = (
+  set: TokenSet,
+  base: string,
+  groups: ExampleGroup[],
+  group: ExampleGroup,
+) => `<div class="stack example-group" id="in-use-${group.id}">
+      <h3>${escapeHtml(group.title)}</h3>
+      <p class="lede">${escapeHtml(group.note)}</p>
+      <p class="tokens-used"><span>Tokens used</span> ${usedProperties(group.css)
+        .map((name) => `<code>${escapeHtml(name)}</code>`)
+        .join(" ")}</p>
+      ${codeBlock(`${group.title} CSS`, group.css)}
+      ${group.examples.map((example) => exampleBlock(set, base, groups, group, example)).join("\n      ")}
+    </div>`;
+
+const gapRows = () =>
+  GAPS.map(
+    (gap) => `<tr>
+        <td>${escapeHtml(gap.pattern)}</td>
+        <td>${escapeHtml(gap.missing)}</td>
+        <td>${escapeHtml(gap.fallback)}</td>
+      </tr>`,
+  );
+
+export function specimenHtml(set: TokenSet, base: string, groups: ExampleGroup[]): string {
   const shadow = tokenValue(set.shared, "shadow.raised");
   const major = set.version.split(".")[0] ?? "1";
   const contrast = measureContrast(set);
@@ -135,6 +244,18 @@ h1, h2, h3 { margin: 0; font-family: var(--mk-font-family-display); line-height:
 h1 { font-size: var(--mk-font-size-2xl); letter-spacing: var(--mk-font-letter-spacing-display); }
 h2 { font-size: var(--mk-font-size-xl); }
 h3 { font-size: var(--mk-font-size-lg); }
+h4 { margin: 0; font-size: var(--mk-font-size-md); font-weight: var(--mk-font-weight-semibold); }
+.stack.tight { gap: var(--mk-spacing-1); }
+.note { color: var(--mk-color-text-secondary); font-size: var(--mk-font-size-sm); }
+.example-group + .example-group { margin-top: var(--mk-spacing-8); padding-top: var(--mk-spacing-8); border-top: 1px solid var(--mk-color-border); }
+.example { padding-top: var(--mk-spacing-4); }
+.preview { display: block; width: 100%; height: 6rem; border: 1px solid var(--mk-color-border); border-radius: var(--mk-radius-md); }
+.code-block { display: flex; gap: var(--mk-spacing-3); align-items: flex-start; }
+.code-block details { flex: 1; min-width: 0; }
+.code-block > button { margin-top: var(--mk-spacing-2); }
+.tokens-used { display: flex; flex-wrap: wrap; gap: var(--mk-spacing-1) var(--mk-spacing-2); align-items: baseline; max-width: none; font-size: var(--mk-font-size-sm); }
+.tokens-used span { color: var(--mk-color-text-muted); font-weight: var(--mk-font-weight-semibold); }
+.tokens-used code { font-size: var(--mk-font-size-xs); }
 p { margin: 0; max-width: 65ch; text-wrap: pretty; }
 .lede { color: var(--mk-color-text-secondary); }
 .toc { position: sticky; top: 0; z-index: var(--mk-z-index-nav); display: flex; flex-wrap: wrap; gap: var(--mk-spacing-2) var(--mk-spacing-5); align-items: center; padding: var(--mk-spacing-3) var(--mk-layout-gutter); background: var(--mk-color-bg); border-bottom: 1px solid var(--mk-color-border); font-size: var(--mk-font-size-sm); }
@@ -188,6 +309,8 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
     <strong>Token specimen</strong>
     <a href="#usage">Use it</a>
     <a href="#colour">Colour</a>
+    <a href="#in-use">In use</a>
+    <a href="#gaps">Gaps</a>
     <a href="#type">Type</a>
     <a href="#spacing">Spacing</a>
     <a href="#radius">Radius</a>
@@ -231,6 +354,22 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
           </details>`,
         ).join("")}
       </div>
+    </section>
+
+    <section class="stack" id="in-use">
+      <h2>In use</h2>
+      <p class="lede">Tokens working together. Each preview is its own page holding only the token rules, <code>base.css</code> and the snippets under it, so it shows what a site gets from <code>index.css</code> plus those snippets.</p>
+      <p class="lede">Copy the HTML and the group CSS into a site and rename the <code>ex-</code> classes to suit it. Copied code belongs to that site: it is not part of the versioned package and carries no compatibility promise (D53).</p>
+      ${groups.map((group) => groupBlock(set, base, groups, group)).join("\n    ")}
+    </section>
+
+    <section class="stack" id="gaps">
+      <h2>Not yet expressible</h2>
+      <p class="lede">Patterns the current tokens cannot draw directly. The examples use the fallback shown; adding the missing token is a separate decision.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Pattern</th><th>Missing token</th><th>Fallback in the examples</th></tr></thead>
+        <tbody>${gapRows().join("")}</tbody>
+      </table></div>
     </section>
 
     <section class="stack" id="type">
@@ -291,8 +430,30 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
       toggle.textContent = isDark() ? "Light mode" : "Dark mode";
       toggle.setAttribute("aria-label", isDark() ? "Switch to light theme" : "Switch to dark theme");
     };
+    const frames = [...document.querySelectorAll("iframe.preview")];
+    const themeFrame = (frame) => {
+      const frameRoot = frame.contentDocument?.documentElement;
+      if (!frameRoot) return;
+      if (root.dataset.theme) frameRoot.dataset.theme = root.dataset.theme;
+      else delete frameRoot.dataset.theme;
+    };
+    const fitFrame = (frame) => {
+      const frameRoot = frame.contentDocument?.documentElement;
+      if (frameRoot) frame.style.height = Math.ceil(frameRoot.getBoundingClientRect().height) + "px";
+    };
+    const setUpFrame = (frame) => {
+      themeFrame(frame);
+      fitFrame(frame);
+      new frame.contentWindow.ResizeObserver(() => fitFrame(frame)).observe(frame.contentDocument.documentElement);
+    };
+    for (const frame of frames) {
+      frame.addEventListener("load", () => setUpFrame(frame));
+      if (frame.contentDocument?.body?.childElementCount) setUpFrame(frame);
+    }
+
     toggle.addEventListener("click", () => {
       root.setAttribute("data-theme", isDark() ? "light" : "dark");
+      frames.forEach(themeFrame);
       sync();
     });
     dark.addEventListener("change", sync);

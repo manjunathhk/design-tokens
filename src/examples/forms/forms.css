@@ -1,0 +1,149 @@
+/* A field is a label, a control and optional help or message text, stacked. */
+.ex-field {
+  display: grid;
+  gap: var(--mk-spacing-1);
+  max-width: 28rem;
+}
+
+.ex-form {
+  display: grid;
+  gap: var(--mk-spacing-5);
+}
+
+.ex-label {
+  color: var(--mk-color-text);
+  font-size: var(--mk-font-size-sm);
+  font-weight: var(--mk-font-weight-semibold);
+}
+
+.ex-optional {
+  color: var(--mk-color-text-muted);
+  font-weight: var(--mk-font-weight-regular);
+}
+
+.ex-help {
+  color: var(--mk-color-text-muted);
+  font-size: var(--mk-font-size-sm);
+}
+
+/* Text-like controls share one look: surface fill, 3:1 control border. */
+.ex-input,
+.ex-select,
+.ex-textarea {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: var(--mk-spacing-2) var(--mk-spacing-3);
+  border: 1px solid var(--mk-color-border-control);
+  border-radius: var(--mk-radius-md);
+  background-color: var(--mk-color-surface);
+  color: var(--mk-color-text);
+  font-size: var(--mk-font-size-base);
+  line-height: var(--mk-font-line-height-normal);
+  transition: border-color var(--mk-motion-duration-fast) var(--mk-motion-ease);
+}
+
+.ex-textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.ex-input::placeholder,
+.ex-textarea::placeholder {
+  color: var(--mk-color-text-muted);
+  opacity: 1;
+}
+
+/* base.css draws the focus outline; the border follows it. */
+.ex-input:focus-visible,
+.ex-select:focus-visible,
+.ex-textarea:focus-visible {
+  border-color: var(--mk-color-focus-ring);
+}
+
+/* Validation: the colour is never the only signal; the message says it too. */
+.ex-input[aria-invalid="true"],
+.ex-textarea[aria-invalid="true"] {
+  border-color: var(--mk-color-danger);
+}
+
+.ex-input.ex-is-valid {
+  border-color: var(--mk-color-success);
+}
+
+.ex-message {
+  display: flex;
+  gap: var(--mk-spacing-1);
+  align-items: center;
+  font-size: var(--mk-font-size-sm);
+  font-weight: var(--mk-font-weight-medium);
+}
+
+.ex-message svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
+.ex-message-error {
+  color: var(--mk-color-danger);
+}
+
+.ex-message-success {
+  color: var(--mk-color-success);
+}
+
+/* Disabled: drawn with existing tokens (see "Not yet expressible"). */
+.ex-input:disabled,
+.ex-select:disabled,
+.ex-textarea:disabled {
+  border-style: dashed;
+  background-color: var(--mk-color-bg-subtle);
+  color: var(--mk-color-text-muted);
+  cursor: not-allowed;
+}
+
+/* Checkboxes, radios and ranges keep their native drawing; accent-color
+   tints them, and the browser picks a contrasting check mark. */
+.ex-fieldset {
+  display: grid;
+  gap: var(--mk-spacing-2);
+  margin: 0;
+  padding: var(--mk-spacing-4);
+  border: 1px solid var(--mk-color-border);
+  border-radius: var(--mk-radius-md);
+}
+
+.ex-fieldset legend {
+  padding: 0 var(--mk-spacing-1);
+  font-size: var(--mk-font-size-sm);
+  font-weight: var(--mk-font-weight-semibold);
+}
+
+.ex-choice {
+  display: flex;
+  gap: var(--mk-spacing-2);
+  align-items: center;
+  font-size: var(--mk-font-size-base);
+  cursor: pointer;
+}
+
+.ex-choice input,
+.ex-range {
+  margin: 0;
+  accent-color: var(--mk-color-accent);
+}
+
+.ex-choice input {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.ex-range {
+  width: 100%;
+}
+
+.ex-output {
+  color: var(--mk-color-text-secondary);
+  font-size: var(--mk-font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
