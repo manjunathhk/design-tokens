@@ -58,16 +58,16 @@ breaking one.
 
 ### Values
 
-- **D47. Colour palette.** Amber accent on warm off-white (light) and deep
-  navy-black (dark), from the owner's palette proposal of 2026-10-05. Two
-  values differ from that proposal because it failed the contrast contract:
-  light `accent`, `focus-ring` and `warning` are amber `#B45309` (proposed
-  `#D97706` gave 2.97:1 against `bg`). Values the proposal did not cover are
-  derived: `border-control` and `border-strong` reuse `text-muted`; `danger`
-  and dark `success` keep their earlier approved values; light `success` is
-  `text-secondary`; `bg-subtle` (`#F3F3F0` light, `#050608` dark) needs owner
-  approval; light `warning` (same amber as `accent`) still has to reach 4.5:1
-  on it, which caps how dark it can be. `accent-subtle` follows `accent` at 14% alpha.
+- **D47. Colour palette.** Amber accent on warm stone greys, light and dark,
+  chosen by the owner (option A of the 2026-10-07 palette comparison). Every
+  value is from Tailwind CSS's published `stone`, `amber`, `green`, `yellow`,
+  `orange`, `red` and `blue` scales; no value is hand-picked. Light mode uses
+  step 700 for `accent`, `focus-ring`, `success` (green), `warning` (yellow),
+  `danger` (red) and `info` (blue); dark mode uses step 400, with orange for
+  `warning`. Status colours are distinct from `accent` and from each other, so
+  a state is never signalled by colour alone being amber or grey. Dark
+  `bg-subtle` and `surface` are both `stone.900`, so a card on a subtle section
+  relies on its border. `accent-subtle` follows `accent` at 14% alpha.
   `color.accent` is the accessible link/action role in both modes. The token
   files are the record of every current value.
 - **D2. `border-control` and `border-strong` are different roles.**
@@ -88,8 +88,8 @@ breaking one.
 
 `src/contrast.ts`, in both modes, printed as a table in CI:
 
-- 4.5:1 for `text`, `text-secondary`, `text-muted`, `danger`, `success` and
-  `warning` against `bg`, `bg-subtle` and `surface`;
+- 4.5:1 for `text`, `text-secondary`, `text-muted`, `danger`, `success`,
+  `warning` and `info` against `bg`, `bg-subtle` and `surface`;
 - 4.5:1 for `accent` against `bg` and `surface` (D52);
 - 4.5:1 for `on-accent` against `accent`;
 - 3:1 for `border-control` and `focus-ring` against `bg`, `bg-subtle` and

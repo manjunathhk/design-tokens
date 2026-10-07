@@ -7,77 +7,85 @@
     "black": {
       "$value": "#000000"
     },
-    "paper": {
-      "$description": "Warm off-whites used for the light page background and subtle sections.",
+    "stone": {
+      "$description": "Warm greys for page backgrounds, text and hairlines (Tailwind stone).",
       "50": {
-        "$value": "#F7F7F5"
+        "$value": "#FAFAF9"
       },
       "100": {
-        "$value": "#F3F3F0"
-      }
-    },
-    "ink": {
-      "$description": "Neutral near-blacks and greys used for light-theme text and control outlines.",
-      "500": {
-        "$value": "#6C6C68"
+        "$value": "#F5F5F4"
       },
-      "700": {
-        "$value": "#3F3F3F"
-      },
-      "900": {
-        "$value": "#111111"
-      }
-    },
-    "umber": {
-      "$description": "Warm dark brown used only as the tint behind light-theme hairlines.",
-      "900": {
-        "$value": "#382B1F"
-      }
-    },
-    "night": {
-      "$description": "Deep navy-blacks used by the dark theme backgrounds and surfaces.",
-      "900": {
-        "$value": "#101216"
-      },
-      "950": {
-        "$value": "#080A0D"
-      },
-      "975": {
-        "$value": "#050608"
-      }
-    },
-    "fog": {
-      "$description": "Light greys used for dark-theme text and control outlines.",
-      "50": {
-        "$value": "#F7F7F7"
+      "200": {
+        "$value": "#E7E5E4"
       },
       "300": {
-        "$value": "#B6B6B6"
+        "$value": "#D6D3D1"
+      },
+      "400": {
+        "$value": "#A8A29E"
       },
       "500": {
-        "$value": "#898989"
+        "$value": "#78716C"
+      },
+      "600": {
+        "$value": "#57534E"
+      },
+      "700": {
+        "$value": "#44403C"
+      },
+      "900": {
+        "$value": "#1C1917"
+      },
+      "950": {
+        "$value": "#0C0A09"
       }
     },
     "amber": {
-      "$description": "Amber accent: 700 for light backgrounds, 500 for dark.",
-      "500": {
-        "$value": "#F59E0B"
+      "$description": "Brand accent: 700 on light backgrounds, 400 on dark (Tailwind amber).",
+      "400": {
+        "$value": "#FBBF24"
       },
       "700": {
         "$value": "#B45309"
       }
     },
-    "red": {
-      "300": {
-        "$value": "#EF9A9A"
+    "green": {
+      "$description": "Success (Tailwind green).",
+      "400": {
+        "$value": "#4ADE80"
       },
       "700": {
-        "$value": "#A93226"
+        "$value": "#15803D"
       }
     },
-    "green": {
-      "300": {
-        "$value": "#34D399"
+    "yellow": {
+      "$description": "Light-theme warning (Tailwind yellow).",
+      "700": {
+        "$value": "#A16207"
+      }
+    },
+    "orange": {
+      "$description": "Dark-theme warning (Tailwind orange).",
+      "400": {
+        "$value": "#FB923C"
+      }
+    },
+    "red": {
+      "$description": "Danger (Tailwind red).",
+      "400": {
+        "$value": "#F87171"
+      },
+      "700": {
+        "$value": "#B91C1C"
+      }
+    },
+    "blue": {
+      "$description": "Information (Tailwind blue).",
+      "400": {
+        "$value": "#60A5FA"
+      },
+      "700": {
+        "$value": "#1D4ED8"
       }
     }
   }

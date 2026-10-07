@@ -3,12 +3,12 @@
     "bg": {
       "$type": "color",
       "$description": "page background",
-      "$value": "{color.paper.50}"
+      "$value": "{color.stone.50}"
     },
     "bg-subtle": {
       "$type": "color",
       "$description": "alternate section background",
-      "$value": "{color.paper.100}"
+      "$value": "{color.stone.100}"
     },
     "surface": {
       "$type": "color",
@@ -18,42 +18,37 @@
     "text": {
       "$type": "color",
       "$description": "primary text, headings",
-      "$value": "{color.ink.900}"
+      "$value": "{color.stone.900}"
     },
     "text-secondary": {
       "$type": "color",
       "$description": "body copy on subtle backgrounds",
-      "$value": "{color.ink.700}"
+      "$value": "{color.stone.700}"
     },
     "text-muted": {
       "$type": "color",
       "$description": "labels, captions, metadata",
-      "$value": "{color.ink.500}"
+      "$value": "{color.stone.600}"
     },
     "border": {
       "$type": "color",
       "$description": "hairlines, dividers (decorative)",
-      "$value": "{color.umber.900}",
-      "$extensions": {
-        "in.manjunathhk": {
-          "alpha": 0.13
-        }
-      }
+      "$value": "{color.stone.200}"
     },
     "border-strong": {
       "$type": "color",
       "$description": "emphasised rules (decorative; not for control outlines)",
-      "$value": "{color.ink.500}"
+      "$value": "{color.stone.500}"
     },
     "border-control": {
       "$type": "color",
       "$description": "outlines of form controls and other UI that must be seen (3:1)",
-      "$value": "{color.ink.500}"
+      "$value": "{color.stone.500}"
     },
     "grid-line": {
       "$type": "color",
       "$description": "drafting-grid background lines",
-      "$value": "{color.ink.900}",
+      "$value": "{color.stone.900}",
       "$extensions": {
         "in.manjunathhk": {
           "alpha": 0.05
@@ -88,12 +83,17 @@
     "success": {
       "$type": "color",
       "$description": "success states",
-      "$value": "{color.ink.700}"
+      "$value": "{color.green.700}"
     },
     "warning": {
       "$type": "color",
       "$description": "warnings",
-      "$value": "{color.amber.700}"
+      "$value": "{color.yellow.700}"
+    },
+    "info": {
+      "$type": "color",
+      "$description": "informational messages",
+      "$value": "{color.blue.700}"
     },
     "focus-ring": {
       "$type": "color",
