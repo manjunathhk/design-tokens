@@ -7,7 +7,10 @@ contract. A change that breaks it does not merge.
 ## Scope is fixed
 - Tokens, base.css, fonts.css, tests, specimen page, docs. Nothing else.
 - Never add UI components, utility-class frameworks, runtime JavaScript,
-  CSS-in-JS or palette switchers. If a request needs one, stop and say so.
+  CSS-in-JS or palette switchers to the published package. If a request
+  needs one, stop and say so. The specimen page may show token-in-use
+  examples with copy-paste snippets under the limits of D53; they are
+  never shipped.
 
 ## Tokens
 - Source of truth is tokens/**/*.json in DTCG format ($value, $type,
