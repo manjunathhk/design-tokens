@@ -3,6 +3,8 @@
  *   • no horizontal page scroll at phone and desktop widths, in both schemes;
  *   • every preview frame is sized to its content and does not scroll sideways;
  *   • the theme toggle reaches every frame;
+ *   • section links collapse behind a menu button at breakpoint.md and below;
+ *   • the width toggle lifts the 80rem cap and is remembered across reloads;
  *   • forced-state copies draw the focus ring from the tokens.
  */
 
@@ -77,6 +79,54 @@ test("theme toggle reaches every preview", async ({ page }) => {
     expect(frame.theme, `${frame.title} data-theme`).toBe("dark");
     expect(frame.bg, `${frame.title} body background`).toBe(rgb(tokens.dark["color.bg"] ?? ""));
   }
+});
+
+test("section links collapse behind the menu button at phone width", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto(SPECIMEN);
+  const menu = page.locator("#menu-toggle");
+  const links = page.locator("#toc-links");
+
+  await expect(links, "section links before opening the menu").toBeHidden();
+  await expect(page.locator("#width-toggle")).toBeHidden();
+  await menu.click();
+  await expect(menu).toHaveAttribute("aria-expanded", "true");
+  await expect(links, "section links after opening the menu").toBeVisible();
+  await links.getByRole("link", { name: "Type" }).click();
+  await expect(menu).toHaveAttribute("aria-expanded", "false");
+  await expect(links, "section links after following one").toBeHidden();
+
+  await menu.click();
+  await page.keyboard.press("Escape");
+  await expect(links, "section links after Escape").toBeHidden();
+  await expect(menu).toBeFocused();
+});
+
+test("section links show inline and the menu button is hidden at desktop width", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(SPECIMEN);
+  await expect(page.locator("#menu-toggle")).toBeHidden();
+  await expect(page.locator("#toc-links")).toBeVisible();
+});
+
+test("width toggle removes the 80rem cap and is remembered after a reload", async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 900 });
+  await page.goto(SPECIMEN);
+  const mainWidth = () =>
+    page.locator("main").evaluate((main) => main.getBoundingClientRect().width);
+
+  const capped = await mainWidth();
+  expect(capped, "main width before the toggle").toBeLessThan(1920);
+  await page.click("#width-toggle");
+  await expect(page.locator("#width-toggle")).toHaveAttribute("aria-pressed", "true");
+  const full = await mainWidth();
+  expect(full, "main width after the toggle").toBeGreaterThan(capped);
+
+  await page.reload();
+  await expect(page.locator("#width-toggle")).toHaveAttribute("aria-pressed", "true");
+  expect(await mainWidth(), "main width after a reload").toBe(full);
 });
 
 /**

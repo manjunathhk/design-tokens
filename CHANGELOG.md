@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- _No unreleased changes yet._
+### Documentation
+
+- The specimen's top bar has a sun/moon icon theme toggle, a full-width
+  toggle that is remembered across reloads, and a section menu that collapses
+  behind a menu button at `breakpoint.md` (900px) and below. The specimen
+  only; nothing in the package changes (#102).
 
 ## [1.5.0] - 2026-10-07
 
