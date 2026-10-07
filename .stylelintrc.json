@@ -2,7 +2,7 @@
   "extends": ["stylelint-config-standard"],
   "overrides": [
     {
-      "files": ["src/base.css"],
+      "files": ["src/base.css", "src/examples/**/*.css"],
       "rules": {
         "color-no-hex": true,
         "color-named": "never",
