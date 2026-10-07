@@ -54,6 +54,12 @@
   color: var(--mk-color-accent);
 }
 
+/* accent on accent-subtle is 3.99:1 in light mode, below 4.5:1, so the label
+   switches to the text colour on hover. */
+.ex-button-quiet:hover {
+  color: var(--mk-color-text);
+}
+
 /* Destructive: outlined, because no on-danger token exists for a filled one. */
 .ex-button-danger {
   border-color: var(--mk-color-danger);
