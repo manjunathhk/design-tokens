@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-09
+
+Adds the opt-in `controls.js` script and a `base.css` width hook; no token
+is added, removed, renamed or changed (MINOR).
+
 ### Added
 
 - `base.css` caps any element marked `data-mk-container` at
@@ -32,6 +37,18 @@ All notable changes to this project will be documented in this file.
   where the tag goes on static HTML, WordPress, .NET Razor and Angular (never
   the `scripts` array of `angular.json`), per-origin storage, and the
   `script-src` CSP directive (D54, #120).
+
+### Release pipeline
+
+- The CDN serves `controls.js` as `text/javascript`, and the CDN check
+  verifies the version banner of every `.js` file as well as `index.css`
+  (#118, D43).
+- The API diff also compares the site-controls surface of `base.css` and
+  `controls.js` against npm `latest`: `data-mk-*` attribute names and
+  values, `mk-*` storage keys and event names. A removal or rename is MAJOR,
+  an addition MINOR (#116, D20, D45).
+- When names are only added, the API diff now lists the added tokens and
+  asks for MINOR, instead of reporting a missing removal as MAJOR (#125).
 
 ## [1.5.1] - 2026-10-09
 
