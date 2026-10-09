@@ -27,6 +27,7 @@ const PREFIX = `v${VERSION}`;
 const FILES = [
   "LICENSES/IBM-Plex-Mono-OFL-1.1.txt",
   "_tokens.scss",
+  "controls.js",
   "fonts/IBMPlexSans-Bold-Latin1.woff2",
   "fonts/IBMPlexSans-Regular-Latin1.woff2",
   "index.css",
@@ -58,13 +59,16 @@ function fixtureFor(manifest: UploadManifest, mode: VerifyCdnMode, prefix = PREF
     if (entry.path.endsWith(".woff2")) {
       headers["access-control-allow-origin"] = "*";
     }
+    const banner = `/*! @manjunathhk/design-tokens v${manifest.version} */\n`;
     fixture[`${prefix}/${entry.path}`] = {
       status: 200,
       headers,
       body:
         entry.path === "index.css"
-          ? `/*! @manjunathhk/design-tokens v${manifest.version} */\n:root{}\n`
-          : "fixture bytes",
+          ? `${banner}:root{}\n`
+          : entry.path === "controls.js"
+            ? `${banner}(() => {})();\n`
+            : "fixture bytes",
     };
   }
   return fixture;
@@ -233,6 +237,49 @@ describe("verifyCdnResponses against local HTTP fixtures", () => {
       ).rejects.toThrow(
         new RegExp(
           `${PREFIX}/index\\.css.*is missing banner.*@manjunathhk/design-tokens v1\\.2\\.3`,
+          "s",
+        ),
+      );
+    });
+  });
+
+  it("fails when controls.js is missing the version banner", async () => {
+    const fixture = withOverrides(fixtureFor(manifest, "pinned"), {
+      [`${PREFIX}/controls.js`]: { body: "(() => {})();\n" },
+    });
+    await withServer(fixture, async (baseUrl) => {
+      await expect(
+        verifyCdnResponses({ manifest, baseUrl, prefix: PREFIX, mode: "pinned" }),
+      ).rejects.toThrow(
+        new RegExp(
+          `${PREFIX}/controls\\.js.*is missing banner.*@manjunathhk/design-tokens v1\\.2\\.3`,
+          "s",
+        ),
+      );
+    });
+  });
+
+  it("fails when controls.js carries another version's banner", async () => {
+    const fixture = withOverrides(fixtureFor(manifest, "alias", "v1"), {
+      [`v1/controls.js`]: { body: "/*! @manjunathhk/design-tokens v1.2.2 */\n(() => {})();\n" },
+    });
+    await withServer(fixture, async (baseUrl) => {
+      await expect(
+        verifyCdnResponses({ manifest, baseUrl, prefix: "v1", mode: "alias" }),
+      ).rejects.toThrow(new RegExp(`v1/controls\\.js.*is missing banner.*v1\\.2\\.3`, "s"));
+    });
+  });
+
+  it("fails when controls.js is not served as JavaScript", async () => {
+    const fixture = withOverrides(fixtureFor(manifest, "pinned"), {
+      [`${PREFIX}/controls.js`]: { headers: { "content-type": "application/octet-stream" } },
+    });
+    await withServer(fixture, async (baseUrl) => {
+      await expect(
+        verifyCdnResponses({ manifest, baseUrl, prefix: PREFIX, mode: "pinned" }),
+      ).rejects.toThrow(
+        new RegExp(
+          `${PREFIX}/controls\\.js.*Content-Type "application/octet-stream", expected "text/javascript"`,
           "s",
         ),
       );
