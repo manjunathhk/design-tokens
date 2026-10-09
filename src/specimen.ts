@@ -137,6 +137,14 @@ const COPY_ICON = icon(
 );
 const CHECK_ICON = icon("check", '<path d="M20 6 9 17l-5-5"/>');
 
+/** Token bars on an accent tile, coloured from the built tokens so it follows the palette and the OS theme. */
+function favicon(set: TokenSet): string {
+  const fill = (mode: Mode) =>
+    `.tile { fill: ${tokenValue(set.modes[mode], "color.accent")}; } .bars { fill: ${tokenValue(set.modes[mode], "color.on-accent")}; }`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><style>${fill("light")} @media (prefers-color-scheme: dark) { ${fill("dark")} }</style><rect class="tile" width="32" height="32" rx="7"/><g class="bars"><rect x="7" y="8" width="18" height="4" rx="2"/><rect x="7" y="14" width="13" height="4" rx="2"/><rect x="7" y="20" width="8" height="4" rx="2"/></g></svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
 /** Code with its copy button in the top-right corner of the box. `shown` is already escaped. */
 const codeBox = (label: string, shown: string, copied: string) =>
   `<div class="code"><pre>${shown}</pre><button type="button" class="icon-button copy-button" aria-label="Copy ${escapeHtml(label)}" title="Copy" data-copy="${escapeHtml(copied)}">${COPY_ICON}${CHECK_ICON}</button></div>`;
@@ -274,6 +282,7 @@ export function specimenHtml(set: TokenSet, base: string, groups: ExampleGroup[]
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>@manjunathhk/design-tokens specimen</title>
+  <link rel="icon" type="image/svg+xml" href="${favicon(set)}">
   <script>
     try {
       if (localStorage.getItem("mk-specimen-layout") === "full") document.documentElement.dataset.layout = "full";
