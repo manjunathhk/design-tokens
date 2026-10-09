@@ -19,6 +19,15 @@ All notable changes to this project will be documented in this file.
   rendered later. No globals, no API; without storage the defaults apply
   (D54, #117). MINOR.
 
+### Documentation
+
+- The README has a Site controls section: the `controls.js` hooks with
+  copy-paste markup, loading it as a blocking script in `<head>` (no `defer`,
+  `async` or `type="module"`), pinning `/vX.Y.Z/` for Subresource Integrity,
+  where the tag goes on static HTML, WordPress, .NET Razor and Angular (never
+  the `scripts` array of `angular.json`), per-origin storage, and the
+  `script-src` CSP directive (D54, #120).
+
 ## [1.5.1] - 2026-10-09
 
 Specimen changes only; no token is added, removed, renamed or changed, and
