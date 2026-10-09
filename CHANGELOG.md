@@ -21,6 +21,11 @@ All notable changes to this project will be documented in this file.
 
 ### Documentation
 
+- The specimen's theme switch and width toggle are now the shipped
+  `controls.js`, inlined in the page, and the page uses the `base.css` width
+  hook. The specimen's own saved choices (`mk-specimen-theme`,
+  `mk-specimen-layout`) are gone, so specimen viewers pick their theme and
+  width once more. The specimen only; nothing in the package changes (#119).
 - The README has a Site controls section: the `controls.js` hooks with
   copy-paste markup, loading it as a blocking script in `<head>` (no `defer`,
   `async` or `type="module"`), pinning `/vX.Y.Z/` for Subresource Integrity,

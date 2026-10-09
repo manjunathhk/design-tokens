@@ -276,7 +276,20 @@ const gapRows = () =>
       </tr>`,
   );
 
-export function specimenHtml(set: TokenSet, base: string, groups: ExampleGroup[]): string {
+/**
+ * The specimen page. `controls` is the built dist/controls.js (D54), inlined in
+ * <head> because Pages serves only docs/index.html (D15).
+ */
+export function specimenHtml(
+  set: TokenSet,
+  base: string,
+  controls: string,
+  groups: ExampleGroup[],
+): string {
+  if (/<\/script/i.test(controls))
+    throw new Error(
+      'dist/controls.js contains "</script", which would end its inline <script> in docs/index.html early.',
+    );
   const shadow = tokenValue(set.shared, "shadow.raised");
   const major = set.version.split(".")[0] ?? "1";
   const contrast = measureContrast(set);
@@ -288,15 +301,12 @@ export function specimenHtml(set: TokenSet, base: string, groups: ExampleGroup[]
   <title>@manjunathhk/design-tokens specimen</title>
   <link rel="icon" type="image/svg+xml" href="${favicon(set)}">
   <script>
-    try {
-      if (localStorage.getItem("mk-specimen-layout") === "full") document.documentElement.dataset.layout = "full";
-      const theme = localStorage.getItem("mk-specimen-theme");
-      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
-    } catch {}
+${controls}
   </script>
   <style>
 ${banner(set.version)}
 ${tokenRules(set)}
+${base}
 html { scroll-padding-top: 4.5rem; scroll-behavior: smooth; font-family: var(--mk-font-family-sans); font-size: var(--mk-font-size-base); line-height: var(--mk-font-line-height-normal); }
 body { margin: 0; background: var(--mk-color-bg); color: var(--mk-color-text); }
 h1, h2, h3 { margin: 0; font-family: var(--mk-font-family-display); line-height: var(--mk-font-line-height-snug); letter-spacing: var(--mk-font-letter-spacing-heading); text-wrap: balance; }
@@ -332,7 +342,6 @@ button:hover { background: var(--mk-color-accent-subtle); }
 .theme-switch .icon-button { border-color: transparent; background: transparent; color: var(--mk-color-text-muted); }
 .theme-switch .icon-button:hover { color: var(--mk-color-text); }
 .theme-switch .icon-button[aria-pressed="true"] { border-color: var(--mk-color-accent); background: var(--mk-color-accent-subtle); color: var(--mk-color-accent); }
-html[data-layout="full"] main { max-width: none; }
 .snippet { display: grid; gap: var(--mk-spacing-2); }
 .copy-button { position: absolute; top: var(--mk-spacing-1); right: var(--mk-spacing-1); border-color: transparent; background: transparent; color: var(--mk-color-text-muted); }
 .copy-button:hover { color: var(--mk-color-text); }
@@ -340,7 +349,7 @@ html[data-layout="full"] main { max-width: none; }
 .copy-button .icon-check, .copy-button[data-copied] .icon-copy { display: none; }
 .copy-button[data-copied] .icon-check { display: block; }
 :focus-visible { outline: 2px solid var(--mk-color-focus-ring); outline-offset: 2px; }
-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mk-spacing-12); max-width: var(--mk-layout-container-max); margin: 0 auto; padding: var(--mk-spacing-10) var(--mk-layout-gutter) var(--mk-spacing-24); }
+main { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mk-spacing-12); padding: var(--mk-spacing-10) var(--mk-layout-gutter) var(--mk-spacing-24); }
 section { background: var(--mk-color-surface); border: 1px solid var(--mk-color-border); border-radius: var(--mk-radius-lg); padding: var(--mk-spacing-6); }
 .stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mk-spacing-4); align-content: start; }
 .grid > * { min-width: 0; }
@@ -402,18 +411,18 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
       <a href="#motion">Motion</a>
     </div>
     <div class="toc-actions">
-      <button type="button" class="icon-button" id="width-toggle" aria-pressed="false" aria-label="Full width" title="Full width">${WIDTH_ICON}</button>
+      <button type="button" class="icon-button" id="width-toggle" data-mk-width-toggle aria-pressed="false" aria-label="Full width" title="Full width">${WIDTH_ICON}</button>
       <div class="theme-switch" id="theme-switch" role="group" aria-label="Theme">
-        <button type="button" class="icon-button" data-theme-choice="system" aria-pressed="true" aria-label="System theme" title="System theme">${MONITOR_ICON}</button>
-        <button type="button" class="icon-button" data-theme-choice="light" aria-pressed="false" aria-label="Light theme" title="Light theme">${SUN_ICON}</button>
-        <button type="button" class="icon-button" data-theme-choice="dark" aria-pressed="false" aria-label="Dark theme" title="Dark theme">${MOON_ICON}</button>
+        <button type="button" class="icon-button" data-mk-theme-choice="system" aria-pressed="true" aria-label="System theme" title="System theme">${MONITOR_ICON}</button>
+        <button type="button" class="icon-button" data-mk-theme-choice="light" aria-pressed="false" aria-label="Light theme" title="Light theme">${SUN_ICON}</button>
+        <button type="button" class="icon-button" data-mk-theme-choice="dark" aria-pressed="false" aria-label="Dark theme" title="Dark theme">${MOON_ICON}</button>
       </div>
     </div>
   </nav>
-  <main>
+  <main data-mk-container>
     <header class="stack">
       <h1>Token specimen</h1>
-      <p class="lede">Version <code>${set.version}</code>. Every semantic token in both modes. The theme switch is for review only.</p>
+      <p class="lede">Version <code>${set.version}</code>. Every semantic token in both modes. The theme switch and width toggle are the shipped <code>controls.js</code>.</p>
     </header>
 
     <section class="stack" id="usage">
@@ -515,12 +524,6 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
 
   <script>
     const root = document.documentElement;
-    const themeButtons = [...document.querySelectorAll("[data-theme-choice]")];
-    const syncTheme = () => {
-      const choice = root.dataset.theme ?? "system";
-      for (const button of themeButtons)
-        button.setAttribute("aria-pressed", String(button.dataset.themeChoice === choice));
-    };
     const frames = [...document.querySelectorAll("iframe.preview")];
     const themeFrame = (frame) => {
       const frameRoot = frame.contentDocument?.documentElement;
@@ -542,31 +545,11 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
       if (frame.contentDocument?.body?.childElementCount) setUpFrame(frame);
     }
 
-    for (const button of themeButtons)
-      button.addEventListener("click", () => {
-        const choice = button.dataset.themeChoice;
-        if (choice === "system") delete root.dataset.theme;
-        else root.dataset.theme = choice;
-        try {
-          localStorage.setItem("mk-specimen-theme", choice);
-        } catch {}
-        frames.forEach(themeFrame);
-        syncTheme();
-      });
-    syncTheme();
-
-    const widthToggle = document.getElementById("width-toggle");
-    const syncWidth = () => widthToggle.setAttribute("aria-pressed", String(root.dataset.layout === "full"));
-    widthToggle.addEventListener("click", () => {
-      const full = root.dataset.layout !== "full";
-      if (full) root.dataset.layout = "full";
-      else delete root.dataset.layout;
-      try {
-        localStorage.setItem("mk-specimen-layout", full ? "full" : "fit");
-      } catch {}
-      syncWidth();
+    // controls.js owns the theme switch; follow its data-theme into every preview.
+    new MutationObserver(() => frames.forEach(themeFrame)).observe(root, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
     });
-    syncWidth();
 
     const toc = document.querySelector(".toc");
     const menuToggle = document.getElementById("menu-toggle");
