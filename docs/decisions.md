@@ -160,7 +160,10 @@ CDN verification can prove which version a URL serves.
     programmable API and no global.
   - **Versioned API.** Attribute names and values, the localStorage keys
     (`mk-theme`, `mk-width`) and any events are covered by the API diff. A
-    rename or removal is MAJOR.
+    rename or removal is MAJOR. The diff reads the files, so every attribute
+    value the script relies on is written in a form it reads (an attribute
+    selector or a literal `setAttribute` value, D20/D45), and `mk-` string
+    literals name storage keys only.
   - **No flash.** A classic (non-module), blocking script in `<head>` applies
     the saved choice before first paint; clicks are delegated from
     `document`, so buttons rendered later work. There is no inline snippet,
@@ -208,8 +211,18 @@ All run in CI on every PR (Linux and Windows) and again in `release.yml`.
   needs the npm registry; its logic is unit-tested in `npm test`. It compares
   the build against npm `latest`: a removed or renamed CSS name or JSON key
   needs a MAJOR bump; an added token or changed value needs at least MINOR; a
-  stricter stylelint config is MAJOR, a looser one MINOR. Doc and build-only
-  changes are not checked.
+  stricter stylelint config is MAJOR, a looser one MINOR. It also compares
+  the site-controls surface (D54) of `dist/base.css` and `dist/controls.js`,
+  file by file: `data-mk-*` attribute names; attribute values written as an
+  attribute selector (`[data-mk-width="full"]`) or as
+  `setAttribute("data-mk-width", "full")`; localStorage keys, which are the
+  string literals starting with `mk-`; and event names passed to `new Event()`
+  or `new CustomEvent()`. Comments are ignored. A removed or renamed item
+  needs a MAJOR bump and an added one at least MINOR; the failure names the
+  item and the file. A file missing from `latest` (such as `controls.js`
+  before its first release) counts only as additions, and a published file
+  missing from the build counts as removals. Doc and build-only changes are
+  not checked.
 - **D26. Cross-origin Playwright smoke test.** Local servers serve the fixture
   page and `dist/` on different ports, with and without
   `Access-Control-Allow-Origin: *`, so the test proves computed colours in

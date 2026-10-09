@@ -1,12 +1,17 @@
+import { readFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import {
   diffNames,
+  diffSiteControls,
   diffStylelintConfig,
   diffValues,
   jsonNames,
   readFromTarball,
+  siteControlsError,
+  siteControlsSurface,
   tokenNames,
+  type FileDiff,
   type TokensJson,
 } from "../scripts/api-diff.js";
 
@@ -209,5 +214,231 @@ describe("API diff", () => {
       ]),
     );
     expect(readFromTarball(withoutJson, "dist/tokens.json")).toBeUndefined();
+  });
+});
+
+const fixture = (name: string) =>
+  readFileSync(new URL(`fixtures/site-controls/${name}`, import.meta.url), "utf8");
+const baseCss = fixture("base.css");
+const controlsJs = fixture("controls.js");
+const siteControls = (
+  version: string,
+  files: { base?: string; controls?: string } = { base: baseCss, controls: controlsJs },
+) => ({
+  version,
+  files: { "dist/base.css": files.base, "dist/controls.js": files.controls },
+});
+const diffFor = (diffs: FileDiff[], path: string): FileDiff => {
+  const diff = diffs.find((d) => d.path === path);
+  if (!diff) throw new Error(`No site-controls diff for ${path}.`);
+  return diff;
+};
+
+describe("API diff: site controls (D54)", () => {
+  it("collects data-mk-* attributes with their values from base.css", () => {
+    expect(siteControlsSurface(baseCss)).toEqual([
+      "attribute data-mk-container",
+      "attribute data-mk-width",
+      'attribute data-mk-width="full"',
+    ]);
+  });
+
+  it("collects attributes, values and storage keys from controls.js, and no events", () => {
+    expect(siteControlsSurface(controlsJs)).toEqual([
+      "attribute data-mk-theme-choice",
+      'attribute data-mk-theme-choice="dark"',
+      'attribute data-mk-theme-choice="light"',
+      'attribute data-mk-theme-choice="system"',
+      "attribute data-mk-width",
+      "attribute data-mk-width-toggle",
+      'attribute data-mk-width="full"',
+      "storage key mk-theme",
+      "storage key mk-width",
+    ]);
+  });
+
+  it("collects dispatched event names and ignores comments", () => {
+    const script = [
+      `/* data-mk-old "mk-old" */`,
+      `// data-mk-older`,
+      `el.dispatchEvent(new CustomEvent("mk-theme-change"));`,
+      `el.dispatchEvent(new Event('mk-width-change'));`,
+    ].join("\n");
+    expect(siteControlsSurface(script)).toEqual([
+      "event mk-theme-change",
+      "event mk-width-change",
+      "storage key mk-theme-change",
+      "storage key mk-width-change",
+    ]);
+  });
+
+  it("passes an unchanged surface at the same version", () => {
+    const diffs = diffSiteControls(siteControls("1.6.0"), siteControls("1.6.0"));
+    expect(diffs.map((d) => [d.path, d.added, d.removed, d.ok])).toEqual([
+      ["dist/base.css", [], [], true],
+      ["dist/controls.js", [], [], true],
+    ]);
+  });
+
+  it("fails naming the attribute and the file when an attribute is removed without a MAJOR bump", () => {
+    const local = controlsJs.replace(
+      `    else if (target.closest('[data-mk-theme-choice="dark"]')) setTheme("dark");\n`,
+      "",
+    );
+    const diff = diffFor(
+      diffSiteControls(
+        siteControls("1.6.0"),
+        siteControls("1.7.0", { base: baseCss, controls: local }),
+      ),
+      "dist/controls.js",
+    );
+    expect(diff).toMatchObject({
+      removed: ['attribute data-mk-theme-choice="dark"'],
+      added: [],
+      ok: false,
+    });
+    expect(siteControlsError(diff)).toBe(
+      'Site controls in dist/controls.js: removed attribute data-mk-theme-choice="dark". ' +
+        "A removal or rename requires a MAJOR bump or restoration.",
+    );
+  });
+
+  it("fails naming both names and the file when an attribute is renamed without a MAJOR bump", () => {
+    const local = baseCss.replaceAll("data-mk-container", "data-mk-wrapper");
+    const diff = diffFor(
+      diffSiteControls(
+        siteControls("1.6.0"),
+        siteControls("1.7.0", { base: local, controls: controlsJs }),
+      ),
+      "dist/base.css",
+    );
+    expect(diff).toMatchObject({
+      removed: ["attribute data-mk-container"],
+      added: ["attribute data-mk-wrapper"],
+      ok: false,
+    });
+    expect(siteControlsError(diff)).toBe(
+      "Site controls in dist/base.css: removed attribute data-mk-container; " +
+        "added attribute data-mk-wrapper. A removal or rename requires a MAJOR bump or restoration.",
+    );
+  });
+
+  it("passes an attribute rename with a MAJOR bump", () => {
+    const local = baseCss.replaceAll("data-mk-container", "data-mk-wrapper");
+    const diffs = diffSiteControls(
+      siteControls("1.6.0"),
+      siteControls("2.0.0", { base: local, controls: controlsJs }),
+    );
+    expect(diffs.every((d) => d.ok)).toBe(true);
+  });
+
+  it("requires a MINOR bump for an added attribute value", () => {
+    const local = controlsJs.replace(
+      `    else if (target.closest("[data-mk-width-toggle]")) toggleWidth();\n`,
+      `    else if (target.closest("[data-mk-width-toggle]")) toggleWidth();\n` +
+        `    else if (target.closest('[data-mk-theme-choice="sepia"]')) setTheme("sepia");\n`,
+    );
+    const patch = diffFor(
+      diffSiteControls(
+        siteControls("1.6.0"),
+        siteControls("1.6.1", { base: baseCss, controls: local }),
+      ),
+      "dist/controls.js",
+    );
+    expect(patch).toMatchObject({
+      removed: [],
+      added: ['attribute data-mk-theme-choice="sepia"'],
+      ok: false,
+    });
+    expect(siteControlsError(patch)).toBe(
+      'Site controls in dist/controls.js: added attribute data-mk-theme-choice="sepia". ' +
+        "An addition requires a MINOR bump.",
+    );
+    const minor = diffSiteControls(
+      siteControls("1.6.0"),
+      siteControls("1.7.0", { base: baseCss, controls: local }),
+    );
+    expect(minor.every((d) => d.ok)).toBe(true);
+  });
+
+  it("fails naming the key and the file when a storage key is removed without a MAJOR bump", () => {
+    const local = controlsJs.replaceAll('"mk-width"', "WIDTH_KEY");
+    const diff = diffFor(
+      diffSiteControls(
+        siteControls("1.6.0"),
+        siteControls("1.7.0", { base: baseCss, controls: local }),
+      ),
+      "dist/controls.js",
+    );
+    expect(diff).toMatchObject({ removed: ["storage key mk-width"], added: [], ok: false });
+    expect(siteControlsError(diff)).toBe(
+      "Site controls in dist/controls.js: removed storage key mk-width. " +
+        "A removal or rename requires a MAJOR bump or restoration.",
+    );
+  });
+
+  it("fails when a storage key is renamed without a MAJOR bump, and passes with one", () => {
+    const local = controlsJs.replaceAll('"mk-theme"', '"mk-colour-theme"');
+    const minor = diffFor(
+      diffSiteControls(
+        siteControls("1.6.0"),
+        siteControls("1.7.0", { base: baseCss, controls: local }),
+      ),
+      "dist/controls.js",
+    );
+    expect(minor).toMatchObject({
+      removed: ["storage key mk-theme"],
+      added: ["storage key mk-colour-theme"],
+      ok: false,
+    });
+    expect(siteControlsError(minor)).toBe(
+      "Site controls in dist/controls.js: removed storage key mk-theme; " +
+        "added storage key mk-colour-theme. A removal or rename requires a MAJOR bump or restoration.",
+    );
+    const major = diffSiteControls(
+      siteControls("1.6.0"),
+      siteControls("2.0.0", { base: baseCss, controls: local }),
+    );
+    expect(major.every((d) => d.ok)).toBe(true);
+  });
+
+  it("requires a MINOR bump for an added storage key", () => {
+    const local = controlsJs.replace(
+      "  applyWidth(localStorage",
+      '  localStorage.removeItem("mk-legacy");\n  applyWidth(localStorage',
+    );
+    const patch = diffFor(
+      diffSiteControls(
+        siteControls("1.6.0"),
+        siteControls("1.6.1", { base: baseCss, controls: local }),
+      ),
+      "dist/controls.js",
+    );
+    expect(patch).toMatchObject({ removed: [], added: ["storage key mk-legacy"], ok: false });
+    const minor = diffSiteControls(
+      siteControls("1.6.0"),
+      siteControls("1.7.0", { base: baseCss, controls: local }),
+    );
+    expect(minor.every((d) => d.ok)).toBe(true);
+  });
+
+  it("counts a file missing from the published version only as additions", () => {
+    const published = siteControls("1.6.0", { base: baseCss });
+    const patch = diffFor(diffSiteControls(published, siteControls("1.6.1")), "dist/controls.js");
+    expect(patch.removed).toEqual([]);
+    expect(patch.added).toEqual(siteControlsSurface(controlsJs));
+    expect(patch.ok).toBe(false);
+    expect(siteControlsError(patch)).toMatch(/^Site controls in dist\/controls\.js: added /);
+
+    expect(diffSiteControls(published, siteControls("1.7.0")).every((d) => d.ok)).toBe(true);
+  });
+
+  it("requires a MAJOR bump when a published file is missing locally", () => {
+    const diff = diffFor(
+      diffSiteControls(siteControls("1.6.0"), siteControls("1.7.0", { base: baseCss })),
+      "dist/controls.js",
+    );
+    expect(diff.removed).toEqual(siteControlsSurface(controlsJs));
+    expect(diff.ok).toBe(false);
   });
 });

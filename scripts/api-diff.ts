@@ -1,12 +1,13 @@
 /**
- * Fails if an emitted token name was removed or renamed since the latest
- * published version, unless package.json has a higher MAJOR version.
+ * Fails if an emitted token name or a site-controls name (D54) was removed or
+ * renamed since the latest published version, unless package.json has a
+ * higher MAJOR version.
  *
  * For compatibility checks, the baseline is the npm `latest` dist tag. That
  * intentionally excludes `next` pre-releases (D20); same-version unchanged
  * builds are allowed to compare equal and be treated as a no-op.
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { gunzipSync } from "node:zlib";
 
@@ -15,6 +16,8 @@ const REGISTRY = "https://registry.npmjs.org";
 const CSS_PATH = "dist/tokens.css";
 const JSON_PATH = "dist/tokens.json";
 const STYLELINT_PATH = "dist/stylelint.mjs";
+/** Files whose site-controls surface (D54) is versioned API. */
+export const SITE_CONTROLS_PATHS = ["dist/base.css", "dist/controls.js"] as const;
 const JSON_GROUPS = ["light", "dark", "shared", "breakpoints"] as const;
 const KNOWN_COLOR_FUNCTIONS = [
   "rgb",
@@ -268,6 +271,79 @@ export function diffStylelintConfig(
   return { changes, ok };
 }
 
+/**
+ * The site-controls API (D54) a stylesheet or script relies on, sorted:
+ * `data-mk-*` attribute names; attribute values written as an attribute
+ * selector (`[data-mk-width="full"]`) or as
+ * `setAttribute("data-mk-width", "full")`; localStorage keys, which are the
+ * string literals starting with `mk-`; and event names passed to `new Event()`
+ * or `new CustomEvent()`. Comments are ignored.
+ */
+export function siteControlsSurface(source: string): string[] {
+  const code = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  const items = new Set<string>();
+  for (const m of code.matchAll(/data-mk-[a-z0-9]+(?:-[a-z0-9]+)*/g)) {
+    items.add(`attribute ${m[0]}`);
+  }
+  for (const m of code.matchAll(
+    /\[\s*(data-mk-[a-z0-9-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s\]"']+))/g,
+  )) {
+    items.add(`attribute ${m[1]}="${m[2] ?? m[3] ?? m[4]}"`);
+  }
+  for (const m of code.matchAll(
+    /setAttribute\(\s*(["'])(data-mk-[a-z0-9-]+)\1\s*,\s*(["'])(.*?)\3\s*\)/g,
+  )) {
+    items.add(`attribute ${m[2]}="${m[4]}"`);
+  }
+  for (const m of code.matchAll(/(["'`])(mk-[a-z0-9-]+)\1/g)) {
+    items.add(`storage key ${m[2]}`);
+  }
+  for (const m of code.matchAll(/new\s+(?:Custom)?Event\(\s*(["'`])(.*?)\1/g)) {
+    items.add(`event ${m[2]}`);
+  }
+  return [...items].sort();
+}
+
+export interface FileDiff extends Diff {
+  path: string;
+}
+
+/**
+ * Compares the site-controls surface of each file in SITE_CONTROLS_PATHS. A
+ * file missing on one side has an empty surface, so a file missing from the
+ * published version counts only as additions.
+ */
+export function diffSiteControls(
+  published: { version: string; files: Record<string, string | undefined> },
+  local: { version: string; files: Record<string, string | undefined> },
+): FileDiff[] {
+  const surface = (source: string | undefined) =>
+    source === undefined ? [] : siteControlsSurface(source);
+  return SITE_CONTROLS_PATHS.map((path) => ({
+    path,
+    ...diffNames(
+      { version: published.version, names: surface(published.files[path]) },
+      { version: local.version, names: surface(local.files[path]) },
+    ),
+  }));
+}
+
+/** The failure message for one file's site-controls diff, or undefined if it passes. */
+export function siteControlsError(diff: FileDiff): string | undefined {
+  if (diff.ok) return undefined;
+  const added = diff.added.length > 0 ? `; added ${diff.added.join(", ")}` : "";
+  if (diff.removed.length > 0) {
+    return (
+      `Site controls in ${diff.path}: removed ${diff.removed.join(", ")}${added}. ` +
+      `A removal or rename requires a MAJOR bump or restoration.`
+    );
+  }
+  return (
+    `Site controls in ${diff.path}: added ${diff.added.join(", ")}. ` +
+    `An addition requires a MINOR bump.`
+  );
+}
+
 /** Reads one file from an npm tarball (gzipped ustar). */
 export function readFromTarball(tgz: Buffer, path: string): string | undefined {
   const tar = gunzipSync(tgz);
@@ -302,6 +378,12 @@ async function main(): Promise<void> {
   const localJsonNames = jsonNames(localJson);
   const localJsonValues = jsonValueMap(localJson);
   const localStylelint = readFileSync(STYLELINT_PATH, "utf8");
+  const localSiteControls = Object.fromEntries(
+    SITE_CONTROLS_PATHS.map((path) => [
+      path,
+      existsSync(path) ? readFileSync(path, "utf8") : undefined,
+    ]),
+  );
 
   const res = await fetch(`${REGISTRY}/${PACKAGE.replace("/", "%2F")}`);
   if (res.status === 404) {
@@ -391,6 +473,27 @@ async function main(): Promise<void> {
     }
   }
 
+  const publishedSiteControls = Object.fromEntries(
+    SITE_CONTROLS_PATHS.map((path) => [path, readFromTarball(tarball, path)]),
+  );
+  const siteControlsDiffs = diffSiteControls(
+    { version: latest, files: publishedSiteControls },
+    { version: local.version, files: localSiteControls },
+  );
+  for (const diff of siteControlsDiffs) {
+    if (publishedSiteControls[diff.path] === undefined) {
+      console.log(
+        `Notice: ${PACKAGE}@${latest} has no ${diff.path}; its site controls count only as additions.`,
+      );
+    }
+    console.log(
+      `API diff (site controls in ${diff.path}) against ${PACKAGE}@${latest} (local ${local.version}): ` +
+        `${diff.added.length} added, ${diff.removed.length} removed.`,
+    );
+    for (const n of diff.added) console.log(`  + ${n}`);
+    for (const n of diff.removed) console.log(`  - ${n}`);
+  }
+
   const errors: string[] = [];
   if (!cssDiff.ok) {
     errors.push(
@@ -421,6 +524,10 @@ async function main(): Promise<void> {
       .map((change) => `${change.rule} (${change.change}; ${change.required})`)
       .join(", ");
     errors.push(`Stylelint config: ${detail}. This requires the documented bump. `);
+  }
+  for (const diff of siteControlsDiffs) {
+    const error = siteControlsError(diff);
+    if (error) errors.push(error);
   }
   if (errors.length > 0) {
     throw new Error(`Compatibility check failed: ${errors.join(" ")}`);
