@@ -310,10 +310,12 @@ All run in CI on every PR (Linux and Windows) and again in `release.yml`.
 - **D42. Alias writes are serialized** by the shared concurrency group
   `alias-update` in both workflows, with `cancel-in-progress: false`.
 - **D43. One tested CDN verifier.** `scripts/verify-cdn.ts` checks, for every
-  manifest entry: status, Content-Type, version banner, the pinned or alias
-  Cache-Control, and for every font `Access-Control-Allow-Origin: *`,
-  requested with an `Origin` header the way a browser does. `*` matches
-  `docs/r2-cors.json`; change both together.
+  manifest entry: status, Content-Type and the pinned or alias Cache-Control;
+  the version banner of `index.css` and of every `.js` file (`controls.js`,
+  D54); and for every font `Access-Control-Allow-Origin: *`, requested with an
+  `Origin` header the way a browser does. `*` matches `docs/r2-cors.json`;
+  change both together. A `dist/` file whose extension has no Content-Type in
+  `scripts/upload-manifest.ts` fails the release before any upload.
 - **D41. `promote.yml` input** reaches the workflow only as an env value and is
   validated by `scripts/promote-version.ts` (final `X.Y.Z` only) before any
   storage or purge step.

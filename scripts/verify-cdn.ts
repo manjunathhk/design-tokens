@@ -91,7 +91,7 @@ export async function verifyCdnResponses({
       );
     }
 
-    if (entry.path === "index.css") {
+    if (entry.path === "index.css" || entry.path.endsWith(".js")) {
       const body = await response.text();
       if (!body.includes(banner)) {
         problems.push(`${url}: is missing banner ${banner}.`);

@@ -43,6 +43,23 @@ Why `*`: assets are public, credentials are never sent, and we avoid per-origin 
 
 Pinned paths (`/vX.Y.Z/`) use long immutable cache. Alias paths (`/vMAJOR/`) use short cache.
 
+Every file in `dist/` is uploaded with the Content-Type that
+`scripts/upload-manifest.ts` maps from its extension. An extension with no
+mapping fails the release at the manifest step, before anything is uploaded.
+
+| Files                                                             | Content-Type       |
+| ----------------------------------------------------------------- | ------------------ |
+| `index.css`, `fonts.css`, `tokens.css`, `base.css`                | `text/css`         |
+| `controls.js` (D54, opt-in site controls)                         | `text/javascript`  |
+| `tokens.mjs`, `stylelint.mjs`                                     | `text/javascript`  |
+| `tokens.json`                                                     | `application/json` |
+| `fonts/*.woff2`                                                   | `font/woff2`       |
+| `tokens.d.ts`, `stylelint.d.ts`, `_tokens.scss`, `LICENSES/*.txt` | `text/plain`       |
+
+`scripts/verify-cdn.ts` checks the version banner of `index.css` and
+`controls.js`, so a URL that serves stale CSS or a stale script fails
+verification.
+
 ## 4) Create the two Cloudflare API tokens
 
 These live on two different screens — don't look for both in the same place.

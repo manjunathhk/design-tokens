@@ -9,6 +9,7 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
   ".css": "text/css",
   ".json": "application/json",
   ".woff2": "font/woff2",
+  ".js": "text/javascript",
   ".mjs": "text/javascript",
   ".txt": "text/plain",
   ".d.ts": "text/plain",

@@ -15,6 +15,7 @@ describe("upload manifest", () => {
     const files = [
       "_tokens.scss",
       "base.css",
+      "controls.js",
       "fonts/IBMPlexMono-Regular-Latin1.woff2",
       "index.css",
       "LICENSES/IBM-Plex-Mono-OFL-1.1.txt",
@@ -41,6 +42,7 @@ describe("upload manifest", () => {
     expect(byPath).toEqual({
       "_tokens.scss": "text/plain",
       "base.css": "text/css",
+      "controls.js": "text/javascript",
       "fonts/IBMPlexMono-Regular-Latin1.woff2": "font/woff2",
       "index.css": "text/css",
       "LICENSES/IBM-Plex-Mono-OFL-1.1.txt": "text/plain",
@@ -61,6 +63,10 @@ describe("upload manifest", () => {
 
     expect(listDistFiles(dist)).toEqual(["LICENSES/OFL.txt", "fonts/a.woff2", "index.css"]);
     rmSync(dist, { recursive: true, force: true });
+  });
+
+  it("serves the classic controls.js script as JavaScript (D54)", () => {
+    expect(contentTypeFor("controls.js")).toBe("text/javascript");
   });
 
   it("fails fast when a file extension has no explicit content type", () => {
