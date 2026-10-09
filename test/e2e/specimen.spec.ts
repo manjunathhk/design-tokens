@@ -2,11 +2,12 @@
  * Specimen token-in-use previews (D53), opened from the built docs/index.html:
  *   • no horizontal page scroll at phone and desktop widths, in both schemes;
  *   • every preview frame is sized to its content and does not scroll sideways;
- *   • the system/light/dark theme switch reaches every frame, follows the OS
- *     on system and is remembered across reloads;
+ *   • the system/light/dark theme switch (the inlined controls.js, D54)
+ *     reaches every frame, follows the OS on system and is remembered across
+ *     reloads;
  *   • section links collapse behind a menu button at breakpoint.md and below;
- *   • main is capped at layout.container-max; the width toggle lifts the cap
- *     and is remembered across reloads;
+ *   • main is capped at layout.container-max by the base.css width hook; the
+ *     width toggle lifts the cap and is remembered across reloads;
  *   • copy buttons sit inside their code box and copy the exact snippet;
  *   • forced-state copies draw the focus ring from the tokens.
  */
@@ -74,7 +75,7 @@ for (const colorScheme of ["light", "dark"] as const) {
 
 const pressedTheme = (page: Page) =>
   page.$$eval('#theme-switch [aria-pressed="true"]', (buttons) =>
-    buttons.map((button) => (button as HTMLElement).dataset.themeChoice),
+    buttons.map((button) => (button as HTMLElement).dataset.mkThemeChoice),
   );
 
 test("theme switch reaches every preview in each of its three states", async ({ page }) => {
@@ -88,7 +89,7 @@ test("theme switch reaches every preview in each of its three states", async ({ 
     ["light", "light", tokens.light["color.bg"]],
     ["system", null, tokens.light["color.bg"]],
   ] as const) {
-    await page.click(`[data-theme-choice="${choice}"]`);
+    await page.click(`[data-mk-theme-choice="${choice}"]`);
     expect(await pressedTheme(page), `pressed after choosing ${choice}`).toEqual([choice]);
     expect(
       await page.evaluate(() => document.documentElement.dataset.theme ?? null),
@@ -110,7 +111,7 @@ test("system theme follows the OS and the theme choice survives a reload", async
   const bodyBg = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   expect(await bodyBg(), "system under OS dark").toBe(rgb(tokens.dark["color.bg"] ?? ""));
 
-  await page.click('[data-theme-choice="light"]');
+  await page.click('[data-mk-theme-choice="light"]');
   await page.reload();
   await page.waitForLoadState("load");
   expect(await pressedTheme(page), "pressed after reload").toEqual(["light"]);
@@ -120,7 +121,7 @@ test("system theme follows the OS and the theme choice survives a reload", async
   for (const frame of await frameStates(page))
     expect(frame.theme, `${frame.title} data-theme after reload`).toBe("light");
 
-  await page.click('[data-theme-choice="system"]');
+  await page.click('[data-mk-theme-choice="system"]');
   await page.reload();
   await page.waitForLoadState("load");
   expect(await pressedTheme(page), "pressed after reload").toEqual(["system"]);

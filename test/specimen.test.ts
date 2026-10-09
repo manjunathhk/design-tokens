@@ -31,7 +31,7 @@ describe("specimen page", () => {
     expect(html).toContain("Motion");
   });
 
-  it("contains a specimen-only system/light/dark theme switch", () => {
+  it("has a system/light/dark theme switch on the shipped controls.js hooks (D54)", () => {
     expect(html).toMatch(
       /<div class="theme-switch" id="theme-switch" role="group" aria-label="Theme">/,
     );
@@ -42,17 +42,26 @@ describe("specimen page", () => {
     ] as const) {
       expect(html, `${choice} button`).toMatch(
         new RegExp(
-          `<button[^>]*data-theme-choice="${choice}" aria-pressed="${pressed}"[^>]*aria-label="[^"]+"[^>]*><svg class="icon icon-${iconName}"`,
+          `<button[^>]*data-mk-theme-choice="${choice}" aria-pressed="${pressed}"[^>]*aria-label="[^"]+"[^>]*><svg class="icon icon-${iconName}"`,
         ),
       );
     }
-    expect(html, "theme applied in <head> before paint").toMatch(
-      /<head>[^]*localStorage\.getItem\("mk-specimen-theme"\)[^]*<\/head>/,
+    const head = /<head>([^]*?)<\/head>/.exec(html)?.[1] ?? "";
+    expect(head, "dist/controls.js inlined in <head>, so the theme applies before paint").toContain(
+      `<script>\n${read("dist/controls.js")}\n  </script>`,
     );
+    expect(html, "base.css on the page, for the width hook").toContain(read("src/base.css"));
   });
 
-  it("has a specimen-only width toggle and a collapsing section menu", () => {
-    expect(html).toMatch(/<button[^>]*id="width-toggle"[^>]*aria-pressed="false"/);
+  it("has no specimen-only theme or width state left (D54)", () => {
+    expect(html).not.toContain("data-layout");
+    expect(html).not.toContain("mk-specimen-");
+    expect(html).not.toContain("data-theme-choice");
+  });
+
+  it("has a width toggle on the shipped hooks and a collapsing section menu", () => {
+    expect(html).toMatch(/<button[^>]*id="width-toggle" data-mk-width-toggle aria-pressed="false"/);
+    expect(html).toContain("<main data-mk-container>");
     expect(html).toMatch(/<button[^>]*id="menu-toggle"[^>]*aria-controls="toc-links"/);
     expect(html).toContain('<div class="toc-links" id="toc-links">');
   });

@@ -269,13 +269,18 @@ All run in CI on every PR (Linux and Windows) and again in `release.yml`.
   - Examples never invent a colour. A pattern the tokens cannot express is
     drawn with existing tokens and listed under "Not yet expressible" on the
     specimen; adding the missing token is a separate owner decision.
-  - The specimen's own script (theme switch, width toggle, section menu,
-    copy buttons, preview sizing) is not shipped and does not count as
-    package runtime JavaScript. The theme switch has three states: System
-    (no `data-theme`, the OS decides), Light and Dark. The choice reaches
-    every preview frame and is remembered across reloads, applied in
-    `<head>` so the page does not flash. Its icons are inline SVG in the specimen,
-    not an icon package. Each copy button is a copy icon in the top-right
+  - The specimen's theme switch and width toggle are the shipped controls
+    (D54): the build inlines `dist/controls.js` in the page's `<head>`
+    (Pages serves only `docs/index.html`, D15), the page includes
+    `base.css`, and the markup uses `data-mk-theme-choice`,
+    `data-mk-width-toggle` and `data-mk-container`, so the specimen
+    exercises exactly what sites get, saved choices included (`mk-theme`,
+    `mk-width`).
+  - The specimen's own script (passing the theme to every preview frame,
+    section menu, copy buttons, preview sizing) is not shipped and does not
+    count as package runtime JavaScript. It adds no API to `controls.js`:
+    it observes `data-theme` on `<html>` and copies it into each frame. The
+    control icons are inline SVG in the specimen, not an icon package. Each copy button is a copy icon in the top-right
     corner of its code box. The favicon is an inline `data:` SVG (Pages
     serves only `docs/index.html`, D15): three bars on a tile, filled from
     `color.accent` and `color.on-accent`, light by default and dark under
