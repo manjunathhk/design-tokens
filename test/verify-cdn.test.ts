@@ -12,8 +12,10 @@ import {
   type UploadManifest,
 } from "../scripts/upload-manifest.js";
 import {
+  bannerFor,
   CORS_REQUEST_ORIGIN,
   verifyCdnResponses,
+  versionCheckFor,
   type VerifyCdnMode,
 } from "../scripts/verify-cdn.js";
 
@@ -23,7 +25,8 @@ const VERSION = "1.2.3";
 const PREFIX = `v${VERSION}`;
 
 // Two fonts on purpose: the old inline verifier checked only the first .woff2
-// it saw, which is one of the gaps this suite exists to lock out.
+// it saw, which is one of the gaps this suite exists to lock out. At least one
+// file of every version-checked type, and a CSS file besides index.css.
 const FILES = [
   "LICENSES/IBM-Plex-Mono-OFL-1.1.txt",
   "_tokens.scss",
@@ -31,9 +34,16 @@ const FILES = [
   "fonts/IBMPlexSans-Bold-Latin1.woff2",
   "fonts/IBMPlexSans-Regular-Latin1.woff2",
   "index.css",
+  "tokens.css",
+  "tokens.d.ts",
   "tokens.json",
   "tokens.mjs",
 ];
+const BANNERED_FILES = FILES.filter((file) => versionCheckFor(file) === "banner");
+const MODES = [
+  { mode: "pinned", prefix: PREFIX },
+  { mode: "alias", prefix: "v1" },
+] as const;
 
 const FONT_PATHS = FILES.filter((file) => file.endsWith(".woff2"));
 const FIRST_FONT_PATH = FONT_PATHS[0];
@@ -59,15 +69,15 @@ function fixtureFor(manifest: UploadManifest, mode: VerifyCdnMode, prefix = PREF
     if (entry.path.endsWith(".woff2")) {
       headers["access-control-allow-origin"] = "*";
     }
-    const banner = `/*! @manjunathhk/design-tokens v${manifest.version} */\n`;
+    const check = versionCheckFor(entry.path);
     fixture[`${prefix}/${entry.path}`] = {
       status: 200,
       headers,
       body:
-        entry.path === "index.css"
-          ? `${banner}:root{}\n`
-          : entry.path === "controls.js"
-            ? `${banner}(() => {})();\n`
+        check === "banner"
+          ? `${bannerFor(manifest.version)}\nfixture body\n`
+          : check === "json"
+            ? JSON.stringify({ version: manifest.version, light: {} })
             : "fixture bytes",
     };
   }
@@ -266,7 +276,97 @@ describe("verifyCdnResponses against local HTTP fixtures", () => {
     await withServer(fixture, async (baseUrl) => {
       await expect(
         verifyCdnResponses({ manifest, baseUrl, prefix: "v1", mode: "alias" }),
-      ).rejects.toThrow(new RegExp(`v1/controls\\.js.*is missing banner.*v1\\.2\\.3`, "s"));
+      ).rejects.toThrow(
+        new RegExp(`v1/controls\\.js: carries the banner for v1\\.2\\.2, expected .*v1\\.2\\.3`),
+      );
+    });
+  });
+
+  it("has a fixture of every version-checked file type", () => {
+    for (const extension of [".css", ".js", ".mjs", ".d.ts", ".scss"]) {
+      expect(
+        BANNERED_FILES.some((file) => file.endsWith(extension)),
+        extension,
+      ).toBe(true);
+    }
+    expect(FILES.filter((file) => versionCheckFor(file) === "json")).toEqual(["tokens.json"]);
+    expect(FILES.filter((file) => versionCheckFor(file) === undefined)).toEqual([
+      "LICENSES/IBM-Plex-Mono-OFL-1.1.txt",
+      "fonts/IBMPlexSans-Bold-Latin1.woff2",
+      "fonts/IBMPlexSans-Regular-Latin1.woff2",
+    ]);
+  });
+
+  describe.each(MODES)("version checks ($mode)", ({ mode, prefix }) => {
+    const verify = (baseUrl: string) => verifyCdnResponses({ manifest, baseUrl, prefix, mode });
+    const failsWith = (overrides: Fixture, pattern: RegExp) =>
+      withServer(withOverrides(fixtureFor(manifest, mode, prefix), overrides), (baseUrl) =>
+        expect(verify(baseUrl)).rejects.toThrow(pattern),
+      );
+
+    it("fails when a CSS file other than index.css is missing the banner", async () => {
+      await failsWith(
+        { [`${prefix}/tokens.css`]: { body: ":root{}\n" } },
+        new RegExp(`${prefix}/tokens\\.css: is missing banner .*v1\\.2\\.3 \\*/\\.`),
+      );
+    });
+
+    it("fails when tokens.mjs carries another version's banner", async () => {
+      await failsWith(
+        {
+          [`${prefix}/tokens.mjs`]: {
+            body: `${bannerFor("1.1.0")}\nexport const version = "1.1.0";\n`,
+          },
+        },
+        new RegExp(
+          `${prefix}/tokens\\.mjs: carries the banner for v1\\.1\\.0, expected .*v1\\.2\\.3 \\*/\\.`,
+        ),
+      );
+    });
+
+    it("fails when tokens.json carries another version", async () => {
+      await failsWith(
+        { [`${prefix}/tokens.json`]: { body: JSON.stringify({ version: "1.1.0" }) } },
+        new RegExp(
+          `${prefix}/tokens\\.json: has "version": "1\\.1\\.0", expected "version": "1\\.2\\.3"`,
+        ),
+      );
+    });
+
+    it("fails when tokens.json has no version", async () => {
+      await failsWith(
+        { [`${prefix}/tokens.json`]: { body: JSON.stringify({ light: {} }) } },
+        new RegExp(
+          `${prefix}/tokens\\.json: has no "version" field, expected "version": "1\\.2\\.3"`,
+        ),
+      );
+    });
+
+    it("fails when tokens.json is not valid JSON", async () => {
+      await failsWith(
+        { [`${prefix}/tokens.json`]: { body: "<html>not found</html>" } },
+        new RegExp(
+          `${prefix}/tokens\\.json: is not valid JSON \\(.+\\), expected "version": "1\\.2\\.3"`,
+        ),
+      );
+    });
+
+    it("names every bannered file that is missing its banner", async () => {
+      const stripped: Fixture = Object.fromEntries(
+        BANNERED_FILES.map((file) => [`${prefix}/${file}`, { body: "no banner\n" }]),
+      );
+      await withServer(
+        withOverrides(fixtureFor(manifest, mode, prefix), stripped),
+        async (baseUrl) => {
+          const message = await verify(baseUrl).then(
+            () => "verification passed",
+            (error: unknown) => (error instanceof Error ? error.message : String(error)),
+          );
+          for (const file of BANNERED_FILES) {
+            expect(message).toContain(`${prefix}/${file}: is missing banner`);
+          }
+        },
+      );
     });
   });
 

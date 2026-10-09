@@ -56,9 +56,10 @@ mapping fails the release at the manifest step, before anything is uploaded.
 | `fonts/*.woff2`                                                   | `font/woff2`       |
 | `tokens.d.ts`, `stylelint.d.ts`, `_tokens.scss`, `LICENSES/*.txt` | `text/plain`       |
 
-`scripts/verify-cdn.ts` checks the version banner of `index.css` and
-`controls.js`, so a URL that serves stale CSS or a stale script fails
-verification.
+`scripts/verify-cdn.ts` checks the version of every file that carries one:
+the banner of every CSS, JS, `.mjs`, `.d.ts` and `.scss` file and the
+`version` field of `tokens.json`. A URL that serves another version's file
+fails verification. Fonts and `LICENSES/*.txt` carry no version.
 
 ## 4) Create the two Cloudflare API tokens
 
@@ -140,7 +141,7 @@ failed run and use **Re-run failed jobs**. There's no need to re-tag.
 ## 7) Release flow summary
 
 - Push a final tag (`vX.Y.Z`) on a `main` commit. There are no release candidates (D50).
-  - Workflow validates the tag, `package.json` version and `CHANGELOG.md` section, runs the gate, uploads pinned `/vX.Y.Z/` and verifies status, Content-Type, banner, per-font CORS and Cache-Control over HTTPS, publishes npm, promotes to alias `/vX/`, purges explicit alias URLs, verifies the alias, and creates the GitHub Release.
+  - Workflow validates the tag, `package.json` version and `CHANGELOG.md` section, runs the gate, uploads pinned `/vX.Y.Z/` and verifies status, Content-Type, version (banner or `version` field), per-font CORS and Cache-Control over HTTPS, publishes npm, promotes to alias `/vX/`, purges explicit alias URLs, verifies the alias, and creates the GitHub Release.
   - A failed run is rerun on the same tag: identical pinned objects and an already-published npm version are skipped.
   - The `pages` job then deploys the specimen. It runs only when the release job succeeded, and **Re-run failed jobs** reruns it with the release.
 
