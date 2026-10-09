@@ -152,6 +152,11 @@ export const GROUPS: GroupSpec[] = [
         note: "Native progress, determinate and indeterminate.",
       },
       {
+        id: "loading",
+        title: "Loading",
+        note: "A spinner beside words, and a skeleton in the shape of the content. Under reduced motion both stand still; the words carry the state.",
+      },
+      {
         id: "empty-state",
         title: "Empty state",
         note: "Says what is missing and offers the next step. Uses the Actions CSS for its button.",
