@@ -222,7 +222,10 @@ All run in CI on every PR (Linux and Windows) and again in `release.yml`.
   item and the file. A file missing from `latest` (such as `controls.js`
   before its first release) counts only as additions, and a published file
   missing from the build counts as removals. Doc and build-only changes are
-  not checked.
+  not checked. A PR whose change the diff calls MINOR or MAJOR, when
+  `package.json` is not already at or past that bump, bumps `package.json`
+  (and the version-banner snapshot) itself, so the diff passes on the PR and
+  on `main`; its CHANGELOG entry stays under `Unreleased` for the Release PR.
 - **D26. Cross-origin Playwright smoke test.** Local servers serve the fixture
   page and `dist/` on different ports, with and without
   `Access-Control-Allow-Origin: *`, so the test proves computed colours in
@@ -278,7 +281,8 @@ All run in CI on every PR (Linux and Windows) and again in `release.yml`.
   short-lived branches merged by PR. A fix for an older major, after a new one
   ships, goes on a `vN.x` branch cut from the last `vN` tag, only when needed.
 - **D50. One tag per release, no release candidates.** A Release PR bumps
-  `package.json` and adds the `## [X.Y.Z]` CHANGELOG section; a human pushes
+  `package.json` (unless a feature PR already did, D20/D45) and adds the
+  `## [X.Y.Z]` CHANGELOG section; a human pushes
   `vX.Y.Z` on the merged commit. `release.yml`:
   1. rejects anything but a final `vX.Y.Z` tag that matches `package.json`,
      sits on `main` and has a CHANGELOG section, before any side effect;
