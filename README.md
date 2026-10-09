@@ -10,7 +10,8 @@ This package is tokens and a small opt-in base stylesheet, nothing else:
 - design tokens for colour (light and dark), typography, spacing, radius,
   shadow, motion, layout, z-index and a breakpoint reference;
 - `base.css`, a small opt-in base (reset, body, links, selection, focus ring,
-  reduced motion, reading defaults) built only on the tokens;
+  reduced motion, reading defaults, a content-width hook) built only on the
+  tokens;
 - self-hosted Inter and JetBrains Mono fonts and `fonts.css`.
 
 It is never a place for UI components (buttons, cards, nav — those are
@@ -57,6 +58,26 @@ forced:
 With no `data-theme` attribute, the page follows `prefers-color-scheme`.
 `color-scheme` is set to match on `:root` in both cases, so native form
 controls and scrollbars also switch.
+
+## Content width
+
+Mark the main content wrapper with `data-mk-container`. `base.css` caps it at
+`--mk-layout-container-max` and centres it (Fit). `data-mk-width="full"` on
+`<html>` removes the cap (Full):
+
+```html
+<html data-mk-width="full">
+  <!-- omit the attribute for Fit -->
+  <body>
+    <main data-mk-container>…</main>
+  </body>
+</html>
+```
+
+Side padding is the site's choice, for example
+`padding-inline: var(--mk-layout-gutter)`. Both rules have zero specificity,
+so a site's own `max-width` on the container wins without `!important`. No
+JavaScript is needed: hard-code the attribute or leave it out.
 
 ## Consumption
 
