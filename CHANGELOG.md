@@ -10,6 +10,14 @@ All notable changes to this project will be documented in this file.
   `layout.container-max` and centres it (Fit); `data-mk-width="full"` on
   `<html>` removes the cap (Full). Both rules have zero specificity and need
   no JavaScript (D54, #115). MINOR.
+- `controls.js` (`@manjunathhk/design-tokens/controls.js`, `/v1/controls.js`
+  on the CDN), an opt-in classic script for `<head>`. Buttons marked
+  `data-mk-theme-choice="system|light|dark"` switch the theme (System removes
+  `data-theme`) and a button marked `data-mk-width-toggle` switches Fit and
+  Full. The choices are stored under `mk-theme` and `mk-width` and applied
+  before first paint, and `aria-pressed` stays in sync, including on buttons
+  rendered later. No globals, no API; without storage the defaults apply
+  (D54, #117). MINOR.
 
 ## [1.5.1] - 2026-10-09
 

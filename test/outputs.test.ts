@@ -1,9 +1,10 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { Script } from "node:vm";
 import { compileString } from "sass";
 import { beforeAll, describe, expect, it } from "vitest";
-import { tokenNames } from "../scripts/api-diff.js";
+import { siteControlsSurface, tokenNames } from "../scripts/api-diff.js";
 
 const PACKAGE = "@manjunathhk/design-tokens";
 const pkg = JSON.parse(readFileSync("package.json", "utf8")) as {
@@ -31,6 +32,7 @@ describe("banners", () => {
     "stylelint.mjs",
     "stylelint.d.ts",
     "tokens.d.ts",
+    "controls.js",
   ]) {
     it(`dist/${file} starts with ${BANNER}`, () => {
       expect(read(`dist/${file}`).split("\n")[0]).toBe(BANNER);
@@ -141,6 +143,28 @@ describe("base.css", () => {
     const used = [...read("src/base.css").matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1] ?? "");
     const unknown = [...new Set(used.filter((n) => !defined.has(n)))];
     expect(unknown, `src/base.css uses undefined tokens: ${unknown.join(", ")}`).toEqual([]);
+  });
+});
+
+describe("controls.js (D54)", () => {
+  const source = read("dist/controls.js");
+
+  it("is a classic script, not a module", () => {
+    expect(() => new Script(source, { filename: "dist/controls.js" })).not.toThrow();
+  });
+
+  it("exposes its whole surface in the form the API diff reads", () => {
+    expect(siteControlsSurface(source)).toEqual([
+      "attribute data-mk-theme-choice",
+      'attribute data-mk-theme-choice="dark"',
+      'attribute data-mk-theme-choice="light"',
+      'attribute data-mk-theme-choice="system"',
+      "attribute data-mk-width",
+      "attribute data-mk-width-toggle",
+      'attribute data-mk-width="full"',
+      "storage key mk-theme",
+      "storage key mk-width",
+    ]);
   });
 });
 

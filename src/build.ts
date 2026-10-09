@@ -1,5 +1,6 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { baseCss, indexCss, tokensCss, tokensScss } from "./css.js";
+import ts from "typescript";
+import { banner, baseCss, indexCss, tokensCss, tokensScss } from "./css.js";
 import { tokensDts, tokensJson, tokensMjs } from "./data.js";
 import { copyFontAssets, fontOutput } from "./fonts.js";
 import { loadExamples } from "./specimen-examples.js";
@@ -10,6 +11,16 @@ import { loadTokens } from "./tokens.js";
 const set = await loadTokens();
 const base = readFileSync("src/base.css", "utf8");
 const fonts = fontOutput(set.version);
+// controls.js (D54) is a classic script: types are stripped, nothing else changes.
+const controls = ts.transpileModule(readFileSync("src/controls.ts", "utf8"), {
+  compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext },
+  reportDiagnostics: true,
+});
+if (controls.diagnostics?.length) {
+  throw new Error(
+    `src/controls.ts: ${controls.diagnostics.map((d) => ts.flattenDiagnosticMessageText(d.messageText, " ")).join("; ")}`,
+  );
+}
 rmSync("dist", { recursive: true, force: true });
 mkdirSync("dist", { recursive: true });
 copyFontAssets("dist");
@@ -24,6 +35,8 @@ const outputs: Record<string, string> = {
   "stylelint.d.ts": stylelintConfigDts(set.version),
   "tokens.d.ts": tokensDts(set),
   "_tokens.scss": tokensScss(set),
+  "controls.js": `${banner(set.version)}
+${controls.outputText}`,
 };
 for (const [file, content] of Object.entries(outputs)) writeFileSync(`dist/${file}`, content);
 mkdirSync("docs", { recursive: true });
