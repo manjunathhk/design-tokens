@@ -168,6 +168,13 @@ CDN verification can prove which version a URL serves.
     the saved choice before first paint; clicks are delegated from
     `document`, so buttons rendered later work. There is no inline snippet,
     so a strict CSP only needs to allow the CDN origin.
+  - **Late buttons.** A `MutationObserver` on `<html>` sets the current
+    `aria-pressed` on matching buttons as soon as they are parsed or
+    rendered (Angular, WordPress blocks), so a site needs no API call.
+  - **Source.** `src/controls.ts` (strict TypeScript, one IIFE so nothing
+    leaks into the global scope) is transpiled by the build to ES2020, types
+    stripped, with the version banner. If storage is missing or throws, the
+    defaults apply and a choice lasts until the page is left.
   - **Works without JS.** The OS theme and the Fit width apply.
   - **Per origin.** Choices are stored in localStorage and do not carry
     across subdomains.
@@ -206,7 +213,8 @@ All run in CI on every PR (Linux and Windows) and again in `release.yml`.
 - **Snapshot** of `dist/tokens.css` and `tokens.json`, banner included, so the
   Release PR updates it with the version.
 - **D24. Output checks** (exports map, banners, SCSS compile, `npm pack
---dry-run`) live in `npm test`.
+--dry-run`, `controls.js` parsing as a classic script with the expected
+  API-diff surface) live in `npm test`.
 - **D20, D45. API diff** (`npm run api-diff`) is its own CI step because it
   needs the npm registry; its logic is unit-tested in `npm test`. It compares
   the build against npm `latest`: a removed or renamed CSS name or JSON key

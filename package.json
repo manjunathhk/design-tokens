@@ -23,6 +23,7 @@
     "./tokens.css": "./dist/tokens.css",
     "./base.css": "./dist/base.css",
     "./fonts.css": "./dist/fonts.css",
+    "./controls.js": "./dist/controls.js",
     "./tokens.json": "./dist/tokens.json",
     "./tokens.mjs": {
       "types": "./dist/tokens.d.ts",
