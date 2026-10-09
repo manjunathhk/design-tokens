@@ -1,0 +1,8 @@
+/* The D54 width hook as base.css is planned to ship it (#115). */
+:where([data-mk-container]) {
+  max-inline-size: var(--mk-layout-container-max);
+}
+
+:where(:root[data-mk-width="full"] [data-mk-container]) {
+  max-inline-size: none;
+}
