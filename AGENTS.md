@@ -5,12 +5,14 @@ base stylesheet shared by all of Manjunath's websites. CI enforces this
 contract. A change that breaks it does not merge.
 
 ## Scope is fixed
-- Tokens, base.css, fonts.css, tests, specimen page, docs. Nothing else.
-- Never add UI components, utility-class frameworks, runtime JavaScript,
-  CSS-in-JS or palette switchers to the published package. If a request
-  needs one, stop and say so. The specimen page may show token-in-use
-  examples with copy-paste snippets under the limits of D53; they are
-  never shipped.
+- Tokens, base.css, fonts.css, controls.js (D54), tests, specimen page,
+  docs. Nothing else.
+- Never add UI components, utility-class frameworks, CSS-in-JS or palette
+  switchers to the published package, and no runtime JavaScript other than
+  controls.js (D54). Its light/dark/system theme switch is not a palette
+  switcher. If a request needs one, stop and say so. The specimen page may
+  show token-in-use examples with copy-paste snippets under the limits of
+  D53; they are never shipped.
 
 ## Tokens
 - Source of truth is tokens/**/*.json in DTCG format ($value, $type,
