@@ -13,6 +13,9 @@ All notable changes to this project will be documented in this file.
 - The specimen's copy buttons are a copy icon in the top-right corner of
   each code box; it turns into a check mark once the code is copied. The
   specimen only; nothing in the package changes (#105).
+- The specimen's theme toggle is a three-way switch: System, Light and Dark.
+  System follows the OS; the choice is remembered across reloads. The
+  specimen only; nothing in the package changes (#109).
 
 ## [1.5.0] - 2026-10-07
 
