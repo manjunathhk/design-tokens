@@ -328,20 +328,25 @@ export function diffSiteControls(
   }));
 }
 
-/** The failure message for one file's site-controls diff, or undefined if it passes. */
-export function siteControlsError(diff: FileDiff): string | undefined {
+/**
+ * The failure message for a name diff, or undefined if it passes. A removal
+ * also lists the additions, so a rename shows both names.
+ */
+export function namesError(subject: string, diff: Diff): string | undefined {
   if (diff.ok) return undefined;
   const added = diff.added.length > 0 ? `; added ${diff.added.join(", ")}` : "";
   if (diff.removed.length > 0) {
     return (
-      `Site controls in ${diff.path}: removed ${diff.removed.join(", ")}${added}. ` +
+      `${subject}: removed ${diff.removed.join(", ")}${added}. ` +
       `A removal or rename requires a MAJOR bump or restoration.`
     );
   }
-  return (
-    `Site controls in ${diff.path}: added ${diff.added.join(", ")}. ` +
-    `An addition requires a MINOR bump.`
-  );
+  return `${subject}: added ${diff.added.join(", ")}. An addition requires a MINOR bump.`;
+}
+
+/** The failure message for one file's site-controls diff, or undefined if it passes. */
+export function siteControlsError(diff: FileDiff): string | undefined {
+  return namesError(`Site controls in ${diff.path}`, diff);
 }
 
 /** Reads one file from an npm tarball (gzipped ustar). */
@@ -495,24 +500,16 @@ async function main(): Promise<void> {
   }
 
   const errors: string[] = [];
-  if (!cssDiff.ok) {
-    errors.push(
-      `CSS custom properties: ${cssDiff.removed.join(", ") || "no removed names"}. ` +
-        `This requires a MAJOR bump or restoration.`,
-    );
-  }
+  const cssError = namesError("CSS custom properties", cssDiff);
+  if (cssError) errors.push(cssError);
   if (!cssValueDiff.ok) {
     errors.push(
       `CSS values: ${cssValueDiff.changed.join(", ") || "no changed values"}. ` +
         `This requires a MINOR bump or restoration.`,
     );
   }
-  if (!jsonDiff.ok) {
-    errors.push(
-      `tokens.json keys: ${jsonDiff.removed.join(", ") || "no removed keys"}. ` +
-        `This requires a MAJOR bump or restoration.`,
-    );
-  }
+  const jsonError = namesError("tokens.json keys", jsonDiff);
+  if (jsonError) errors.push(jsonError);
   if (!jsonValueDiff.ok) {
     errors.push(
       `tokens.json values: ${jsonValueDiff.changed.join(", ") || "no changed values"}. ` +

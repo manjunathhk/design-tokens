@@ -7,6 +7,7 @@ import {
   diffStylelintConfig,
   diffValues,
   jsonNames,
+  namesError,
   readFromTarball,
   siteControlsError,
   siteControlsSurface,
@@ -40,6 +41,9 @@ describe("API diff", () => {
       { version: "1.2.1", names: [...names, "--mk-color-new"] },
     );
     expect(diff).toEqual({ removed: [], added: ["--mk-color-new"], ok: false });
+    expect(namesError("CSS custom properties", diff)).toBe(
+      "CSS custom properties: added --mk-color-new. An addition requires a MINOR bump.",
+    );
   });
 
   it("passes when names are only added with a suitable MINOR bump", () => {
@@ -56,6 +60,34 @@ describe("API diff", () => {
       { version: "1.3.0", names: ["--mk-color-bg"] },
     );
     expect(diff).toEqual({ removed: ["--mk-color-accent"], added: [], ok: false });
+    expect(namesError("CSS custom properties", diff)).toBe(
+      "CSS custom properties: removed --mk-color-accent. " +
+        "A removal or rename requires a MAJOR bump or restoration.",
+    );
+  });
+
+  it("fails naming both names when a token is renamed without a MAJOR bump", () => {
+    const diff = diffNames(
+      { version: "1.2.0", names },
+      { version: "1.3.0", names: ["--mk-color-bg", "--mk-color-brand"] },
+    );
+    expect(diff).toEqual({
+      removed: ["--mk-color-accent"],
+      added: ["--mk-color-brand"],
+      ok: false,
+    });
+    expect(namesError("CSS custom properties", diff)).toBe(
+      "CSS custom properties: removed --mk-color-accent; added --mk-color-brand. " +
+        "A removal or rename requires a MAJOR bump or restoration.",
+    );
+  });
+
+  it("has no message for a passing name diff", () => {
+    const diff = diffNames(
+      { version: "1.2.0", names },
+      { version: "1.3.0", names: [...names, "--mk-color-new"] },
+    );
+    expect(namesError("CSS custom properties", diff)).toBeUndefined();
   });
 
   it("passes a removal with a MAJOR bump", () => {
@@ -117,6 +149,9 @@ describe("API diff", () => {
     );
     expect(diff.ok).toBe(false);
     expect(diff.added).toEqual(["breakpoints.breakpoint.md"]);
+    expect(namesError("tokens.json keys", diff)).toBe(
+      "tokens.json keys: added breakpoints.breakpoint.md. An addition requires a MINOR bump.",
+    );
   });
 
   it("fails naming the group and the key when a breakpoint is removed without a MAJOR bump", () => {
@@ -125,6 +160,26 @@ describe("API diff", () => {
       { version: "1.3.0", names: jsonNames(tokensJson({})) },
     );
     expect(diff).toEqual({ removed: ["breakpoints.breakpoint.sm"], added: [], ok: false });
+    expect(namesError("tokens.json keys", diff)).toBe(
+      "tokens.json keys: removed breakpoints.breakpoint.sm. " +
+        "A removal or rename requires a MAJOR bump or restoration.",
+    );
+  });
+
+  it("fails naming both keys when a tokens.json key is renamed without a MAJOR bump", () => {
+    const diff = diffNames(
+      { version: "1.2.0", names: jsonNames(tokensJson()) },
+      { version: "1.3.0", names: jsonNames(tokensJson({ "breakpoint.small": "560px" })) },
+    );
+    expect(diff).toEqual({
+      removed: ["breakpoints.breakpoint.sm"],
+      added: ["breakpoints.breakpoint.small"],
+      ok: false,
+    });
+    expect(namesError("tokens.json keys", diff)).toBe(
+      "tokens.json keys: removed breakpoints.breakpoint.sm; added breakpoints.breakpoint.small. " +
+        "A removal or rename requires a MAJOR bump or restoration.",
+    );
   });
 
   it("fails naming the group and the key when a shared key is removed without a MAJOR bump", () => {
