@@ -202,3 +202,78 @@
 .ex-empty-text {
   color: var(--mk-color-text-secondary);
 }
+
+/* Loading: a spinner beside words that say what is loading, and a skeleton
+   that holds the shape of the content to come. Under reduced motion base.css
+   stops both animations; the words still carry the state. */
+.ex-loading {
+  display: flex;
+  gap: var(--mk-spacing-2);
+  align-items: center;
+  color: var(--mk-color-text-secondary);
+  font-size: var(--mk-font-size-sm);
+}
+
+.ex-spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+  border: 2px solid var(--mk-color-border);
+  border-top-color: var(--mk-color-accent);
+  border-radius: var(--mk-radius-pill);
+  animation: ex-spin var(--mk-motion-duration-slower) linear infinite;
+}
+
+@keyframes ex-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.ex-skeleton-card {
+  display: grid;
+  gap: var(--mk-spacing-2);
+  max-width: 28rem;
+  padding: var(--mk-spacing-4);
+  border: 1px solid var(--mk-color-border);
+  border-radius: var(--mk-radius-lg);
+  background-color: var(--mk-color-surface);
+}
+
+.ex-skeleton {
+  display: block;
+  height: 0.75rem;
+  border-radius: var(--mk-radius-sm);
+  background-color: var(--mk-color-border);
+  animation: ex-pulse calc(2 * var(--mk-motion-duration-slower)) var(--mk-motion-ease) infinite
+    alternate;
+}
+
+.ex-skeleton-eyebrow {
+  width: 25%;
+}
+
+.ex-skeleton-title {
+  width: 75%;
+  height: 1.25rem;
+  margin-bottom: var(--mk-spacing-1);
+}
+
+.ex-skeleton-short {
+  width: 60%;
+}
+
+@keyframes ex-pulse {
+  to {
+    opacity: 0.4;
+  }
+}
+
+.ex-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
