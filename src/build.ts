@@ -24,6 +24,8 @@ if (controls.diagnostics?.length) {
 rmSync("dist", { recursive: true, force: true });
 mkdirSync("dist", { recursive: true });
 copyFontAssets("dist");
+const controlsJs = `${banner(set.version)}
+${controls.outputText}`;
 const outputs: Record<string, string> = {
   "tokens.css": tokensCss(set),
   "base.css": baseCss(set, base),
@@ -35,10 +37,9 @@ const outputs: Record<string, string> = {
   "stylelint.d.ts": stylelintConfigDts(set.version),
   "tokens.d.ts": tokensDts(set),
   "_tokens.scss": tokensScss(set),
-  "controls.js": `${banner(set.version)}
-${controls.outputText}`,
+  "controls.js": controlsJs,
 };
 for (const [file, content] of Object.entries(outputs)) writeFileSync(`dist/${file}`, content);
 mkdirSync("docs", { recursive: true });
-writeFileSync("docs/index.html", specimenHtml(set, base, loadExamples()));
+writeFileSync("docs/index.html", specimenHtml(set, base, controlsJs, loadExamples()));
 console.log(`Built @manjunathhk/design-tokens v${set.version} into dist/`);

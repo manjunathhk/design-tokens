@@ -19,6 +19,14 @@ All notable changes to this project will be documented in this file.
   rendered later. No globals, no API; without storage the defaults apply
   (D54, #117). MINOR.
 
+### Documentation
+
+- The specimen's theme switch and width toggle are now the shipped
+  `controls.js`, inlined in the page, and the page uses the `base.css` width
+  hook. The specimen's own saved choices (`mk-specimen-theme`,
+  `mk-specimen-layout`) are gone, so specimen viewers pick their theme and
+  width once more. The specimen only; nothing in the package changes (#119).
+
 ## [1.5.1] - 2026-10-09
 
 Specimen changes only; no token is added, removed, renamed or changed, and
