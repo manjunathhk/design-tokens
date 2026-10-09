@@ -131,6 +131,10 @@ const SUN_ICON = icon(
   "sun",
   '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
 );
+const MONITOR_ICON = icon(
+  "monitor",
+  '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+);
 const COPY_ICON = icon(
   "copy",
   '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
@@ -286,6 +290,8 @@ export function specimenHtml(set: TokenSet, base: string, groups: ExampleGroup[]
   <script>
     try {
       if (localStorage.getItem("mk-specimen-layout") === "full") document.documentElement.dataset.layout = "full";
+      const theme = localStorage.getItem("mk-specimen-theme");
+      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
     } catch {}
   </script>
   <style>
@@ -321,8 +327,11 @@ button:hover { background: var(--mk-color-accent-subtle); }
 .icon-button { display: inline-grid; place-items: center; padding: var(--mk-spacing-2); }
 .icon-button .icon { width: 1.25rem; height: 1.25rem; }
 .icon-button[aria-pressed="true"] { border-color: var(--mk-color-accent); background: var(--mk-color-accent-subtle); color: var(--mk-color-accent); }
-.menu-toggle, .theme-toggle .icon-sun, .theme-toggle[data-dark] .icon-moon { display: none; }
-.theme-toggle[data-dark] .icon-sun { display: block; }
+.menu-toggle { display: none; }
+.theme-switch { display: inline-flex; padding: 1px; border: 1px solid var(--mk-color-border-control); border-radius: var(--mk-radius-pill); background: var(--mk-color-surface); }
+.theme-switch .icon-button { border-color: transparent; background: transparent; color: var(--mk-color-text-muted); }
+.theme-switch .icon-button:hover { color: var(--mk-color-text); }
+.theme-switch .icon-button[aria-pressed="true"] { border-color: var(--mk-color-accent); background: var(--mk-color-accent-subtle); color: var(--mk-color-accent); }
 html[data-layout="full"] main { max-width: none; }
 .snippet { display: grid; gap: var(--mk-spacing-2); }
 .copy-button { position: absolute; top: var(--mk-spacing-1); right: var(--mk-spacing-1); border-color: transparent; background: transparent; color: var(--mk-color-text-muted); }
@@ -394,7 +403,11 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
     </div>
     <div class="toc-actions">
       <button type="button" class="icon-button" id="width-toggle" aria-pressed="false" aria-label="Full width" title="Full width">${WIDTH_ICON}</button>
-      <button type="button" class="icon-button theme-toggle" id="theme-toggle">${MOON_ICON}${SUN_ICON}</button>
+      <div class="theme-switch" id="theme-switch" role="group" aria-label="Theme">
+        <button type="button" class="icon-button" data-theme-choice="system" aria-pressed="true" aria-label="System theme" title="System theme">${MONITOR_ICON}</button>
+        <button type="button" class="icon-button" data-theme-choice="light" aria-pressed="false" aria-label="Light theme" title="Light theme">${SUN_ICON}</button>
+        <button type="button" class="icon-button" data-theme-choice="dark" aria-pressed="false" aria-label="Dark theme" title="Dark theme">${MOON_ICON}</button>
+      </div>
     </div>
   </nav>
   <main>
@@ -502,14 +515,11 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
 
   <script>
     const root = document.documentElement;
-    const toggle = document.getElementById("theme-toggle");
-    const dark = window.matchMedia("(prefers-color-scheme: dark)");
-    const isDark = () => (root.dataset.theme ? root.dataset.theme === "dark" : dark.matches);
-    const sync = () => {
-      const label = isDark() ? "Switch to light theme" : "Switch to dark theme";
-      toggle.toggleAttribute("data-dark", isDark());
-      toggle.setAttribute("aria-label", label);
-      toggle.title = label;
+    const themeButtons = [...document.querySelectorAll("[data-theme-choice]")];
+    const syncTheme = () => {
+      const choice = root.dataset.theme ?? "system";
+      for (const button of themeButtons)
+        button.setAttribute("aria-pressed", String(button.dataset.themeChoice === choice));
     };
     const frames = [...document.querySelectorAll("iframe.preview")];
     const themeFrame = (frame) => {
@@ -532,13 +542,18 @@ summary small { margin-left: var(--mk-spacing-3); font-weight: var(--mk-font-wei
       if (frame.contentDocument?.body?.childElementCount) setUpFrame(frame);
     }
 
-    toggle.addEventListener("click", () => {
-      root.setAttribute("data-theme", isDark() ? "light" : "dark");
-      frames.forEach(themeFrame);
-      sync();
-    });
-    dark.addEventListener("change", sync);
-    sync();
+    for (const button of themeButtons)
+      button.addEventListener("click", () => {
+        const choice = button.dataset.themeChoice;
+        if (choice === "system") delete root.dataset.theme;
+        else root.dataset.theme = choice;
+        try {
+          localStorage.setItem("mk-specimen-theme", choice);
+        } catch {}
+        frames.forEach(themeFrame);
+        syncTheme();
+      });
+    syncTheme();
 
     const widthToggle = document.getElementById("width-toggle");
     const syncWidth = () => widthToggle.setAttribute("aria-pressed", String(root.dataset.layout === "full"));

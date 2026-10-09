@@ -31,11 +31,23 @@ describe("specimen page", () => {
     expect(html).toContain("Motion");
   });
 
-  it("contains a specimen-only light/dark theme toggle", () => {
-    expect(html).toContain('id="theme-toggle"');
-    expect(html).toContain('root.setAttribute("data-theme", isDark() ? "light" : "dark")');
+  it("contains a specimen-only system/light/dark theme switch", () => {
     expect(html).toMatch(
-      /id="theme-toggle">\s*<svg class="icon icon-moon"[^]*?<svg class="icon icon-sun"/,
+      /<div class="theme-switch" id="theme-switch" role="group" aria-label="Theme">/,
+    );
+    for (const [choice, pressed, iconName] of [
+      ["system", "true", "monitor"],
+      ["light", "false", "sun"],
+      ["dark", "false", "moon"],
+    ] as const) {
+      expect(html, `${choice} button`).toMatch(
+        new RegExp(
+          `<button[^>]*data-theme-choice="${choice}" aria-pressed="${pressed}"[^>]*aria-label="[^"]+"[^>]*><svg class="icon icon-${iconName}"`,
+        ),
+      );
+    }
+    expect(html, "theme applied in <head> before paint").toMatch(
+      /<head>[^]*localStorage\.getItem\("mk-specimen-theme"\)[^]*<\/head>/,
     );
   });
 
