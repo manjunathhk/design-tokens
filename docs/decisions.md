@@ -147,6 +147,38 @@ CDN verification can prove which version a URL serves.
   `transparent`, `currentcolor` and system colours stay allowed. A stricter
   rule is MAJOR, a looser one MINOR. `stylelint >=16` is an optional peer
   dependency.
+- **D54. Site controls script.** The package ships one opt-in script,
+  `controls.js` (`@manjunathhk/design-tokens/controls.js`, `/vX/controls.js`
+  on the CDN), versioned with the tokens. It provides a three-state theme
+  switch (System removes `data-theme`, so the OS decides; Light; Dark) and a
+  Fit/Full width toggle. Limits:
+  - **Opt-in.** A site that does not load it gets exactly what it gets today;
+    no CSS depends on it. Adding it is MINOR.
+  - **Declarative.** Sites mark native `<button>` elements with
+    `data-mk-theme-choice="system|light|dark"` and `data-mk-width-toggle`,
+    and supply the button contents (the package ships no icons). There is no
+    programmable API and no global.
+  - **Versioned API.** Attribute names and values, the localStorage keys
+    (`mk-theme`, `mk-width`) and any events are covered by the API diff. A
+    rename or removal is MAJOR.
+  - **No flash.** A classic (non-module), blocking script in `<head>` applies
+    the saved choice before first paint; clicks are delegated from
+    `document`, so buttons rendered later work. There is no inline snippet,
+    so a strict CSP only needs to allow the CDN origin.
+  - **Works without JS.** The OS theme and the Fit width apply.
+  - **Per origin.** Choices are stored in localStorage and do not carry
+    across subdomains.
+  - **Accessible.** `aria-pressed` stays in sync with the state and controls
+    are keyboard operable, all covered by Playwright.
+  - **Integrity.** Sites that require Subresource Integrity pin `/vX.Y.Z/`,
+    because the `/vMAJOR/` alias changes content.
+  - **Width hook.** `base.css` caps `[data-mk-container]` at
+    `layout.container-max`; `data-mk-width="full"` on `<html>` removes the
+    cap. The hook works without the script.
+
+  No other runtime JavaScript is shipped; a new control needs its own
+  decision. A page-loading overlay was considered and deferred (#104).
+
 - **D11. Licence.** The package's own code is MIT; the fonts are SIL OFL 1.1.
 
 ## Build and tooling
