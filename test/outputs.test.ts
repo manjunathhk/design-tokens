@@ -5,6 +5,8 @@ import { Script } from "node:vm";
 import { compileString } from "sass";
 import { beforeAll, describe, expect, it } from "vitest";
 import { siteControlsSurface, tokenNames } from "../scripts/api-diff.js";
+import { listDistFiles } from "../scripts/upload-manifest.js";
+import { versionCheckFor } from "../scripts/verify-cdn.js";
 
 const PACKAGE = "@manjunathhk/design-tokens";
 const pkg = JSON.parse(readFileSync("package.json", "utf8")) as {
@@ -21,27 +23,31 @@ beforeAll(() => {
   if (!existsSync("dist/tokens.css")) throw new Error("dist/ not found. Run npm run build first.");
 });
 
+// Derived from dist/ with the CDN verifier's own rule (D24, D43): a versioned
+// file without its banner fails here, before the immutable pinned upload.
 describe("banners", () => {
-  for (const file of [
-    "index.css",
-    "tokens.css",
-    "base.css",
-    "fonts.css",
-    "_tokens.scss",
-    "tokens.mjs",
-    "stylelint.mjs",
-    "stylelint.d.ts",
-    "tokens.d.ts",
-    "controls.js",
-  ]) {
-    it(`dist/${file} starts with ${BANNER}`, () => {
-      expect(read(`dist/${file}`).split("\n")[0]).toBe(BANNER);
-    });
-  }
-
-  it(`dist/tokens.json carries "version": "${pkg.version}"`, () => {
-    expect((JSON.parse(read("dist/tokens.json")) as { version: string }).version).toBe(pkg.version);
+  const versioned = listDistFiles().flatMap((file) => {
+    const check = versionCheckFor(file);
+    return check ? [{ file, check }] : [];
   });
+
+  it("finds the versioned files in dist/", () => {
+    expect(versioned.map((v) => v.file)).toEqual(
+      expect.arrayContaining(["index.css", "controls.js", "tokens.json", "tokens.mjs"]),
+    );
+  });
+
+  for (const { file, check } of versioned) {
+    if (check === "banner") {
+      it(`dist/${file} starts with ${BANNER}`, () => {
+        expect(read(`dist/${file}`).split("\n")[0]).toBe(BANNER);
+      });
+    } else {
+      it(`dist/${file} carries "version": "${pkg.version}"`, () => {
+        expect((JSON.parse(read(`dist/${file}`)) as { version: string }).version).toBe(pkg.version);
+      });
+    }
+  }
 });
 
 describe("exports map", () => {

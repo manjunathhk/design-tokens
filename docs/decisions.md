@@ -116,9 +116,10 @@ breaking one.
 
 ## Outputs
 
-Every CSS and JSON output starts with a version banner
-(`/*! @manjunathhk/design-tokens vX.Y.Z */`; JSON has a `version` field), so
-CDN verification can prove which version a URL serves.
+Every CSS, JS, `.mjs`, `.d.ts` and `.scss` output starts with a version
+banner (`/*! @manjunathhk/design-tokens vX.Y.Z */`) and JSON has a `version`
+field, so CDN verification can prove which version a URL serves. Fonts and
+`LICENSES/*.txt` carry no version.
 
 - **D8. `index.css` is concatenated**, not an `@import` chain: fonts, tokens
   and base in one request. `fonts.css`, `tokens.css` and `base.css` also ship
@@ -214,7 +215,10 @@ All run in CI on every PR (Linux and Windows) and again in `release.yml`.
   Release PR updates it with the version.
 - **D24. Output checks** (exports map, banners, SCSS compile, `npm pack
 --dry-run`, `controls.js` parsing as a classic script with the expected
-  API-diff surface) live in `npm test`.
+  API-diff surface) live in `npm test`. The banner check walks `dist/` with
+  the CDN verifier's own rule (`versionCheckFor` in `scripts/verify-cdn.ts`),
+  so a versioned file without its banner fails `npm test`, never the release
+  after the immutable pinned upload.
 - **D20, D45. API diff** (`npm run api-diff`) is its own CI step because it
   needs the npm registry; its logic is unit-tested in `npm test`. It compares
   the build against npm `latest`: a removed or renamed CSS name or JSON key
@@ -324,8 +328,10 @@ All run in CI on every PR (Linux and Windows) and again in `release.yml`.
   `alias-update` in both workflows, with `cancel-in-progress: false`.
 - **D43. One tested CDN verifier.** `scripts/verify-cdn.ts` checks, for every
   manifest entry: status, Content-Type and the pinned or alias Cache-Control;
-  the version banner of `index.css` and of every `.js` file (`controls.js`,
-  D54); and for every font `Access-Control-Allow-Origin: *`, requested with an
+  the version of every file that carries one (the banner for the manifest
+  version in every `.css`, `.js`, `.mjs`, `.d.ts` and `.scss` file; a parsed
+  `version` equal to it in every `.json` file); and for every font
+  `Access-Control-Allow-Origin: *`, requested with an
   `Origin` header the way a browser does. `*` matches `docs/r2-cors.json`;
   change both together. A `dist/` file whose extension has no Content-Type in
   `scripts/upload-manifest.ts` fails the release before any upload.

@@ -19,6 +19,58 @@ export const WILDCARD_ALLOW_ORIGIN = "*";
 
 export type VerifyCdnMode = "pinned" | "alias";
 
+// File types that carry the version banner (D24).
+const BANNER_EXTENSIONS = [".css", ".js", ".mjs", ".d.ts", ".scss"] as const;
+
+/**
+ * How a file proves which version it is: a banner, or the `version` field of
+ * JSON (D22). Fonts and license texts carry no version. The D24 banner test
+ * in test/outputs.test.ts uses the same rule over dist/, so a file the
+ * verifier would check fails `npm test` before it can fail a release.
+ */
+export function versionCheckFor(path: string): "banner" | "json" | undefined {
+  if (BANNER_EXTENSIONS.some((extension) => path.endsWith(extension))) return "banner";
+  if (path.endsWith(".json")) return "json";
+  return undefined;
+}
+
+export function bannerFor(version: string): string {
+  return `/*! @manjunathhk/design-tokens v${version} */`;
+}
+
+const ANY_BANNER = /\/\*! @manjunathhk\/design-tokens v(\S+) \*\//;
+
+function versionProblem(
+  url: string,
+  body: string,
+  check: "banner" | "json",
+  version: string,
+): string | undefined {
+  if (check === "banner") {
+    const banner = bannerFor(version);
+    if (body.includes(banner)) return undefined;
+    const found = ANY_BANNER.exec(body)?.[1];
+    return found
+      ? `${url}: carries the banner for v${found}, expected ${banner}.`
+      : `${url}: is missing banner ${banner}.`;
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(body);
+  } catch (error: unknown) {
+    const reason = error instanceof Error ? error.message : String(error);
+    return `${url}: is not valid JSON (${reason}), expected "version": "${version}".`;
+  }
+  const found =
+    typeof parsed === "object" && parsed !== null && "version" in parsed
+      ? (parsed as { version: unknown }).version
+      : undefined;
+  if (found === version) return undefined;
+  return found === undefined
+    ? `${url}: has no "version" field, expected "version": "${version}".`
+    : `${url}: has "version": ${JSON.stringify(found)}, expected "version": "${version}".`;
+}
+
 export interface VerifyCdnInput {
   manifest: UploadManifest;
   baseUrl: string;
@@ -61,7 +113,6 @@ export async function verifyCdnResponses({
     );
   }
 
-  const banner = `/*! @manjunathhk/design-tokens v${manifest.version} */`;
   const problems: string[] = [];
   let fontEntries = 0;
 
@@ -91,11 +142,10 @@ export async function verifyCdnResponses({
       );
     }
 
-    if (entry.path === "index.css" || entry.path.endsWith(".js")) {
-      const body = await response.text();
-      if (!body.includes(banner)) {
-        problems.push(`${url}: is missing banner ${banner}.`);
-      }
+    const check = versionCheckFor(entry.path);
+    if (check) {
+      const problem = versionProblem(url, await response.text(), check, manifest.version);
+      if (problem) problems.push(problem);
     }
 
     const expectedCacheControl =
