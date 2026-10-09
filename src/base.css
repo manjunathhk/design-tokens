@@ -67,6 +67,16 @@
   font-family: var(--mk-font-family-mono);
 }
 
+/* Content width (D54): Fit caps the container; data-mk-width="full" on <html> removes the cap. */
+:where([data-mk-container]) {
+  max-width: var(--mk-layout-container-max);
+  margin-inline: auto;
+}
+
+:where(html[data-mk-width="full"] [data-mk-container]) {
+  max-width: none;
+}
+
 /* Links */
 :where(a) {
   color: var(--mk-color-accent);
