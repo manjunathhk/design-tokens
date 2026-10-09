@@ -26,6 +26,12 @@ All notable changes to this project will be documented in this file.
   hook. The specimen's own saved choices (`mk-specimen-theme`,
   `mk-specimen-layout`) are gone, so specimen viewers pick their theme and
   width once more. The specimen only; nothing in the package changes (#119).
+- The README has a Site controls section: the `controls.js` hooks with
+  copy-paste markup, loading it as a blocking script in `<head>` (no `defer`,
+  `async` or `type="module"`), pinning `/vX.Y.Z/` for Subresource Integrity,
+  where the tag goes on static HTML, WordPress, .NET Razor and Angular (never
+  the `scripts` array of `angular.json`), per-origin storage, and the
+  `script-src` CSP directive (D54, #120).
 
 ## [1.5.1] - 2026-10-09
 

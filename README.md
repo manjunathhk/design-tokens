@@ -12,11 +12,13 @@ This package is tokens and a small opt-in base stylesheet, nothing else:
 - `base.css`, a small opt-in base (reset, body, links, selection, focus ring,
   reduced motion, reading defaults, a content-width hook) built only on the
   tokens;
-- self-hosted Inter and JetBrains Mono fonts and `fonts.css`.
+- self-hosted Inter and JetBrains Mono fonts and `fonts.css`;
+- `controls.js`, an opt-in script for a light/dark/system theme switch and a
+  Fit/Full width toggle.
 
 It is never a place for UI components (buttons, cards, nav — those are
 framework-specific and live in each site), a utility-class framework,
-CSS-in-JS, runtime JavaScript, or a palette switcher. See
+CSS-in-JS, runtime JavaScript other than `controls.js`, or a palette switcher. See
 [AGENTS.md](AGENTS.md) for the full contract; contributors and coding agents
 read it first.
 
@@ -30,6 +32,7 @@ Each file in `dist/` has a subpath export (`@manjunathhk/design-tokens/<file>`).
 | `tokens.css`   | `--mk-*` custom properties, light and dark                                            |
 | `base.css`     | Opt-in reset and base styles, zero specificity, plus `.mk-grid-bg`                    |
 | `fonts.css`    | Self-hosted Inter and JetBrains Mono `@font-face` rules                               |
+| `controls.js`  | Opt-in theme switch and width toggle ([Site controls](#site-controls))                |
 | `tokens.json`  | `{ version, light, dark, shared, breakpoints }`, flat, keyed by token path            |
 | `tokens.mjs`   | The same five groups as typed constants (`tokens.d.ts`); also the package root import |
 | `_tokens.scss` | `$mk-*: var(--mk-*)`, raw `$mk-breakpoint-*` values and `@include mk-media(md)`       |
@@ -77,7 +80,118 @@ Mark the main content wrapper with `data-mk-container`. `base.css` caps it at
 Side padding is the site's choice, for example
 `padding-inline: var(--mk-layout-gutter)`. Both rules have zero specificity,
 so a site's own `max-width` on the container wins without `!important`. No
-JavaScript is needed: hard-code the attribute or leave it out.
+JavaScript is needed: hard-code the attribute or leave it out, or let visitors
+choose with [Site controls](#site-controls).
+
+## Site controls
+
+`controls.js` lets visitors pick the theme (System, Light or Dark) and the
+content width (Fit or Full), and remembers the choice. It is opt-in: a site
+that does not load it gets the OS theme and the Fit width, and no CSS depends
+on it. It has no API and adds no globals; sites only mark buttons.
+
+### Markup
+
+Mark native `<button>` elements; the site supplies the contents (words, or
+its own icons with an `aria-label`). The package ships no icons and no button
+styles.
+
+```html
+<div role="group" aria-label="Theme">
+  <button type="button" data-mk-theme-choice="system">System</button>
+  <button type="button" data-mk-theme-choice="light">Light</button>
+  <button type="button" data-mk-theme-choice="dark">Dark</button>
+</div>
+
+<button type="button" data-mk-width-toggle>Full width</button>
+
+<main data-mk-container>…</main>
+```
+
+| Hook                                    | Where                       | Effect                                                                      |
+| --------------------------------------- | --------------------------- | --------------------------------------------------------------------------- |
+| `data-mk-theme-choice="system"`         | `<button>`                  | Removes `data-theme` from `<html>`, so the OS decides                       |
+| `data-mk-theme-choice="light"`/`"dark"` | `<button>`                  | Sets `data-theme="light"` or `"dark"` on `<html>`                           |
+| `data-mk-width-toggle`                  | `<button>`                  | Switches between Fit and Full                                               |
+| `data-mk-container`                     | Main content wrapper        | Capped at `--mk-layout-container-max` (see [Content width](#content-width)) |
+| `data-mk-width="full"`                  | `<html>`, set by the script | Removes the cap; absent means Fit                                           |
+
+The script keeps `aria-pressed` on every marked button in step with the
+current choice, including buttons rendered later (Angular components,
+WordPress blocks), so style the selected state with
+`[aria-pressed="true"]`. Clicks are handled from `document`; buttons need no
+`onclick` and no initialisation call.
+
+### Loading
+
+Load it as a plain script in `<head>`, before the body:
+
+```html
+<script src="https://design.manjunathhk.in/v1/controls.js"></script>
+```
+
+Do not add `defer`, `async` or `type="module"`: any of them can run the
+script after first paint, and the page flashes the OS theme and the Fit width before
+the saved choice applies.
+
+Sites that require Subresource Integrity pin a version, because the `/v1/`
+alias changes content with every release:
+
+```html
+<script
+  src="https://design.manjunathhk.in/v1.6.0/controls.js"
+  integrity="sha384-…"
+  crossorigin="anonymous"
+></script>
+```
+
+Compute the hash from the pinned file, for example
+`curl -s https://design.manjunathhk.in/v1.6.0/controls.js | openssl dgst -sha384 -binary | openssl base64 -A`.
+
+### Per stack
+
+**Static HTML** (including Docker / NGINX): put the `<script>` tag in
+`<head>`, next to the stylesheet `<link>`.
+
+**WordPress**, in `functions.php`. Load it in the header and give no
+`strategy`, so WordPress adds neither `defer` nor `async` (the `$args` array
+needs WordPress 6.3 or later; on older versions pass `false`):
+
+```php
+function mk_design_tokens_controls_enqueue() {
+    wp_enqueue_script(
+        'mk-design-tokens-controls',
+        'https://design.manjunathhk.in/v1/controls.js',
+        [],
+        null,
+        [ 'in_footer' => false ]
+    );
+}
+add_action( 'wp_enqueue_scripts', 'mk_design_tokens_controls_enqueue' );
+```
+
+**.NET Razor or Blazor**: in the shared layout's `<head>` (`_Layout.cshtml`
+or `App.razor`), next to the stylesheet `<link>`.
+
+**Angular**: put the `<script>` tag in the `<head>` of `src/index.html`. Do
+not list the file in the `scripts` array of `angular.json`: Angular injects
+those at the end of `<body>`, which makes the page flash. To serve it from
+the npm package instead of the CDN, copy it with an `assets` entry in
+`angular.json`:
+
+```json
+{ "glob": "controls.js", "input": "node_modules/@manjunathhk/design-tokens/dist", "output": "/" }
+```
+
+and reference `<script src="controls.js"></script>` from the `<head>` of
+`src/index.html`.
+
+### Storage
+
+The choices are stored in `localStorage` under `mk-theme` and `mk-width`.
+Storage is per origin, so a choice made on `example.com` does not carry to
+`blog.example.com`. If storage is unavailable (blocked, private mode), the
+defaults apply and a choice lasts until the page is left.
 
 ## Consumption
 
@@ -185,7 +299,11 @@ unstyled content.
 ```
 style-src 'self' https://design.manjunathhk.in;
 font-src 'self' https://design.manjunathhk.in;
+script-src 'self' https://design.manjunathhk.in;
 ```
+
+`script-src` is needed only on a site that loads `controls.js`. There is no
+inline snippet, so no `'unsafe-inline'`, hash or nonce is required.
 
 Add `https://cdn.jsdelivr.net` to both directives only on a site that is
 actively using the jsDelivr fallback above.
@@ -266,6 +384,8 @@ on the `promote` workflow, which accepts a final `X.Y.Z` version only.
   <!-- or data-theme="dark", or omit the attribute to follow the OS -->
 </html>
 ```
+
+To let visitors choose, see [Site controls](#site-controls).
 
 ## Migration map
 
