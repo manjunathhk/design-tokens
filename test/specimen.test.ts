@@ -12,14 +12,14 @@ beforeAll(() => {
 describe("specimen page", () => {
   let html = "";
   let tokens: {
+    light: Record<string, string | number>;
+    dark: Record<string, string | number>;
     shared: Record<string, string | number>;
   };
 
   beforeAll(() => {
     html = read("docs/index.html");
-    tokens = JSON.parse(read("dist/tokens.json")) as {
-      shared: Record<string, string | number>;
-    };
+    tokens = JSON.parse(read("dist/tokens.json")) as typeof tokens;
   });
 
   it("is generated with specimen sections", () => {
@@ -43,6 +43,23 @@ describe("specimen page", () => {
     expect(html).toMatch(/<button[^>]*id="width-toggle"[^>]*aria-pressed="false"/);
     expect(html).toMatch(/<button[^>]*id="menu-toggle"[^>]*aria-controls="toc-links"/);
     expect(html).toContain('<div class="toc-links" id="toc-links">');
+  });
+
+  it("has an inline SVG favicon coloured from accent and on-accent in both modes", () => {
+    const href =
+      /<link rel="icon" type="image\/svg\+xml" href="data:image\/svg\+xml,([^"]+)">/.exec(
+        html,
+      )?.[1];
+    expect(href, "favicon <link> with a data: SVG").toBeDefined();
+    const svg = decodeURIComponent(href ?? "");
+    const [light = "", dark = ""] = svg.split("@media (prefers-color-scheme: dark)");
+    for (const [mode, css] of [
+      ["light", light],
+      ["dark", dark],
+    ] as const) {
+      expect(css, `${mode} tile`).toContain(`.tile { fill: ${tokens[mode]["color.accent"]}; }`);
+      expect(css, `${mode} bars`).toContain(`.bars { fill: ${tokens[mode]["color.on-accent"]}; }`);
+    }
   });
 
   it("has copyable consumption snippets", () => {
