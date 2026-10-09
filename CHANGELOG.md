@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- _No unreleased changes yet._
+### Added
+
+- `base.css` caps any element marked `data-mk-container` at
+  `layout.container-max` and centres it (Fit); `data-mk-width="full"` on
+  `<html>` removes the cap (Full). Both rules have zero specificity and need
+  no JavaScript (D54, #115). MINOR.
 
 ## [1.5.1] - 2026-10-09
 

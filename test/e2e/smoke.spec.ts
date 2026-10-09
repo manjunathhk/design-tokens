@@ -22,6 +22,7 @@ import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { extname, join } from "node:path";
 import type { Server } from "node:http";
+import type { Page } from "@playwright/test";
 import { test, expect } from "@playwright/test";
 
 // ---------------------------------------------------------------------------
@@ -574,4 +575,81 @@ test("consumer overrides: site rules placed before index.css override pseudo-ele
   expect(elBoxSizing).toBe("content-box");
   expect(beforeBoxSizing).toBe("content-box");
   expect(afterBoxSizing).toBe("content-box");
+});
+
+// ---------------------------------------------------------------------------
+// Content width hook (D54): data-mk-container, Fit and Full
+// ---------------------------------------------------------------------------
+
+const CONTAINER_MAX = tokens.shared["layout.container-max"];
+
+function widthPage(opts: { full: boolean; siteCss?: string }): string {
+  const cdnOrigin = `http://127.0.0.1:${CDN_PORT}`;
+  return `<!doctype html>
+<html lang="en"${opts.full ? ' data-mk-width="full"' : ""}>
+  <head>
+    <meta charset="utf-8" />
+    ${opts.siteCss ? `<style>${opts.siteCss}</style>` : ""}
+    <link rel="stylesheet" href="${cdnOrigin}/index.css" />
+  </head>
+  <body>
+    <main data-mk-container class="site-main" id="container"></main>
+  </body>
+</html>`;
+}
+
+async function containerBox(page: Page) {
+  return page.evaluate(() => {
+    const el = document.getElementById("container");
+    if (!el) throw new Error("container not found");
+    const s = getComputedStyle(el);
+    return {
+      maxWidth: s.maxWidth,
+      width: el.getBoundingClientRect().width,
+      marginLeft: s.marginLeft,
+      marginRight: s.marginRight,
+    };
+  });
+}
+
+test("width hook: data-mk-container is capped at layout.container-max and centred (Fit)", async ({
+  page,
+}) => {
+  expect(CONTAINER_MAX, "layout.container-max missing from dist/tokens.json").toBeDefined();
+  await page.setViewportSize({ width: 1800, height: 900 });
+  await page.setContent(widthPage({ full: false }));
+  await page.waitForLoadState("networkidle");
+
+  const box = await containerBox(page);
+  expect(box.maxWidth).toBe(CONTAINER_MAX);
+  expect(`${box.width}px`).toBe(CONTAINER_MAX);
+  expect(box.marginLeft).toBe(box.marginRight);
+  expect(box.marginLeft).not.toBe("0px");
+});
+
+test('width hook: data-mk-width="full" on <html> removes the cap without controls.js (Full)', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1800, height: 900 });
+  await page.setContent(widthPage({ full: true }));
+  await page.waitForLoadState("networkidle");
+
+  const box = await containerBox(page);
+  expect(box.maxWidth).toBe("none");
+  expect(box.width).toBe(1800);
+});
+
+test("consumer overrides: a site max-width on the container wins in Fit and Full without !important (D23)", async ({
+  page,
+}) => {
+  // The site rule is placed before index.css, so it wins on specificity alone.
+  const siteCss = ".site-main { max-width: 600px; }";
+  await page.setViewportSize({ width: 1800, height: 900 });
+
+  for (const full of [false, true]) {
+    await page.setContent(widthPage({ full, siteCss }));
+    await page.waitForLoadState("networkidle");
+    const box = await containerBox(page);
+    expect(box.maxWidth, `site rule lost with full=${full}`).toBe("600px");
+  }
 });
