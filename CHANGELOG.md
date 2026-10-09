@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- _No unreleased changes yet._
+
+## [1.5.1] - 2026-10-09
+
+Specimen changes only; no token is added, removed, renamed or changed, and
+the package differs from 1.5.0 only in its version (PATCH).
+
 ### Documentation
 
 - The specimen's top bar has a sun/moon icon theme toggle, a full-width
@@ -13,9 +20,17 @@ All notable changes to this project will be documented in this file.
 - The specimen's copy buttons are a copy icon in the top-right corner of
   each code box; it turns into a check mark once the code is copied. The
   specimen only; nothing in the package changes (#105).
+- The specimen has a favicon: three bars on a tile, coloured from
+  `color.accent` and `color.on-accent`, with a dark version under
+  `prefers-color-scheme: dark`. The specimen only; nothing in the package
+  changes (#107).
 - The specimen's theme toggle is a three-way switch: System, Light and Dark.
   System follows the OS; the choice is remembered across reloads. The
   specimen only; nothing in the package changes (#109).
+- The specimen's "In use" section has a loading example under Feedback: a
+  spinner beside words that say what is loading, and a pulsing skeleton
+  card. Under reduced motion both stop and the words carry the state. The
+  specimen only; nothing in the package changes (#111).
 
 ## [1.5.0] - 2026-10-07
 
