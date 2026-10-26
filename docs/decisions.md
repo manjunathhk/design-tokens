@@ -80,9 +80,13 @@ breaking one.
   decorative rule with no contrast requirement.
 - **D7. One `shadow.raised` for both modes.** A dark variant, if ever needed,
   is a MINOR addition; renaming or splitting the key is not allowed.
-- **D48. Fonts.** Inter (400/500/600/700, 400 italic) for `sans` and
-  `display`, JetBrains Mono (400/500/700, 400 italic) for `mono`. Binaries come
-  from the exactly pinned `@fontsource/inter` and `@fontsource/jetbrains-mono`
+- **D48. Fonts.** IBM Plex Sans Condensed (500/600/700) for `display`,
+  Atkinson Hyperlegible Next (400/500/600/700, 400 italic) for `sans`, Commit
+  Mono (400/500/700, 400 italic) for `mono`. Chosen so the body face stays
+  quiet and legible while the display face carries the identity; Inter and
+  JetBrains Mono were dropped as too common. Binaries come from the exactly
+  pinned `@fontsource/ibm-plex-sans-condensed`,
+  `@fontsource/atkinson-hyperlegible-next` and `@fontsource/commit-mono`
   devDependencies: Latin subset, woff2, `font-display: swap`, OFL texts in
   `dist/LICENSES/`. Add a weight only together with a token that uses it.
 - **D49. Non-colour values** (spacing, layout, radius, breakpoints, motion,

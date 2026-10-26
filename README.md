@@ -12,7 +12,7 @@ This package is tokens and a small opt-in base stylesheet, nothing else:
 - `base.css`, a small opt-in base (reset, body, links, selection, focus ring,
   reduced motion, reading defaults, a content-width hook) built only on the
   tokens;
-- self-hosted Inter and JetBrains Mono fonts and `fonts.css`;
+- self-hosted IBM Plex Sans Condensed, Atkinson Hyperlegible Next and Commit Mono fonts and `fonts.css`;
 - `controls.js`, an opt-in script for a light/dark/system theme switch and a
   Fit/Full width toggle.
 
@@ -31,7 +31,7 @@ Each file in `dist/` has a subpath export (`@manjunathhk/design-tokens/<file>`).
 | `index.css`    | Fonts, tokens and base in one file (the package `style` entry)                        |
 | `tokens.css`   | `--mk-*` custom properties, light and dark                                            |
 | `base.css`     | Opt-in reset and base styles, zero specificity, plus `.mk-grid-bg`                    |
-| `fonts.css`    | Self-hosted Inter and JetBrains Mono `@font-face` rules                               |
+| `fonts.css`    | Self-hosted Plex Sans Condensed, Atkinson Next, Commit Mono `@font-face`              |
 | `controls.js`  | Opt-in theme switch and width toggle ([Site controls](#site-controls))                |
 | `tokens.json`  | `{ version, light, dark, shared, breakpoints }`, flat, keyed by token path            |
 | `tokens.mjs`   | The same five groups as typed constants (`tokens.d.ts`); also the package root import |

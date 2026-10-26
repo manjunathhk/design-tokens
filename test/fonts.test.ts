@@ -4,17 +4,24 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 const read = (file: string) => readFileSync(file, "utf8");
 const fontFiles = [
-  "inter-latin-400-italic.woff2",
-  "inter-latin-400-normal.woff2",
-  "inter-latin-500-normal.woff2",
-  "inter-latin-600-normal.woff2",
-  "inter-latin-700-normal.woff2",
-  "jetbrains-mono-latin-400-italic.woff2",
-  "jetbrains-mono-latin-400-normal.woff2",
-  "jetbrains-mono-latin-500-normal.woff2",
-  "jetbrains-mono-latin-700-normal.woff2",
+  "atkinson-hyperlegible-next-latin-400-italic.woff2",
+  "atkinson-hyperlegible-next-latin-400-normal.woff2",
+  "atkinson-hyperlegible-next-latin-500-normal.woff2",
+  "atkinson-hyperlegible-next-latin-600-normal.woff2",
+  "atkinson-hyperlegible-next-latin-700-normal.woff2",
+  "commit-mono-latin-400-italic.woff2",
+  "commit-mono-latin-400-normal.woff2",
+  "commit-mono-latin-500-normal.woff2",
+  "commit-mono-latin-700-normal.woff2",
+  "ibm-plex-sans-condensed-latin-500-normal.woff2",
+  "ibm-plex-sans-condensed-latin-600-normal.woff2",
+  "ibm-plex-sans-condensed-latin-700-normal.woff2",
 ] as const;
-const licenseFiles = ["Inter-OFL.txt", "JetBrainsMono-OFL.txt"] as const;
+const licenseFiles = [
+  "AtkinsonHyperlegibleNext-OFL.txt",
+  "CommitMono-OFL.txt",
+  "IBMPlexSansCondensed-OFL.txt",
+] as const;
 
 beforeAll(() => {
   if (!existsSync("dist/fonts.css"))
@@ -36,11 +43,12 @@ describe("fonts.css", () => {
     expect(urls.sort()).toEqual(fontFiles.map((file) => `fonts/${file}`).sort());
   });
 
-  it("declares the requested Inter and JetBrains Mono faces with font-display swap", () => {
+  it("declares the requested Plex Sans Condensed, Atkinson Hyperlegible Next and Commit Mono faces with font-display swap", () => {
     expect(css.match(/@font-face/g)).toHaveLength(fontFiles.length);
     expect(css.match(/font-display: swap;/g)).toHaveLength(fontFiles.length);
-    expect(css).toContain('font-family: "Inter";');
-    expect(css).toContain('font-family: "JetBrains Mono";');
+    expect(css).toContain('font-family: "IBM Plex Sans Condensed";');
+    expect(css).toContain('font-family: "Atkinson Hyperlegible Next";');
+    expect(css).toContain('font-family: "Commit Mono";');
     expect(css).toContain("font-style: italic;");
   });
 });

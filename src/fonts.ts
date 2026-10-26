@@ -3,8 +3,11 @@ import { join } from "node:path";
 import { banner } from "./css.js";
 
 type FontFace = {
-  readonly packageName: "@fontsource/inter" | "@fontsource/jetbrains-mono";
-  readonly family: "Inter" | "JetBrains Mono";
+  readonly packageName:
+    | "@fontsource/ibm-plex-sans-condensed"
+    | "@fontsource/atkinson-hyperlegible-next"
+    | "@fontsource/commit-mono";
+  readonly family: "IBM Plex Sans Condensed" | "Atkinson Hyperlegible Next" | "Commit Mono";
   readonly style: "normal" | "italic";
   readonly weight: 400 | 500 | 600 | 700;
   readonly localNames: readonly [string, string];
@@ -17,91 +20,122 @@ const LATIN1 =
 
 const fontFaces: readonly FontFace[] = [
   {
-    packageName: "@fontsource/inter",
-    family: "Inter",
-    style: "normal",
-    weight: 400,
-    localNames: ["Inter", "Inter Regular"],
-    file: "inter-latin-400-normal.woff2",
-    unicodeRange: LATIN1,
-  },
-  {
-    packageName: "@fontsource/inter",
-    family: "Inter",
+    packageName: "@fontsource/ibm-plex-sans-condensed",
+    family: "IBM Plex Sans Condensed",
     style: "normal",
     weight: 500,
-    localNames: ["Inter Medium", "Inter-Medium"],
-    file: "inter-latin-500-normal.woff2",
+    localNames: ["IBM Plex Sans Condensed Medium", "IBMPlexSansCond-Medium"],
+    file: "ibm-plex-sans-condensed-latin-500-normal.woff2",
     unicodeRange: LATIN1,
   },
   {
-    packageName: "@fontsource/inter",
-    family: "Inter",
+    packageName: "@fontsource/ibm-plex-sans-condensed",
+    family: "IBM Plex Sans Condensed",
     style: "normal",
     weight: 600,
-    localNames: ["Inter SemiBold", "Inter-SemiBold"],
-    file: "inter-latin-600-normal.woff2",
+    localNames: ["IBM Plex Sans Condensed SemiBold", "IBMPlexSansCond-SemiBold"],
+    file: "ibm-plex-sans-condensed-latin-600-normal.woff2",
     unicodeRange: LATIN1,
   },
   {
-    packageName: "@fontsource/inter",
-    family: "Inter",
+    packageName: "@fontsource/ibm-plex-sans-condensed",
+    family: "IBM Plex Sans Condensed",
     style: "normal",
     weight: 700,
-    localNames: ["Inter Bold", "Inter-Bold"],
-    file: "inter-latin-700-normal.woff2",
+    localNames: ["IBM Plex Sans Condensed Bold", "IBMPlexSansCond-Bold"],
+    file: "ibm-plex-sans-condensed-latin-700-normal.woff2",
     unicodeRange: LATIN1,
   },
   {
-    packageName: "@fontsource/inter",
-    family: "Inter",
-    style: "italic",
-    weight: 400,
-    localNames: ["Inter Italic", "Inter-Italic"],
-    file: "inter-latin-400-italic.woff2",
-    unicodeRange: LATIN1,
-  },
-  {
-    packageName: "@fontsource/jetbrains-mono",
-    family: "JetBrains Mono",
+    packageName: "@fontsource/atkinson-hyperlegible-next",
+    family: "Atkinson Hyperlegible Next",
     style: "normal",
     weight: 400,
-    localNames: ["JetBrains Mono", "JetBrainsMono-Regular"],
-    file: "jetbrains-mono-latin-400-normal.woff2",
+    localNames: ["Atkinson Hyperlegible Next", "AtkinsonHyperlegibleNext-Regular"],
+    file: "atkinson-hyperlegible-next-latin-400-normal.woff2",
     unicodeRange: LATIN1,
   },
   {
-    packageName: "@fontsource/jetbrains-mono",
-    family: "JetBrains Mono",
+    packageName: "@fontsource/atkinson-hyperlegible-next",
+    family: "Atkinson Hyperlegible Next",
     style: "normal",
     weight: 500,
-    localNames: ["JetBrains Mono Medium", "JetBrainsMono-Medium"],
-    file: "jetbrains-mono-latin-500-normal.woff2",
+    localNames: ["Atkinson Hyperlegible Next Medium", "AtkinsonHyperlegibleNext-Medium"],
+    file: "atkinson-hyperlegible-next-latin-500-normal.woff2",
     unicodeRange: LATIN1,
   },
   {
-    packageName: "@fontsource/jetbrains-mono",
-    family: "JetBrains Mono",
+    packageName: "@fontsource/atkinson-hyperlegible-next",
+    family: "Atkinson Hyperlegible Next",
+    style: "normal",
+    weight: 600,
+    localNames: ["Atkinson Hyperlegible Next SemiBold", "AtkinsonHyperlegibleNext-SemiBold"],
+    file: "atkinson-hyperlegible-next-latin-600-normal.woff2",
+    unicodeRange: LATIN1,
+  },
+  {
+    packageName: "@fontsource/atkinson-hyperlegible-next",
+    family: "Atkinson Hyperlegible Next",
     style: "normal",
     weight: 700,
-    localNames: ["JetBrains Mono Bold", "JetBrainsMono-Bold"],
-    file: "jetbrains-mono-latin-700-normal.woff2",
+    localNames: ["Atkinson Hyperlegible Next Bold", "AtkinsonHyperlegibleNext-Bold"],
+    file: "atkinson-hyperlegible-next-latin-700-normal.woff2",
     unicodeRange: LATIN1,
   },
   {
-    packageName: "@fontsource/jetbrains-mono",
-    family: "JetBrains Mono",
+    packageName: "@fontsource/atkinson-hyperlegible-next",
+    family: "Atkinson Hyperlegible Next",
     style: "italic",
     weight: 400,
-    localNames: ["JetBrains Mono Italic", "JetBrainsMono-Italic"],
-    file: "jetbrains-mono-latin-400-italic.woff2",
+    localNames: ["Atkinson Hyperlegible Next Italic", "AtkinsonHyperlegibleNext-Italic"],
+    file: "atkinson-hyperlegible-next-latin-400-italic.woff2",
+    unicodeRange: LATIN1,
+  },
+  {
+    packageName: "@fontsource/commit-mono",
+    family: "Commit Mono",
+    style: "normal",
+    weight: 400,
+    localNames: ["Commit Mono", "CommitMono-Regular"],
+    file: "commit-mono-latin-400-normal.woff2",
+    unicodeRange: LATIN1,
+  },
+  {
+    packageName: "@fontsource/commit-mono",
+    family: "Commit Mono",
+    style: "normal",
+    weight: 500,
+    localNames: ["Commit Mono Medium", "CommitMono-Medium"],
+    file: "commit-mono-latin-500-normal.woff2",
+    unicodeRange: LATIN1,
+  },
+  {
+    packageName: "@fontsource/commit-mono",
+    family: "Commit Mono",
+    style: "normal",
+    weight: 700,
+    localNames: ["Commit Mono Bold", "CommitMono-Bold"],
+    file: "commit-mono-latin-700-normal.woff2",
+    unicodeRange: LATIN1,
+  },
+  {
+    packageName: "@fontsource/commit-mono",
+    family: "Commit Mono",
+    style: "italic",
+    weight: 400,
+    localNames: ["Commit Mono Italic", "CommitMono-Italic"],
+    file: "commit-mono-latin-400-italic.woff2",
     unicodeRange: LATIN1,
   },
 ];
 
 const licenses = [
-  { packageName: "@fontsource/inter", file: "Inter-OFL.txt" },
-  { packageName: "@fontsource/jetbrains-mono", file: "JetBrainsMono-OFL.txt" },
+  { packageName: "@fontsource/ibm-plex-sans-condensed", file: "IBMPlexSansCondensed-OFL.txt" },
+  {
+    packageName: "@fontsource/atkinson-hyperlegible-next",
+    file: "AtkinsonHyperlegibleNext-OFL.txt",
+  },
+  { packageName: "@fontsource/commit-mono", file: "CommitMono-OFL.txt" },
 ] as const;
 
 const packagePath = (packageName: string, ...parts: string[]) =>

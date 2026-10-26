@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Font families: `font.family.display` is now IBM Plex Sans Condensed
+  (500/600/700), `font.family.sans` is Atkinson Hyperlegible Next
+  (400/500/600/700, 400 italic) and `font.family.mono` is Commit Mono
+  (400/500/700, 400 italic), replacing Inter and JetBrains Mono (D48). Token
+  names are unchanged; values change (MINOR).
+
 ## [1.6.0] - 2026-10-09
 
 Adds the opt-in `controls.js` script and a `base.css` width hook; no token
